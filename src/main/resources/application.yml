@@ -51,7 +51,7 @@ server:
     context-path: /
 
 jwt:
-  secret: kangkimjangkangkimjangkangkimjangkangkimjangkangkimjangkangkimjangkangkimjangkangkimjangkangkimjang
+  secret: ${JWT_SECRET}
   expiration: 108000000 #30??
 
 ---
