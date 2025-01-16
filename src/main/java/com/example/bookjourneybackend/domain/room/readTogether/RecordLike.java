@@ -21,15 +21,14 @@ public class RecordLike extends BaseEntity {
     @JoinColumn(name = "record_id", nullable = false)
     private Record record;
 
-//    //TODO 유저 연관관계 추가
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "user_id", nullable = false)
-//    private User user;
-//
-//    @Builder
-//    public RecordLike(Long recordLikeId, Record record, User user) {
-//        this.recordLikeId = recordLikeId;
-//        this.record = record;
-//        this.user = user;
-//    }
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
+    @Builder
+    public RecordLike(Long recordLikeId, Record record, User user) {
+        this.recordLikeId = recordLikeId;
+        this.record = record;
+        this.user = user;
+    }
 }

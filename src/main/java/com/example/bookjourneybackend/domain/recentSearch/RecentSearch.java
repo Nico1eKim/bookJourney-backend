@@ -1,6 +1,7 @@
 package com.example.bookjourneybackend.domain.recentSearch;
 
 import com.example.bookjourneybackend.domain.user.User;
+import com.example.bookjourneybackend.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
@@ -10,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "recent_search")
 @Getter
 @NoArgsConstructor
-public class RecentSearch {
+public class RecentSearch extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

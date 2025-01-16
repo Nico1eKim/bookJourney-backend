@@ -1,5 +1,6 @@
 package com.example.bookjourneybackend.domain.user;
 
+import com.example.bookjourneybackend.domain.book.Genre;
 import com.example.bookjourneybackend.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.Builder;
@@ -7,6 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
+@Table(name = "favorite_genres")
 @Getter
 @NoArgsConstructor
 public class FavoriteGenre extends BaseEntity {
@@ -19,14 +21,14 @@ public class FavoriteGenre extends BaseEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    //todo Genre ManyToOne 추가
-    @Column(name = "genre_id", nullable = false)
-    private Long genreId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "genre_id", nullable = false)
+    private Genre genre;
 
     @Builder
-    public FavoriteGenre(Long favoriteGenreId, User user, Long genreId) {
+    public FavoriteGenre(Long favoriteGenreId, User user, Genre genre) {
         this.favoriteGenreId = favoriteGenreId;
         this.user = user;
-        this.genreId = genreId;
+        this.genre = genre;
     }
 }

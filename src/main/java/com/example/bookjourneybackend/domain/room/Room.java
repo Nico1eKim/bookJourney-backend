@@ -32,24 +32,22 @@ public class Room extends BaseEntity {
     @Column(nullable = false)
     private Double userPercentage;
 
-//    //TODO 사용자 연관관계 추가
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "user_id", nullable = false)
-//    private User user;
-//
-//    //TODO 책 연관관계 추가
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "book_id", nullable = false)
-//    private Book book;
-//
-//
-//    @Builder
-//    public Room(Long roomId, RoomType roomType, UserRole userRole, Double userPercentage, User user, Book book) {
-//        this.roomId = roomId;
-//        this.roomType = roomType;
-//        this.userRole = userRole;
-//        this.userPercentage = userPercentage;
-//        this.user = user;
-//        this.book = book;
-//    }
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "book_id", nullable = false)
+    private Book book;
+
+
+    @Builder
+    public Room(Long roomId, RoomType roomType, UserRole userRole, Double userPercentage, User user, Book book) {
+        this.roomId = roomId;
+        this.roomType = roomType;
+        this.userRole = userRole;
+        this.userPercentage = userPercentage;
+        this.user = user;
+        this.book = book;
+    }
 }
