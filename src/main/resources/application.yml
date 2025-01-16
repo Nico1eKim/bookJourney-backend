@@ -3,9 +3,9 @@ spring:
     name: bookjourney
   profiles:
     group:
-      local: db-local, common
-      dev: db-dev, common
-      prod: db-prod, common
+      local: db-local, port-local, common
+      dev: db-dev, port-dev, common
+      prod: db-prod, port-dev, common
     active: local
 
 ---
@@ -56,6 +56,21 @@ spring:
   #      hibernate:
   #        format_sql: true
   #        dialect: org.hibernate.dialect.MySQLDialect
+
+#  datasource:
+#    url: jdbc:mysql://localhost:3306/book_journey
+#    username: ${LOCAL_DB_USER}
+#    password: ${LOCAL_DB_PASSWORD}
+#    driver-class-name: com.mysql.cj.jdbc.Driver
+#
+#  jpa:
+#    hibernate:
+#      ddl-auto: update
+#    show-sql: true
+#    properties:
+#      hibernate:
+#        format_sql: true
+#        dialect: org.hibernate.dialect.MySQLDialect
 
   datasource:
     url: jdbc:h2:mem:BookJourneyBackendApplication;MODE=MYSQL;
@@ -108,6 +123,30 @@ spring:
       port: 6379
 
 ---
+#개발용 및 배포용 포트
+spring:
+  config:
+    activate:
+      on-profile: port-dev
+
+server:
+  port: 9000
+  servlet:
+    context-path: /
+
+---
+#로컬용 포트
+spring:
+  config:
+    activate:
+      on-profile: port-local
+
+server:
+  port: 8080
+  servlet:
+    context-path: /
+
+---
 #공통
 spring:
   config:
@@ -134,11 +173,6 @@ spring:
           timeout: 5000
           writetimeout: 5000
     auth-code-expiration-millis: 1800000  # 30 * 60 * 1000 == 30?
-
-server:
-  port: 8080
-  servlet:
-    context-path: /
 
 jwt:
   secret: ${JWT_SECRET}
