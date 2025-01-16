@@ -21,15 +21,14 @@ public class CommentLike extends BaseEntity {
     @JoinColumn(name = "comment_id", nullable = false)
     private Comment comment;
 
-//    //TODO 유저 연관관계추가
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "user_id", nullable = false)
-//    private User user;
-//
-//    @Builder
-//    public CommentLike(Long commentLikeId, Comment comment, User user) {
-//        this.commentLikeId = commentLikeId;
-//        this.comment = comment;
-//        this.user = user;
-//    }
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
+    @Builder
+    public CommentLike(Long commentLikeId, Comment comment, User user) {
+        this.commentLikeId = commentLikeId;
+        this.comment = comment;
+        this.user = user;
+    }
 }

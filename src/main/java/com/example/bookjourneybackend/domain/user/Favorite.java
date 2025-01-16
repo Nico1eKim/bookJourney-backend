@@ -1,5 +1,7 @@
 package com.example.bookjourneybackend.domain.user;
 
+import com.example.bookjourneybackend.domain.book.Book;
+import com.example.bookjourneybackend.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
@@ -9,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "favorites")
 @Getter
 @NoArgsConstructor
-public class Favorite {
+public class Favorite extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "favorite_id")
@@ -19,14 +21,14 @@ public class Favorite {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    //todo Book @ManyToOne으로 바꾸기
-    @Column(name = "book_id", nullable = false)
-    private Long bookId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "book_id", nullable = false)
+    private Book book;
 
     @Builder
-    public Favorite(Long favoriteId, User user, Long bookId) {
+    public Favorite(Long favoriteId, User user, Book book) {
         this.favoriteId = favoriteId;
         this.user = user;
-        this.bookId = bookId;
+        this.book = book;
     }
 }
