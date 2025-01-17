@@ -1,5 +1,6 @@
 package com.example.bookjourneybackend.domain.record.domain;
 
+import com.example.bookjourneybackend.domain.readTogether.domain.ReadTogether;
 import com.example.bookjourneybackend.domain.room.domain.Room;
 import com.example.bookjourneybackend.domain.user.domain.User;
 import com.example.bookjourneybackend.global.entity.BaseEntity;
@@ -19,8 +20,8 @@ public class Record extends BaseEntity {
     private Long recordId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "room_id", nullable = false)
-    private Room room;
+    @JoinColumn(name = "read_together_id", nullable = false)
+    private ReadTogether readTogether;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
@@ -40,9 +41,9 @@ public class Record extends BaseEntity {
     private String content;
 
     @Builder
-    public Record(Long recordId, Room room, User user, String recordTitle, RecordType recordType, Integer bookPage, String content) {
+    public Record(Long recordId, ReadTogether readTogether, User user, String recordTitle, RecordType recordType, Integer bookPage, String content) {
         this.recordId = recordId;
-        this.room = room;
+        this.readTogether = readTogether;
         this.user = user;
         this.recordTitle = recordTitle;
         this.recordType = recordType;
