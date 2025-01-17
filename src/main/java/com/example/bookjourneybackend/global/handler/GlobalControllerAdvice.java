@@ -1,11 +1,14 @@
-package com.example.bookjourneybackend.global.common.exception_handler;
+package com.example.bookjourneybackend.global.handler;
 
-import com.example.bookjourneybackend.global.common.exception.GlobalException;
-import com.example.bookjourneybackend.global.common.response.BaseErrorResponse;
+import com.example.bookjourneybackend.global.exception.GlobalException;
+import com.example.bookjourneybackend.global.response.BaseErrorResponse;
+import com.example.bookjourneybackend.global.response.BaseResponse;
 import jakarta.annotation.Priority;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.coyote.BadRequestException;
 import org.hibernate.TypeMismatchException;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -41,6 +44,20 @@ public class GlobalControllerAdvice {
     public BaseErrorResponse handleRestApiException(GlobalException e) {
         log.error("[handle_RestApiException]", e);
         return new BaseErrorResponse(e.getExceptionStatus(), e.getMessage());
+    }
+
+    //dto 유효성 검증 예외처리
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public BaseResponse<Void> handleValidationException(MethodArgumentNotValidException ex) {
+        // 첫 번째 유효성 검사 실패 메시지만 가져오기
+        String errorMessage = ex.getBindingResult()
+                .getFieldErrors()
+                .stream()
+                .findFirst()
+                .map(error -> error.getDefaultMessage())
+                .orElse("Validation failed");
+
+        return BaseResponse.of(HttpStatus.BAD_REQUEST, errorMessage, null);
     }
 
 }
