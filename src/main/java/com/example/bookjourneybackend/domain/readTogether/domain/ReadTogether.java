@@ -1,8 +1,7 @@
-package com.example.bookjourneybackend.domain.room.readTogether;
+package com.example.bookjourneybackend.domain.readTogether.domain;
 
-import com.example.bookjourneybackend.domain.room.Room;
+import com.example.bookjourneybackend.domain.room.domain.Room;
 import com.example.bookjourneybackend.global.entity.BaseEntity;
-import com.example.bookjourneybackend.global.entity.EntityStatus;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
@@ -14,7 +13,7 @@ import java.time.LocalDateTime;
 @Entity
 @Getter
 @Table(name = "read_together")
-public class RoomTogether extends BaseEntity{
+public class ReadTogether extends BaseEntity{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -55,7 +54,7 @@ public class RoomTogether extends BaseEntity{
 
 
     @Builder
-    public RoomTogether(Long readTogetherId, Room room, String roomName, boolean isPublic, Integer password, Double roomPercentage, LocalDateTime progressStartDate, LocalDateTime progressEndDate, LocalDateTime recruitStartDate, LocalDateTime recruitEndDate, Integer recruitCount, Integer recordCount) {
+    public ReadTogether(Long readTogetherId, Room room, String roomName, boolean isPublic, Integer password, Double roomPercentage, LocalDateTime progressStartDate, LocalDateTime progressEndDate, LocalDateTime recruitStartDate, LocalDateTime recruitEndDate, Integer recruitCount, Integer recordCount) {
         this.readTogetherId = readTogetherId;
         this.room = room;
         this.roomName = roomName;
