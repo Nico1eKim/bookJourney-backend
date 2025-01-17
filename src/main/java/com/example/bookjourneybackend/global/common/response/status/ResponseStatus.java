@@ -1,4 +1,4 @@
-package com.example.bookjourneybackend.global.response.status;
+package com.example.bookjourneybackend.global.common.response.status;
 
 import org.springframework.http.HttpStatus;
 
