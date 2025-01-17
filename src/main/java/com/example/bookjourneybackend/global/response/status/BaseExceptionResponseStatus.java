@@ -1,4 +1,4 @@
-package com.example.bookjourneybackend.global.common.response.status;
+package com.example.bookjourneybackend.global.response.status;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

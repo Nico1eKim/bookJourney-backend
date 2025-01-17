@@ -1,6 +1,6 @@
-package com.example.bookjourneybackend.global.common.exception;
+package com.example.bookjourneybackend.global.exception;
 
-import com.example.bookjourneybackend.global.common.response.status.ResponseStatus;
+import com.example.bookjourneybackend.global.response.status.ResponseStatus;
 import lombok.Getter;
 
 @Getter
