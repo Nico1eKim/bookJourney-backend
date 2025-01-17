@@ -40,10 +40,12 @@ public class Record extends BaseEntity {
     private String content;
 
     @Builder
-    public Record(Long recordId, Room room, User user, Integer bookPage, String content) {
+    public Record(Long recordId, Room room, User user, String recordName, RecordType recordType, Integer bookPage, String content) {
         this.recordId = recordId;
         this.room = room;
         this.user = user;
+        this.recordName = recordName;
+        this.recordType = recordType;
         this.bookPage = bookPage;
         this.content = content;
     }
