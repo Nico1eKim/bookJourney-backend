@@ -27,7 +27,7 @@ public class Record extends BaseEntity {
     private User user;
 
     @Column(length = 90)
-    private String recordName;
+    private String recordTitle;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -40,11 +40,11 @@ public class Record extends BaseEntity {
     private String content;
 
     @Builder
-    public Record(Long recordId, Room room, User user, String recordName, RecordType recordType, Integer bookPage, String content) {
+    public Record(Long recordId, Room room, User user, String recordTitle, RecordType recordType, Integer bookPage, String content) {
         this.recordId = recordId;
         this.room = room;
         this.user = user;
-        this.recordName = recordName;
+        this.recordTitle = recordTitle;
         this.recordType = recordType;
         this.bookPage = bookPage;
         this.content = content;
