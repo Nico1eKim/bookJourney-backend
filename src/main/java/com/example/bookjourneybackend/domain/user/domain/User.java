@@ -1,17 +1,10 @@
-package com.example.bookjourneybackend.domain.user;
+package com.example.bookjourneybackend.domain.user.domain;
 
-import com.example.bookjourneybackend.domain.recentSearch.RecentSearch;
-import com.example.bookjourneybackend.domain.room.Room;
-import com.example.bookjourneybackend.domain.room.readTogether.CommentLike;
-import com.example.bookjourneybackend.domain.room.readTogether.RecordLike;
 import com.example.bookjourneybackend.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Table(name = "users")

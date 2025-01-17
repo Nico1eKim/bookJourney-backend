@@ -1,4 +1,4 @@
-package com.example.bookjourneybackend.domain.user;
+package com.example.bookjourneybackend.domain.user.domain;
 
 import com.example.bookjourneybackend.global.entity.BaseEntity;
 import jakarta.persistence.*;
