@@ -1,4 +1,4 @@
-package com.example.bookjourneybackend.global.entity;
+package com.example.bookjourneybackend.domain.room.domain;
 
 import lombok.Getter;
 
@@ -14,9 +14,9 @@ public enum UserRole {
     }
 
     public static UserRole from(String type) {
-        for (UserRole postType : UserRole.values()) {
-            if (postType.getType().equals(type)) {
-                return postType;
+        for (UserRole userRole : UserRole.values()) {
+            if (userRole.getType().equals(type)) {
+                return userRole;
             }
         }
         //TODO 예외 엔티티 작성

@@ -1,4 +1,4 @@
-package com.example.bookjourneybackend.global.entity;
+package com.example.bookjourneybackend.domain.room.domain;
 
 import lombok.Getter;
 
@@ -14,9 +14,9 @@ public enum RoomType {
     }
 
     public static RoomType from(String type) {
-        for (RoomType postType : RoomType.values()) {
-            if (postType.getType().equals(type)) {
-                return postType;
+        for (RoomType roomType : RoomType.values()) {
+            if (roomType.getType().equals(type)) {
+                return roomType;
             }
         }
         //TODO 예외 엔티티 작성

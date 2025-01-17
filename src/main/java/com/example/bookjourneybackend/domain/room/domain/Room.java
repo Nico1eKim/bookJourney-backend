@@ -1,10 +1,8 @@
-package com.example.bookjourneybackend.domain.room;
+package com.example.bookjourneybackend.domain.room.domain;
 
-import com.example.bookjourneybackend.domain.book.Book;
-import com.example.bookjourneybackend.domain.user.User;
+import com.example.bookjourneybackend.domain.book.domain.Book;
+import com.example.bookjourneybackend.domain.user.domain.User;
 import com.example.bookjourneybackend.global.entity.BaseEntity;
-import com.example.bookjourneybackend.global.entity.RoomType;
-import com.example.bookjourneybackend.global.entity.UserRole;
 import jakarta.persistence.*;
 
 import lombok.Builder;
