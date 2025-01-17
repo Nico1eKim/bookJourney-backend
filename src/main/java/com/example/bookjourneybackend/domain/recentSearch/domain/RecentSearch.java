@@ -1,6 +1,6 @@
-package com.example.bookjourneybackend.domain.recentSearch;
+package com.example.bookjourneybackend.domain.recentSearch.domain;
 
-import com.example.bookjourneybackend.domain.user.User;
+import com.example.bookjourneybackend.domain.user.domain.User;
 import com.example.bookjourneybackend.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.Builder;
