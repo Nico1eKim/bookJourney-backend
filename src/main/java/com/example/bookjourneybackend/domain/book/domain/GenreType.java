@@ -1,4 +1,4 @@
-package com.example.bookjourneybackend.global.entity;
+package com.example.bookjourneybackend.domain.book.domain;
 
 import lombok.Getter;
 
