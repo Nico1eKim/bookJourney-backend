@@ -43,12 +43,13 @@ public class Room extends BaseEntity {
 
 
     @Builder
-    public Room(Long roomId, RoomType roomType, UserRole userRole, Double userPercentage, User user, Book book) {
+    public Room(Long roomId, RoomType roomType, UserRole userRole, Double userPercentage, User user, Book book,Integer currentPage) {
         this.roomId = roomId;
         this.roomType = roomType;
         this.userRole = userRole;
         this.userPercentage = userPercentage;
         this.user = user;
         this.book = book;
+        this.currentPage = currentPage;
     }
 }
