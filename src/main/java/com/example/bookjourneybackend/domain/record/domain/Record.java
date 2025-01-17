@@ -1,7 +1,7 @@
-package com.example.bookjourneybackend.domain.room.readTogether;
+package com.example.bookjourneybackend.domain.record.domain;
 
-import com.example.bookjourneybackend.domain.room.Room;
-import com.example.bookjourneybackend.domain.user.User;
+import com.example.bookjourneybackend.domain.room.domain.Room;
+import com.example.bookjourneybackend.domain.user.domain.User;
 import com.example.bookjourneybackend.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.Builder;
@@ -25,6 +25,13 @@ public class Record extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
+    @Column(length = 90)
+    private String recordName;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private RecordType recordType;
 
     @Column(nullable = false)
     private Integer bookPage;
