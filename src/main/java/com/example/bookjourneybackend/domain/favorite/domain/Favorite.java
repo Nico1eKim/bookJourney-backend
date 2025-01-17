@@ -1,6 +1,7 @@
-package com.example.bookjourneybackend.domain.user;
+package com.example.bookjourneybackend.domain.favorite.domain;
 
-import com.example.bookjourneybackend.domain.book.Book;
+import com.example.bookjourneybackend.domain.book.domain.Book;
+import com.example.bookjourneybackend.domain.user.domain.User;
 import com.example.bookjourneybackend.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.Builder;
