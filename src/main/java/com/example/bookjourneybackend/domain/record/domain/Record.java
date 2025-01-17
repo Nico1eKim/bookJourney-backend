@@ -1,7 +1,6 @@
 package com.example.bookjourneybackend.domain.record.domain;
 
 import com.example.bookjourneybackend.domain.readTogether.domain.ReadTogether;
-import com.example.bookjourneybackend.domain.room.domain.Room;
 import com.example.bookjourneybackend.domain.user.domain.User;
 import com.example.bookjourneybackend.global.entity.BaseEntity;
 import jakarta.persistence.*;
@@ -35,19 +34,19 @@ public class Record extends BaseEntity {
     private RecordType recordType;
 
     @Column(nullable = false)
-    private Integer bookPage;
+    private Integer recordPage;
 
     @Column(nullable = false, length = 3000)
     private String content;
 
     @Builder
-    public Record(Long recordId, ReadTogether readTogether, User user, String recordTitle, RecordType recordType, Integer bookPage, String content) {
+    public Record(Long recordId, ReadTogether readTogether, User user, String recordTitle, RecordType recordType, Integer recordPage, String content) {
         this.recordId = recordId;
         this.readTogether = readTogether;
         this.user = user;
         this.recordTitle = recordTitle;
         this.recordType = recordType;
-        this.bookPage = bookPage;
+        this.recordPage = recordPage;
         this.content = content;
     }
 }

@@ -38,6 +38,9 @@ public class Room extends BaseEntity {
     @JoinColumn(name = "book_id", nullable = false)
     private Book book;
 
+    @Column(nullable = false)
+    private Integer currentPage;
+
 
     @Builder
     public Room(Long roomId, RoomType roomType, UserRole userRole, Double userPercentage, User user, Book book) {
