@@ -1,5 +1,7 @@
-package com.example.bookjourneybackend.domain.book;
+package com.example.bookjourneybackend.domain.bestSeller.domain;
 
+import com.example.bookjourneybackend.domain.book.domain.Book;
+import com.example.bookjourneybackend.domain.book.domain.Genre;
 import com.example.bookjourneybackend.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.Builder;
