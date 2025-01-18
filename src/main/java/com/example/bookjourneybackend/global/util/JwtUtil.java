@@ -130,13 +130,13 @@ public class JwtUtil {
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
             return true;
         } catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
-            log.info("잘못된 JWT 서명입니다.", e);
+            log.info("Invalid JWT Token", e);
         } catch (ExpiredJwtException e) {
-            log.info("만료된 JWT 토큰입니다.", e);
+            log.info("Expired JWT Token", e);
         } catch (UnsupportedJwtException e) {
-            log.info("지원되지 않는 JWT 토큰입니다.", e);
+            log.info("Unsupported JWT Token", e);
         } catch (IllegalArgumentException e) {
-            log.info("JWT 토큰이 잘못되었습니다.", e);
+            log.info("JWT claims string is empty.", e);
         }
         return false;
     }
@@ -166,11 +166,11 @@ public class JwtUtil {
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
             return true;
         } catch (ExpiredJwtException e) {
-            log.info("만료된 Refresh 토큰입니다", e);
+            log.info("Expired Refresh Token", e);
         } catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException | UnsupportedJwtException e) {
-            log.info("잘못된 JWT 서명입니다", e);
+            log.info("Invalid Refresh Token", e);
         } catch (IllegalArgumentException e) {
-            log.info("Refresh 토큰이 잘못되었습니다.", e);
+            log.info("Refresh JWT claims string is empty.", e);
         }
         return false;
     }
