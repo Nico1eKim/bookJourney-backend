@@ -1,6 +1,6 @@
-package com.example.bookjourneybackend.global.common.response;
+package com.example.bookjourneybackend.global.response;
 
-import com.example.bookjourneybackend.global.common.response.status.ResponseStatus;
+import com.example.bookjourneybackend.global.response.status.ResponseStatus;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import lombok.Getter;

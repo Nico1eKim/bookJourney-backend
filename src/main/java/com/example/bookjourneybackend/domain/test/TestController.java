@@ -1,14 +1,14 @@
 package com.example.bookjourneybackend.domain.test;
 
-import com.example.bookjourneybackend.global.common.exception.GlobalException;
-import com.example.bookjourneybackend.global.common.response.BaseResponse;
-import com.example.bookjourneybackend.global.common.response.status.BaseExceptionResponseStatus;
-import org.apache.coyote.BadRequestException;
+import com.example.bookjourneybackend.global.exception.GlobalException;
+import com.example.bookjourneybackend.global.response.BaseResponse;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import static com.example.bookjourneybackend.global.common.response.status.BaseExceptionResponseStatus.*;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.*;
 
 @RestController
 public class TestController {
@@ -31,4 +31,8 @@ public class TestController {
         throw new GlobalException(CANNOT_FOUND_USER);
     }
 
+    @PostMapping("/dtoValidated")
+    public BaseResponse<String> triggerValidatedException(@RequestBody @Valid final TestRequest testRequest) {
+        return BaseResponse.ok("");
+    }
 }
