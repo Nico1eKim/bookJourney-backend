@@ -21,13 +21,19 @@ public enum BaseExceptionResponseStatus implements ResponseStatus{
     /**
      * 5000 : user 관련
      */
-    CANNOT_FOUND_USER(3000,BAD_REQUEST, "유저를 찾을 수 없습니다."),
-    ALREADY_EXIST_EMAIL(3001, BAD_REQUEST, "이미 존재하는 이메일입니다."),
+    CANNOT_FOUND_USER(5000,BAD_REQUEST, "해당하는 유저가 없습니다."),
 
     /**
      * 6000 : book 관련
      */
-    CANNOT_FOUND_BOOK(6000, BAD_REQUEST, "책을 찾을 수 없습니다.");
+    CANNOT_FOUND_BOOK(6000, BAD_REQUEST, "책을 찾을 수 없습니다."),
+
+    /**
+     * 7000 : auth 관련
+     */
+    ALREADY_EXIST_EMAIL(7001, BAD_REQUEST, "이미 존재하는 이메일입니다."),
+    CANNOT_FOUND_EMAIL(7002,BAD_REQUEST, "이메일이 존재하지 않습니다."),
+    INVALID_PASSWORD(7003,BAD_REQUEST, "비밀번호가 일치하지 않습니다.");
 
     private final int code;
     private final HttpStatus status;
