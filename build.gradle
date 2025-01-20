@@ -44,6 +44,9 @@ dependencies {
     //Redis
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 
+    //Jackson (JSON 파싱용)
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.0'
+
     compileOnly 'org.projectlombok:lombok'
     developmentOnly 'org.springframework.boot:spring-boot-docker-compose'
     runtimeOnly 'com.h2database:h2'
