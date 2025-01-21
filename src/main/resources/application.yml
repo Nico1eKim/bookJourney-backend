@@ -179,6 +179,9 @@ jwt:
   access-token-expiration: 3600000 #1시간
   refresh-token-expiration: 604800000 #7일
 
+aladin:
+  key: ${ALADIN_API_KEY}
+
 #logging:
 #  level:
 #    root: DEBUG

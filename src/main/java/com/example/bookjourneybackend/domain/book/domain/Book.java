@@ -30,8 +30,8 @@ public class Book extends BaseEntity {
 
     private LocalDateTime publishedDate;
 
-    @Column(length = 13)
-    private Long isbnCode;
+    @Column(nullable = false, length = 13)
+    private String isbnCode;
 
     private Integer pageCount;
 
@@ -44,9 +44,7 @@ public class Book extends BaseEntity {
     private String authorName;
 
     @Builder
-    public Book(Long bookId, Genre genre, String bookTitle, String publisher,
-                LocalDateTime publishedDate, Long isbnCode, Integer pageCount, String description,
-                Integer roomCount, String authorName) {
+    public Book(Long bookId, Genre genre, String bookTitle, String publisher, LocalDateTime publishedDate, String isbnCode, Integer pageCount, String description, Integer roomCount, String authorName) {
         this.bookId = bookId;
         this.genre = genre;
         this.bookTitle = bookTitle;
