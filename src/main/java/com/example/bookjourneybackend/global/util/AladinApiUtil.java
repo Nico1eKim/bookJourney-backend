@@ -39,7 +39,7 @@ public class AladinApiUtil {
     private final ObjectMapper objectMapper;
 
 
-    public String buildApiUrl(GetBookListRequest request) {
+    public String buildSearchApiUrl(GetBookListRequest request) {
         return String.format(
                 ALADIN_BASEL_URL + ALADIN_ITEM_SEARCH_PATH +
                         "?ttbkey=%s&Query=%s&QueryType=%s&start=%d&MaxResults=%d&output=%s&CategoryId=%d&Cover=%s",
@@ -50,6 +50,18 @@ public class AladinApiUtil {
                 MAX_RESULTS,
                 OUTPUT,
                 request.getGenreType().getCategoryId(),
+                COVER_SIZE
+        );
+    }
+
+    public String buildLookUpApiUrl(String isbn) {
+        return String.format(
+                ALADIN_BASEL_URL + ALADIN_ITEM_LOOKUP_PATH +
+                        "?ttbkey=%s&itemIdType=%s&ItemId=%s&output=%s&Cover=%s",
+                TTBKey,
+                isbn.length() == 13 ? "ISBN13" : "ISBN",
+                isbn,
+                OUTPUT,
                 COVER_SIZE
         );
     }
