@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @AllArgsConstructor
-public class BookInfo {
+public class BookInfo {     //책 목록에서 나오는 책 정보들
     private String bookTitle;
 
     private String authorName;

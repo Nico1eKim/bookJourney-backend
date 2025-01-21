@@ -21,7 +21,7 @@ public class BookController {
         return BaseResponse.ok(bookService.searchBook(getBookListRequest));
     }
 
-    @GetMapping("/info")
+    @GetMapping("/info/{isbn}")
     public BaseResponse<GetBookInfoResponse> viewBookInfo(@PathVariable("isbn") final String isbn) {
         return BaseResponse.ok(bookService.showBookInfo(isbn));
     }
