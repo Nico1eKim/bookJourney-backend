@@ -1,6 +1,7 @@
 package com.example.bookjourneybackend.domain.book.service;
 
 import com.example.bookjourneybackend.domain.book.dto.request.GetBookListRequest;
+import com.example.bookjourneybackend.domain.book.dto.response.GetBookInfoResponse;
 import com.example.bookjourneybackend.global.exception.GlobalException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -71,6 +72,7 @@ public class BookCacheService {
         return currentResponse;
     }
 
+
     //알라딘 API로부터 받은 Response에 에러가 없는지 확인
     private void checkValidatedResponse(String currentResponse) {
         try {
@@ -98,4 +100,13 @@ public class BookCacheService {
         );
     }
 
+    @Cacheable(
+            cacheNames = "getBookInfo",
+            key = "'books:isbn:' + #p2",
+            cacheManager = "bookInfoCacheManager"
+    )
+    public GetBookInfoResponse cachingBookInfo(String title, String author, String isbn, String cover, String description, String categoryName, String publisher, String publishedDate) {
+
+        return new GetBookInfoResponse(categoryName, cover, title, author, publisher, publishedDate, isbn, description);
+    }
 }

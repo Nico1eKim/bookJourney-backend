@@ -3,6 +3,7 @@ package com.example.bookjourneybackend.domain.book.service;
 import com.example.bookjourneybackend.domain.book.domain.repository.BookRepository;
 import com.example.bookjourneybackend.domain.book.dto.request.GetBookListRequest;
 import com.example.bookjourneybackend.domain.book.dto.response.BookInfo;
+import com.example.bookjourneybackend.domain.book.dto.response.GetBookInfoResponse;
 import com.example.bookjourneybackend.domain.book.dto.response.GetBookListResponse;
 import com.example.bookjourneybackend.global.exception.GlobalException;
 import com.fasterxml.jackson.core.JsonParser;
@@ -86,11 +87,14 @@ public class BookService {
                     String cover = item.get("cover").asText();
 
 //                    String link = item.get("link").asText();
-//                    String description = item.get("description").asText();
-//                    String categoryName = item.get("categoryName").asText();
-//                    String publisher = item.get("publisher").asText();
+                    String description = item.get("description").asText();
+                    String categoryName = item.get("categoryName").asText();
+                    String publisher = item.get("publisher").asText();
+                    String publishedDate = item.get("pubDate").asText();
 
-                    bookList.add(new BookInfo(title, author, isbn, cover));
+                    GetBookInfoResponse g = bookCacheService.cachingBookInfo(title, author, isbn, cover, description, categoryName, publisher, publishedDate);
+
+                    bookList.add(new BookInfo(g.getBookTitle(), g.getAuthorName(), g.getIsbnCode(), g.getImageUrl()));
                 }
             }
         } catch (JsonProcessingException e) {
@@ -100,4 +104,7 @@ public class BookService {
         return bookList;
     }
 
+    public GetBookInfoResponse showBookInfo(String isbn) {
+        return null;
+    }
 }
