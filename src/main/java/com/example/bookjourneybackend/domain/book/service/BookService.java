@@ -105,6 +105,6 @@ public class BookService {
     }
 
     public GetBookInfoResponse showBookInfo(String isbn) {
-        return null;
+        return bookCacheService.checkBookInfo(isbn);
     }
 }
