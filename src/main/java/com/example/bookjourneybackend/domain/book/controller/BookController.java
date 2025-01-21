@@ -5,6 +5,7 @@ import com.example.bookjourneybackend.domain.book.dto.response.GetBookInfoRespon
 import com.example.bookjourneybackend.domain.book.dto.response.GetBookListResponse;
 import com.example.bookjourneybackend.domain.book.service.BookService;
 import com.example.bookjourneybackend.global.response.BaseResponse;
+import com.example.bookjourneybackend.global.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class BookController {
     private final BookService bookService;
+    private final JwtUtil jwtUtil;
 
     @GetMapping("/search")
     public BaseResponse<GetBookListResponse> viewBookList(final GetBookListRequest getBookListRequest) {
@@ -22,8 +24,10 @@ public class BookController {
     }
 
     @GetMapping("/info/{isbn}")
-    public BaseResponse<GetBookInfoResponse> viewBookInfo(@PathVariable("isbn") final String isbn) {
-        return BaseResponse.ok(bookService.showBookInfo(isbn));
+    public BaseResponse<GetBookInfoResponse> viewBookInfo(@PathVariable("isbn") final String isbn,
+                                                          @RequestHeader("Authorization") String authorization) {
+        Long userId = jwtUtil.extractIdFromHeader(authorization);
+        return BaseResponse.ok(bookService.showBookInfo(isbn, userId));
     }
 
 }

@@ -1,10 +1,12 @@
 package com.example.bookjourneybackend.domain.book.service;
 
+import com.example.bookjourneybackend.domain.book.domain.Book;
 import com.example.bookjourneybackend.domain.book.domain.repository.BookRepository;
 import com.example.bookjourneybackend.domain.book.dto.request.GetBookListRequest;
 import com.example.bookjourneybackend.domain.book.dto.response.BookInfo;
 import com.example.bookjourneybackend.domain.book.dto.response.GetBookInfoResponse;
 import com.example.bookjourneybackend.domain.book.dto.response.GetBookListResponse;
+import com.example.bookjourneybackend.domain.favorite.domain.repository.FavoriteRepository;
 import com.example.bookjourneybackend.global.exception.GlobalException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -17,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.*;
@@ -28,6 +31,7 @@ import static com.example.bookjourneybackend.global.response.status.BaseExceptio
 public class BookService {
 
     private final BookRepository bookRepository;
+    private final FavoriteRepository favoriteRepository;
     private final ObjectMapper objectMapper;
     private final BookCacheService bookCacheService;
 
@@ -103,8 +107,19 @@ public class BookService {
         return bookList;
     }
 
-    public GetBookInfoResponse showBookInfo(String isbn) {
+    public GetBookInfoResponse showBookInfo(String isbn, Long userId) {
         log.info("------------------------[BookService.showBookInfo]------------------------");
-        return bookCacheService.checkBookInfo(isbn);
+        GetBookInfoResponse getBookInfoResponse = bookCacheService.checkBookInfo(isbn);
+
+        Optional<Book> findBook = bookRepository.findByIsbnCode(isbn);
+
+        if (findBook.isPresent()) {     //레포지토리에 책이 존재하면..
+            if (favoriteRepository.existsActiveFavoriteByUserIdAndBook(userId, findBook.get())) {
+                getBookInfoResponse.setFavorite(true);   //즐겨찾기 추가
+            }
+        }
+        bookCacheService.checkBookInfo(isbn);
+
+        return getBookInfoResponse;
     }
 }
