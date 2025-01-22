@@ -53,8 +53,11 @@ public class Book extends BaseEntity {
     @Builder.Default
     private List<Favorite> favorites = new ArrayList<>();
 
+    @Column(length = 500)
+    private String imageUrl;
+
     @Builder
-    public Book(Long bookId, Genre genre, String bookTitle, String publisher, LocalDateTime publishedDate, String isbn, Integer pageCount, String description, Integer roomCount, String authorName) {
+    public Book(Long bookId, Genre genre, String bookTitle, String publisher, LocalDateTime publishedDate, String isbn, Integer pageCount, String description, Integer roomCount, String authorName, String imageUrl) {
         this.bookId = bookId;
         this.genre = genre;
         this.bookTitle = bookTitle;
@@ -65,6 +68,7 @@ public class Book extends BaseEntity {
         this.description = description;
         this.roomCount = roomCount;
         this.authorName = authorName;
+        this.imageUrl = imageUrl;
     }
 
     public void addFavorite(Favorite favorite) {
