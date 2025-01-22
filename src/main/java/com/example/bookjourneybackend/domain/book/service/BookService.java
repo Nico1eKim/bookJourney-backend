@@ -113,11 +113,12 @@ public class BookService {
 
         Optional<Book> findBook = bookRepository.findByIsbn(isbn);
 
-        if (findBook.isPresent()) {     //레포지토리에 책이 존재하면..
-            if (favoriteRepository.existsActiveFavoriteByUserIdAndBook(userId, findBook.get())) {
-                getBookInfoResponse.setFavorite(true);   //즐겨찾기 추가
-            }
-        }
+        //레포지토리에 책이 존재하면..
+        findBook.ifPresent(book -> {
+            boolean isFavorite = favoriteRepository.existsActiveFavoriteByUserIdAndBook(userId, book);
+            getBookInfoResponse.setFavorite(isFavorite);
+        });
+
         bookCacheService.checkBookInfo(isbn);
 
         return getBookInfoResponse;
