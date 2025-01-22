@@ -32,7 +32,7 @@ public class SecurityConfig {
             "/v3/api-docs/**", "/api-docs/**", "/swagger-ui.html",
             "/auth/login","/users/signup","/users/emails/verification-requests","/users/emails/verifications",
             "/users/nickname","/h2-console/**"
-            , "/books/search", "/rooms-together/**"   //개발을 위해 일시적으로 허용..
+            , "/books/**", "/rooms-together/**"   //개발을 위해 일시적으로 허용..
     };
 
 

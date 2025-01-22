@@ -1,9 +1,12 @@
 package com.example.bookjourneybackend.domain.book.service;
 
+import com.example.bookjourneybackend.domain.book.domain.Book;
 import com.example.bookjourneybackend.domain.book.domain.repository.BookRepository;
 import com.example.bookjourneybackend.domain.book.dto.request.GetBookListRequest;
 import com.example.bookjourneybackend.domain.book.dto.response.BookInfo;
+import com.example.bookjourneybackend.domain.book.dto.response.GetBookInfoResponse;
 import com.example.bookjourneybackend.domain.book.dto.response.GetBookListResponse;
+import com.example.bookjourneybackend.domain.favorite.domain.repository.FavoriteRepository;
 import com.example.bookjourneybackend.global.exception.GlobalException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -16,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.*;
@@ -27,6 +31,7 @@ import static com.example.bookjourneybackend.global.response.status.BaseExceptio
 public class BookService {
 
     private final BookRepository bookRepository;
+    private final FavoriteRepository favoriteRepository;
     private final ObjectMapper objectMapper;
     private final BookCacheService bookCacheService;
 
@@ -54,7 +59,7 @@ public class BookService {
         List<BookInfo> bookList = new ArrayList<>();
 
         //응답 JSON 데이터 파싱
-        bookList = parseBookListFromResponse(currentResponse, bookList);
+        bookList = parseBookListFromResponse(currentResponse);
 
 
         log.info("Caching completed for current page.");
@@ -62,8 +67,8 @@ public class BookService {
         return GetBookListResponse.of(bookList);
     }
 
-    //todo 책 상세보기용 캐싱 전략 짜기 (key -> isbn코드)
-    private List<BookInfo> parseBookListFromResponse(String currentResponse, List<BookInfo> bookList) {
+    private List<BookInfo> parseBookListFromResponse(String currentResponse) {
+        List<BookInfo> bookList = new ArrayList<>();
         try{
             //JSON 형식 오류 허용 -> "Unrecognized character escape ''' (code 39)" 에러 해결용
             objectMapper.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
@@ -74,7 +79,6 @@ public class BookService {
             JsonNode items = root.get("item");
 
             if (items != null && items.isArray()) {
-                bookList = new ArrayList<>();
                 for (JsonNode item : items) {
                     String title = item.get("title").asText();
                     String author = item.get("author").asText();
@@ -86,11 +90,14 @@ public class BookService {
                     String cover = item.get("cover").asText();
 
 //                    String link = item.get("link").asText();
-//                    String description = item.get("description").asText();
-//                    String categoryName = item.get("categoryName").asText();
-//                    String publisher = item.get("publisher").asText();
+                    String description = item.get("description").asText();
+                    String categoryName = item.get("categoryName").asText();
+                    String publisher = item.get("publisher").asText();
+                    String publishedDate = item.get("pubDate").asText();
 
-                    bookList.add(new BookInfo(title, author, isbn, cover));
+                    GetBookInfoResponse g = bookCacheService.cachingBookInfo(title, author, isbn, cover, description, categoryName, publisher, publishedDate);
+
+                    bookList.add(new BookInfo(g.getBookTitle(), g.getAuthorName(), g.getIsbn(), g.getImageUrl()));
                 }
             }
         } catch (JsonProcessingException e) {
@@ -100,4 +107,20 @@ public class BookService {
         return bookList;
     }
 
+    public GetBookInfoResponse showBookInfo(String isbn, Long userId) {
+        log.info("------------------------[BookService.showBookInfo]------------------------");
+        GetBookInfoResponse getBookInfoResponse = bookCacheService.checkBookInfo(isbn);
+
+        Optional<Book> findBook = bookRepository.findByIsbn(isbn);
+
+        //레포지토리에 책이 존재하면..
+        findBook.ifPresent(book -> {
+            boolean isFavorite = favoriteRepository.existsActiveFavoriteByUserIdAndBook(userId, book);
+            getBookInfoResponse.setFavorite(isFavorite);
+        });
+
+        bookCacheService.checkBookInfo(isbn);
+
+        return getBookInfoResponse;
+    }
 }

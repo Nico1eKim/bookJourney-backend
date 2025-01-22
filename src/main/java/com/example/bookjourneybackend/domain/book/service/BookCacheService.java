@@ -1,46 +1,31 @@
 package com.example.bookjourneybackend.domain.book.service;
 
 import com.example.bookjourneybackend.domain.book.dto.request.GetBookListRequest;
+import com.example.bookjourneybackend.domain.book.dto.response.GetBookInfoResponse;
 import com.example.bookjourneybackend.global.exception.GlobalException;
+import com.example.bookjourneybackend.global.util.AladinApiUtil;
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.ALADIN_API_ERROR;
+import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.ALADIN_API_PARSING_ERROR;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class BookCacheService {
 
-    @Value("${aladin.key}")
-    private String TTBKey;
-
     private final RestTemplate restTemplate;
+    private final AladinApiUtil aladinApiUtil;
     private final ObjectMapper objectMapper;
-
-    public static final String ALADIN_BASEL_URL = "http://www.aladin.co.kr/ttb/api";
-    private final String ALADIN_ITEM_SEARCH_PATH = "/ItemSearch.aspx";   //상품 검색 API (책 검색용)
-    private final String ALADIN_ITEM_LOOKUP_PATH = "/ItemLookUp.aspx";
-    private final String ALADIN_ITEM_LIST_PATH = "/ItemList.aspx";   //상품 리스트 API (베스트셀러 조회용)
-
-    private final int MAX_RESULTS = 10; //최대 책 검색 결과 개수
-    private final String OUTPUT = "js"; // 응답 포맷 (xml 또는 json)
-
-    //Big : 큰 크기 : 너비 200px
-    //MidBig : 중간 큰 크기 : 너비 150px
-    //Mid(기본값) : 중간 크기 : 너비 85px
-    //Small : 작은 크기 : 너비 75px
-    //Mini : 매우 작은 크기 : 너비 65px
-    //None : 없음
-    private final String COVER_SIZE = "MidBig";
 
     //Ex) books:searchTerm:해리포터(인코딩 안된상태로 들어감):genreType:NOVEL_POETRY_DRAMA:queryType:Title:page:1
     @Cacheable(
@@ -55,12 +40,12 @@ public class BookCacheService {
         log.info("[getCurrentPage Caching] 검색어: {}, 장르명: {}, 검색종류: {}, 페이지수: {}",
                 getBookListRequest.getSearchTerm(), getBookListRequest.getGenreType(), getBookListRequest.getQueryType(), getBookListRequest.getPage());
 
-        String requestUrl = buildApiUrl(getBookListRequest);
+        String requestUrl = aladinApiUtil.buildSearchApiUrl(getBookListRequest);
         String currentResponse;
 
         try {
             currentResponse = restTemplate.getForEntity(requestUrl, String.class).getBody();
-            checkValidatedResponse(currentResponse);
+            aladinApiUtil.checkValidatedResponse(currentResponse);
             log.info("알라딘 API 응답 Body: {}", currentResponse);
 
         } catch (RestClientException e) {
@@ -71,31 +56,68 @@ public class BookCacheService {
         return currentResponse;
     }
 
-    //알라딘 API로부터 받은 Response에 에러가 없는지 확인
-    private void checkValidatedResponse(String currentResponse) {
+    @Cacheable(
+            cacheNames = "getBookInfo",
+            key = "'book:isbn:' + #p2",
+            cacheManager = "bookInfoCacheManager"
+    )
+    public GetBookInfoResponse cachingBookInfo(String title, String author, String isbn, String cover, String description, String categoryName, String publisher, String publishedDate) {
+        return GetBookInfoResponse.of(categoryName, cover, title, author, false, publisher, publishedDate, isbn, description);
+    }
+
+    @Cacheable(
+            cacheNames = "getBookInfo",
+            key = "'book:isbn:' + #p0",
+            cacheManager = "bookInfoCacheManager"
+    )
+    public GetBookInfoResponse checkBookInfo(String isbn) {
+        log.info("[checkBookInfo Caching] isbn: {}",
+                isbn);
+
+        String requestUrl = aladinApiUtil.buildLookUpApiUrl(isbn);
+        String currentResponse;
+        GetBookInfoResponse getBookInfoResponse = null;
+
         try {
+            currentResponse = restTemplate.getForEntity(requestUrl, String.class).getBody();
+            aladinApiUtil.checkValidatedResponse(currentResponse);
+            log.info("알라딘 API 응답 Body: {}", currentResponse);
+
+            //JSON 형식 오류 허용 -> "Unrecognized character escape ''' (code 39)" 에러 해결용
+            objectMapper.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
+            objectMapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
+//            currentResponse = currentResponse.replace("'", "\"");
+
             JsonNode root = objectMapper.readTree(currentResponse);
-            if (root.has("errorCode")) {
-                throw new GlobalException(ALADIN_API_ERROR);
+            JsonNode items = root.get("item");
+
+            if (items != null && items.isArray()) {
+                for (JsonNode item : items) {
+                    String title = item.get("title").asText();
+                    String author = item.get("author").asText();
+
+                    //isbn 13자리가 비어있는 경우 10자리 사용
+//                    String isbn = item.has("isbn13") && !item.get("isbn13").asText().isEmpty()
+//                            ? item.get("isbn13").asText()
+//                            : item.get("isbn").asText();
+                    String cover = item.get("cover").asText();
+
+//                    String link = item.get("link").asText();
+                    String description = item.get("description").asText();
+                    String categoryName = item.get("categoryName").asText();
+                    String publisher = item.get("publisher").asText();
+                    String publishedDate = item.get("pubDate").asText();
+
+                    getBookInfoResponse = GetBookInfoResponse.of(categoryName, cover, title, author, false, publisher, publishedDate, isbn, description);
+                }
             }
+        } catch (RestClientException e) {
+            throw new GlobalException(ALADIN_API_ERROR);
         } catch (JsonProcessingException e) {
-//            throw new RuntimeException(e);
+            log.info("Json 파싱 에러 메시지: {}", e.getMessage());
+            throw new GlobalException(ALADIN_API_PARSING_ERROR);
         }
-    }
 
-    private String buildApiUrl(GetBookListRequest request) {
-        return String.format(
-                ALADIN_BASEL_URL + ALADIN_ITEM_SEARCH_PATH +
-                        "?ttbkey=%s&Query=%s&QueryType=%s&start=%d&MaxResults=%d&output=%s&CategoryId=%d&Cover=%s",
-                TTBKey,
-                request.getSearchTerm(),
-                request.getQueryType(),
-                request.getPage(),
-                MAX_RESULTS,
-                OUTPUT,
-                request.getGenreType().getCategoryId(),
-                COVER_SIZE
-        );
+        return getBookInfoResponse;
     }
-
 }
