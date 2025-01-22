@@ -1,6 +1,7 @@
 package com.example.bookjourneybackend.domain.room.domain;
 
 import com.example.bookjourneybackend.domain.book.domain.Book;
+import com.example.bookjourneybackend.domain.readTogether.domain.ReadTogether;
 import com.example.bookjourneybackend.domain.user.domain.User;
 import com.example.bookjourneybackend.global.entity.BaseEntity;
 import jakarta.persistence.*;
@@ -41,9 +42,15 @@ public class Room extends BaseEntity {
     @Column(nullable = false)
     private Integer currentPage;
 
+    // ReadTogether와의 관계 추가
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "read_together_id", nullable = false)
+    private ReadTogether readTogether;
+
+
 
     @Builder
-    public Room(Long roomId, RoomType roomType, UserRole userRole, Double userPercentage, User user, Book book,Integer currentPage) {
+    public Room(Long roomId, RoomType roomType, UserRole userRole, Double userPercentage, User user, Book book,Integer currentPage, ReadTogether readTogether) {
         this.roomId = roomId;
         this.roomType = roomType;
         this.userRole = userRole;
@@ -51,5 +58,6 @@ public class Room extends BaseEntity {
         this.user = user;
         this.book = book;
         this.currentPage = currentPage;
+        this.readTogether = readTogether;
     }
 }
