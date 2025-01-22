@@ -37,7 +37,7 @@ public class Book extends BaseEntity {
     private LocalDateTime publishedDate;
 
     @Column(nullable = false, length = 13)
-    private String isbnCode;
+    private String isbn;
 
     private Integer pageCount;
 
@@ -54,13 +54,13 @@ public class Book extends BaseEntity {
     private List<Favorite> favorites = new ArrayList<>();
 
     @Builder
-    public Book(Long bookId, Genre genre, String bookTitle, String publisher, LocalDateTime publishedDate, String isbnCode, Integer pageCount, String description, Integer roomCount, String authorName) {
+    public Book(Long bookId, Genre genre, String bookTitle, String publisher, LocalDateTime publishedDate, String isbn, Integer pageCount, String description, Integer roomCount, String authorName) {
         this.bookId = bookId;
         this.genre = genre;
         this.bookTitle = bookTitle;
         this.publisher = publisher;
         this.publishedDate = publishedDate;
-        this.isbnCode = isbnCode;
+        this.isbn = isbn;
         this.pageCount = pageCount;
         this.description = description;
         this.roomCount = roomCount;

@@ -1,6 +1,5 @@
 package com.example.bookjourneybackend.domain.book.dto.response;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -25,22 +24,22 @@ public class GetBookInfoResponse {
 
     private String publishedDate;
 
-    private String isbnCode;
+    private String isbn;
 
     private String description;
 
-    public GetBookInfoResponse(String genre, String imageUrl, String bookTitle, String authorName, String publisher, String publishedDate, String isbnCode, String description) {
+    public GetBookInfoResponse(String genre, String imageUrl, String bookTitle, String authorName, String publisher, String publishedDate, String isbn, String description) {
         this.genre = genre;
         this.imageUrl = imageUrl;
         this.bookTitle = bookTitle;
         this.authorName = authorName;
         this.publisher = publisher;
         this.publishedDate = publishedDate;
-        this.isbnCode = isbnCode;
+        this.isbn = isbn;
         this.description = description;
     }
 
-    public static GetBookInfoResponse of(String genre, String imageUrl, String bookTitle, String authorName, boolean favorite, String publisher, String publishedDate, String isbnCode, String description) {
-        return new GetBookInfoResponse(genre, imageUrl, bookTitle, authorName, favorite, publisher, publishedDate, isbnCode, description);
+    public static GetBookInfoResponse of(String genre, String imageUrl, String bookTitle, String authorName, boolean favorite, String publisher, String publishedDate, String isbn, String description) {
+        return new GetBookInfoResponse(genre, imageUrl, bookTitle, authorName, favorite, publisher, publishedDate, isbn, description);
     }
 }

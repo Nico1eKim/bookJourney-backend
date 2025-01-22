@@ -97,7 +97,7 @@ public class BookService {
 
                     GetBookInfoResponse g = bookCacheService.cachingBookInfo(title, author, isbn, cover, description, categoryName, publisher, publishedDate);
 
-                    bookList.add(new BookInfo(g.getBookTitle(), g.getAuthorName(), g.getIsbnCode(), g.getImageUrl()));
+                    bookList.add(new BookInfo(g.getBookTitle(), g.getAuthorName(), g.getIsbn(), g.getImageUrl()));
                 }
             }
         } catch (JsonProcessingException e) {
@@ -111,7 +111,7 @@ public class BookService {
         log.info("------------------------[BookService.showBookInfo]------------------------");
         GetBookInfoResponse getBookInfoResponse = bookCacheService.checkBookInfo(isbn);
 
-        Optional<Book> findBook = bookRepository.findByIsbnCode(isbn);
+        Optional<Book> findBook = bookRepository.findByIsbn(isbn);
 
         if (findBook.isPresent()) {     //레포지토리에 책이 존재하면..
             if (favoriteRepository.existsActiveFavoriteByUserIdAndBook(userId, findBook.get())) {
