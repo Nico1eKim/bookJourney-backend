@@ -1,4 +1,4 @@
-package com.example.bookjourneybackend.domain.readTogether.dto.response;
+package com.example.bookjourneybackend.domain.room.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -7,7 +7,7 @@ import java.util.List;
 
 @Getter
 @AllArgsConstructor
-public class RoomData {
+public class GetRoomInfoResponse {
     private Long roomId;
     private String bookTitle;
     private String roomName;

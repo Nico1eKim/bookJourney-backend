@@ -1,12 +1,13 @@
 package com.example.bookjourneybackend.domain.record.domain;
 
-import com.example.bookjourneybackend.domain.readTogether.domain.ReadTogether;
+import com.example.bookjourneybackend.domain.room.domain.Room;
 import com.example.bookjourneybackend.domain.user.domain.User;
 import com.example.bookjourneybackend.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "records")
@@ -18,9 +19,10 @@ public class Record extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long recordId;
 
+    @Setter
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "read_together_id", nullable = false)
-    private ReadTogether readTogether;
+    @JoinColumn(name = "room_id", nullable = false)
+    private Room room;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
@@ -40,13 +42,14 @@ public class Record extends BaseEntity {
     private String content;
 
     @Builder
-    public Record(Long recordId, ReadTogether readTogether, User user, String recordTitle, RecordType recordType, Integer recordPage, String content) {
+    public Record(Long recordId, Room room, User user, String recordTitle, RecordType recordType, Integer recordPage, String content) {
         this.recordId = recordId;
-        this.readTogether = readTogether;
+        this.room = room;
         this.user = user;
         this.recordTitle = recordTitle;
         this.recordType = recordType;
         this.recordPage = recordPage;
         this.content = content;
     }
+
 }

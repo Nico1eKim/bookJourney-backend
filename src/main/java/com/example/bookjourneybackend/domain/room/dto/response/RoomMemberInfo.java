@@ -1,6 +1,6 @@
-package com.example.bookjourneybackend.domain.readTogether.dto.response;
+package com.example.bookjourneybackend.domain.room.dto.response;
 
-import com.example.bookjourneybackend.domain.room.domain.UserRole;
+import com.example.bookjourneybackend.domain.userRoom.domain.UserRole;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
