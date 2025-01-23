@@ -1,32 +1,56 @@
 package com.example.bookjourneybackend.domain.room.service;
 
+import com.example.bookjourneybackend.domain.room.domain.Room;
+import com.example.bookjourneybackend.domain.room.domain.repository.RoomRepository;
 import com.example.bookjourneybackend.domain.room.dto.response.GetRoomInfoResponse;
 import com.example.bookjourneybackend.domain.room.dto.response.RoomMemberInfo;
-import com.example.bookjourneybackend.domain.userRoom.domain.UserRole;
+import com.example.bookjourneybackend.domain.user.domain.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
-import java.util.Arrays;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class RoomService {
 
-    public GetRoomInfoResponse getRoomInfo(Long roomId) {
-        // 테스트용 데이터
-        RoomMemberInfo member1 = new RoomMemberInfo(UserRole.HOST, "hostImage.jpg", "호스트 닉네임", 50);
-        RoomMemberInfo member2 = new RoomMemberInfo(UserRole.MEMBER, "teamImage1.jpg", "팀원1 닉네임", 40);
-        RoomMemberInfo member3 = new RoomMemberInfo(UserRole.MEMBER, "teamImage2.jpg", "팀원2 닉네임", 30);
+    private final RoomRepository roomRepository;
 
-        return new GetRoomInfoResponse(roomId,
-                "밤의 여행자들",
-                "같이 읽기방 제목",
-                true,
-                30,
-                "D-8",
-                4,
-                6,
-                Arrays.asList(member1, member2, member3));
+    public GetRoomInfoResponse getRoomInfo(Long roomId) {
+        Room room = roomRepository.findById(roomId)
+                .orElseThrow(() -> new IllegalArgumentException("해당하는 방이 존재하지 않습ㄴ다."));
+
+        // 방(Room)에 소속된 사용자-방(UserRoom) 객체의 리스트를 가져옴
+        List<RoomMemberInfo> members = room.getUserRooms().stream().map(userRoom -> {
+            User user = userRoom.getUser();
+
+            return new RoomMemberInfo(
+                    userRoom.getUserRole(),
+                    user.getUserImage() != null ? user.getUserImage().getImageUrl() : null,
+                    user.getNickname(),
+                    userRoom.getUserPercentage().intValue()
+            );
+        }).toList();
+
+        return new GetRoomInfoResponse(
+                room.getRoomId(),
+                room.getUserRooms().stream()
+                        .filter(userRoom -> "HOST".equals(userRoom.getUserRole().name())) // 호스트의 책 제목을 가져옴
+                        .findFirst()
+                        .map(userRoom -> userRoom.getBook().getBookTitle())
+                        .orElse("책 이름 없음"),
+                room.getRoomName(),
+                room.isPublic(),
+                room.getRoomPercentage().intValue(),
+                "D-" + calculateDaysLeft(room.getProgressEndDate()),
+                room.getRecruitCount(),
+                room.getRecordCount(),
+                members
+        );
     }
 
+    private long calculateDaysLeft(LocalDateTime endDate) {
+        return ChronoUnit.DAYS.between(LocalDateTime.now(), endDate);
+    }
 }
