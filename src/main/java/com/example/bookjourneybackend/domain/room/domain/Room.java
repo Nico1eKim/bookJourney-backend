@@ -24,10 +24,6 @@ public class Room extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long roomId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_room_id", nullable = false)
-    private UserRoom userRoom;
-
     @Column(nullable = false, length = 60)
     private String roomName;
 
@@ -66,7 +62,7 @@ public class Room extends BaseEntity {
     @Builder
     public Room(Long roomId, UserRoom userRoom, String roomName, boolean isPublic, Integer password, Double roomPercentage, LocalDateTime progressStartDate, LocalDateTime progressEndDate, LocalDateTime recruitStartDate, LocalDateTime recruitEndDate, Integer recruitCount, Integer recordCount) {
         this.roomId = roomId;
-        this.userRoom = userRoom;
+//        this.userRoom = userRoom;
         this.roomName = roomName;
         this.isPublic = isPublic;
         this.password = password;
