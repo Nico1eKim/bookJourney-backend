@@ -48,6 +48,10 @@ public class Record extends BaseEntity {
     @OneToMany(mappedBy = "record", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> comments = new ArrayList<>();
 
+    @Builder.Default
+    @OneToMany(mappedBy = "record", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<RecordLike> recordLikes = new ArrayList<>();
+
     @Builder
     public Record(Long recordId, Room room, User user, String recordTitle, RecordType recordType, Integer recordPage, String content) {
         this.recordId = recordId;
@@ -62,6 +66,11 @@ public class Record extends BaseEntity {
     public void addComment(Comment comment) {
         this.comments.add(comment);
         comment.setRecord(this);
+    }
+
+    public void addRecordLike(RecordLike recordLike) {
+        this.recordLikes.add(recordLike);
+        recordLike.setRecord(this);
     }
 
 }
