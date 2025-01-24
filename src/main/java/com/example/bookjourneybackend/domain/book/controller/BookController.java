@@ -4,6 +4,7 @@ import com.example.bookjourneybackend.domain.book.dto.request.GetBookListRequest
 import com.example.bookjourneybackend.domain.book.dto.response.GetBookInfoResponse;
 import com.example.bookjourneybackend.domain.book.dto.response.GetBookListResponse;
 import com.example.bookjourneybackend.domain.book.service.BookService;
+import com.example.bookjourneybackend.global.annotation.LoginUserId;
 import com.example.bookjourneybackend.global.response.BaseResponse;
 import com.example.bookjourneybackend.global.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
@@ -25,8 +26,7 @@ public class BookController {
 
     @GetMapping("/info/{isbn}")
     public BaseResponse<GetBookInfoResponse> viewBookInfo(@PathVariable("isbn") final String isbn,
-                                                          @RequestHeader("Authorization") String authorization) {
-        Long userId = jwtUtil.extractIdFromHeader(authorization);
+                                                          @LoginUserId Long userId) {
         return BaseResponse.ok(bookService.showBookInfo(isbn, userId));
     }
 
