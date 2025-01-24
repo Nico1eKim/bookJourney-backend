@@ -1,14 +1,22 @@
 package com.example.bookjourneybackend.domain.user.domain;
 
+import com.example.bookjourneybackend.domain.favorite.domain.Favorite;
+import com.example.bookjourneybackend.domain.userRoom.domain.UserRoom;
 import com.example.bookjourneybackend.global.entity.BaseEntity;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Table(name = "users")
 @Getter
+@Builder
+@AllArgsConstructor
 @NoArgsConstructor
 public class User extends BaseEntity{
 
@@ -26,8 +34,12 @@ public class User extends BaseEntity{
     @Column(name = "nickname", nullable = false, length = 100)
     private String nickname;
 
-    @OneToOne(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private UserImage userImage; // User와 UserImage의 연관 관계 추가
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<Favorite> favorites = new ArrayList<>();
 
     @Builder
     public User(Long userId, String email, String password, String nickname) {
@@ -35,5 +47,10 @@ public class User extends BaseEntity{
         this.email = email;
         this.password = password;
         this.nickname = nickname;
+    }
+
+    public void addFavorite(Favorite favorite) {
+        this.favorites.add(favorite);
+        favorite.setUser(this);
     }
 }
