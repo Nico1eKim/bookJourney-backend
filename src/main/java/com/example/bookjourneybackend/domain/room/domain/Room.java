@@ -7,6 +7,7 @@ import com.example.bookjourneybackend.domain.user.domain.User;
 import com.example.bookjourneybackend.domain.userRoom.domain.UserRoom;
 import com.example.bookjourneybackend.global.entity.BaseEntity;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,10 +16,13 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-@NoArgsConstructor
+
 @Entity
 @Getter
+@Builder
 @Table(name = "rooms")
+@AllArgsConstructor
+@NoArgsConstructor
 public class Room extends BaseEntity {
 
     @Id
@@ -61,9 +65,11 @@ public class Room extends BaseEntity {
     @Column(nullable = false)
     private Integer recordCount;
 
+    @Builder.Default
     @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserRoom> userRooms = new ArrayList<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Record> records = new ArrayList<>();
 
@@ -91,5 +97,6 @@ public class Room extends BaseEntity {
 
     public void addRecord(Record record) {
         this.records.add(record);
+        record.setRoom(this);
     }
 }
