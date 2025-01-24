@@ -2,7 +2,6 @@ package com.example.bookjourneybackend.domain.room.service;
 
 import com.example.bookjourneybackend.domain.room.domain.Room;
 import com.example.bookjourneybackend.domain.room.domain.repository.RoomRepository;
-import com.example.bookjourneybackend.domain.room.dto.response.GetRoomDetailResponse;
 import com.example.bookjourneybackend.domain.room.dto.response.GetRoomInfoResponse;
 import com.example.bookjourneybackend.domain.room.dto.response.RoomMemberInfo;
 import com.example.bookjourneybackend.domain.user.domain.User;
