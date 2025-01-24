@@ -1,6 +1,7 @@
 package com.example.bookjourneybackend.domain.book.domain;
 
 import com.example.bookjourneybackend.domain.favorite.domain.Favorite;
+import com.example.bookjourneybackend.domain.room.domain.Room;
 import com.example.bookjourneybackend.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -54,6 +55,10 @@ public class Book extends BaseEntity {
     @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Favorite> favorites = new ArrayList<>();
 
+    @Builder.Default
+    @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Room> rooms = new ArrayList<>();
+
     @Column(nullable = false, length = 500)
     private String imageUrl;
 
@@ -79,5 +84,10 @@ public class Book extends BaseEntity {
     public void addFavorite(Favorite favorite) {
         this.favorites.add(favorite);
         favorite.setBook(this);
+    }
+
+    public void addRoom(Room room) {
+        this.rooms.add(room);
+        room.setBook(this);
     }
 }
