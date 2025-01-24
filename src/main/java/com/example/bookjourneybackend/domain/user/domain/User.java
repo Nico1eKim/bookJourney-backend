@@ -1,6 +1,7 @@
 package com.example.bookjourneybackend.domain.user.domain;
 
 import com.example.bookjourneybackend.domain.favorite.domain.Favorite;
+import com.example.bookjourneybackend.domain.recentSearch.domain.RecentSearch;
 import com.example.bookjourneybackend.domain.userRoom.domain.UserRoom;
 import com.example.bookjourneybackend.global.entity.BaseEntity;
 import jakarta.persistence.*;
@@ -45,6 +46,10 @@ public class User extends BaseEntity{
     @Builder.Default
     private List<FavoriteGenre> favoriteGenres = new ArrayList<>();
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<RecentSearch> recentSearches = new ArrayList<>();
+
     @Builder
     public User(Long userId, String email, String password, String nickname) {
         this.userId = userId;
@@ -63,5 +68,8 @@ public class User extends BaseEntity{
         favoriteGenre.setUser(this);
     }
 
-
+    public void addRecentSearch(RecentSearch recentSearch) {
+        this.recentSearches.add(recentSearch);
+        recentSearch.setUser(this);
+    }
 }
