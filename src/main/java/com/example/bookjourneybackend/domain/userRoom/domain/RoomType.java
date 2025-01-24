@@ -1,4 +1,4 @@
-package com.example.bookjourneybackend.domain.room.domain;
+package com.example.bookjourneybackend.domain.userRoom.domain;
 
 import lombok.Getter;
 

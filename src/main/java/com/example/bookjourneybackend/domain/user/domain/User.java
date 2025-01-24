@@ -26,6 +26,9 @@ public class User extends BaseEntity{
     @Column(name = "nickname", nullable = false, length = 100)
     private String nickname;
 
+    @OneToOne(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private UserImage userImage; // User와 UserImage의 연관 관계 추가
+
     @Builder
     public User(Long userId, String email, String password, String nickname) {
         this.userId = userId;
