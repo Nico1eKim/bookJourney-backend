@@ -32,13 +32,10 @@ public class UserRoom extends BaseEntity {
     @Column(nullable = false)
     private Double userPercentage;
 
+    @Setter
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "book_id", nullable = false)
-    private Book book;
 
     @Column(nullable = false)
     private Integer currentPage;
@@ -50,13 +47,12 @@ public class UserRoom extends BaseEntity {
     private Room room;
 
     @Builder
-    public UserRoom(Long userRoomId, RoomType roomType, UserRole userRole, Double userPercentage, User user, Book book, Integer currentPage, Room room) {
+    public UserRoom(Long userRoomId, RoomType roomType, UserRole userRole, Double userPercentage, User user, Integer currentPage, Room room) {
         this.userRoomId = userRoomId;
         this.roomType = roomType;
         this.userRole = userRole;
         this.userPercentage = userPercentage;
         this.user = user;
-        this.book = book;
         this.currentPage = currentPage;
         this.room = room;
     }

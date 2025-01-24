@@ -29,11 +29,7 @@ public class RoomService {
         List<RoomMemberInfo> members = getRoomMemberInfoList(room);
 
         return GetRoomInfoResponse.of(
-                room.getUserRooms().stream()
-                        .filter(userRoom -> "HOST".equals(userRoom.getUserRole().name()))
-                        .findFirst()
-                        .map(userRoom -> userRoom.getBook().getBookTitle())
-                        .orElse("책 이름 없음"),
+                room.getBook().getBookTitle(),
                 room.getRoomName(),
                 room.isPublic(),
                 room.getRoomPercentage().intValue(),

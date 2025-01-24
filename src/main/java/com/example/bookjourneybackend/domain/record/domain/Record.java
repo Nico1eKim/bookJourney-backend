@@ -1,17 +1,20 @@
 package com.example.bookjourneybackend.domain.record.domain;
 
+import com.example.bookjourneybackend.domain.comment.domain.Comment;
 import com.example.bookjourneybackend.domain.room.domain.Room;
 import com.example.bookjourneybackend.domain.user.domain.User;
 import com.example.bookjourneybackend.global.entity.BaseEntity;
 import jakarta.persistence.*;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "records")
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Getter
 public class Record extends BaseEntity {
 
@@ -41,6 +44,14 @@ public class Record extends BaseEntity {
     @Column(nullable = false, length = 3000)
     private String content;
 
+    @Builder.Default
+    @OneToMany(mappedBy = "record", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Comment> comments = new ArrayList<>();
+
+    @Builder.Default
+    @OneToMany(mappedBy = "record", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<RecordLike> recordLikes = new ArrayList<>();
+
     @Builder
     public Record(Long recordId, Room room, User user, String recordTitle, RecordType recordType, Integer recordPage, String content) {
         this.recordId = recordId;
@@ -50,6 +61,16 @@ public class Record extends BaseEntity {
         this.recordType = recordType;
         this.recordPage = recordPage;
         this.content = content;
+    }
+
+    public void addComment(Comment comment) {
+        this.comments.add(comment);
+        comment.setRecord(this);
+    }
+
+    public void addRecordLike(RecordLike recordLike) {
+        this.recordLikes.add(recordLike);
+        recordLike.setRecord(this);
     }
 
 }

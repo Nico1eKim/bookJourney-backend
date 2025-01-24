@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "recent_search")
@@ -18,6 +19,7 @@ public class RecentSearch extends BaseEntity {
     @Column(name = "recent_search_id")
     private Long recentSearchId;
 
+    @Setter
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
