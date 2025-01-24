@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class BookController {
     private final BookService bookService;
-    private final JwtUtil jwtUtil;
 
     @GetMapping("/search")
     public BaseResponse<GetBookListResponse> viewBookList(final GetBookListRequest getBookListRequest) {
