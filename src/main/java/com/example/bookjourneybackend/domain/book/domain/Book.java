@@ -50,8 +50,8 @@ public class Book extends BaseEntity {
     @Column(nullable = false, length = 50)
     private String authorName;
 
-    @OneToMany(mappedBy = "book")
     @Builder.Default
+    @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Favorite> favorites = new ArrayList<>();
 
     @Column(nullable = false, length = 500)
@@ -78,5 +78,6 @@ public class Book extends BaseEntity {
 
     public void addFavorite(Favorite favorite) {
         this.favorites.add(favorite);
+        favorite.setBook(this);
     }
 }
