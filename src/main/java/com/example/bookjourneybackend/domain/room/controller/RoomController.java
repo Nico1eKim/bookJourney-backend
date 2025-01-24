@@ -1,6 +1,5 @@
 package com.example.bookjourneybackend.domain.room.controller;
 
-import com.example.bookjourneybackend.domain.room.dto.response.GetRoomDetailResponse;
 import com.example.bookjourneybackend.domain.room.dto.response.GetRoomInfoResponse;
 import com.example.bookjourneybackend.domain.room.service.RoomService;
 import com.example.bookjourneybackend.global.response.BaseResponse;
