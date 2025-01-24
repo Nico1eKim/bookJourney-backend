@@ -24,9 +24,9 @@ public class Book extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long bookId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "genre_id", nullable = false)
-    private Genre genre;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private GenreType genre;
 
     @Column(nullable = false, length = 100)
     private String bookTitle;
@@ -44,6 +44,7 @@ public class Book extends BaseEntity {
     @Column(length = 1000)
     private String description;
 
+    @Column(nullable = false)
     private Integer roomCount;
 
     @Column(nullable = false, length = 50)
@@ -53,11 +54,14 @@ public class Book extends BaseEntity {
     @Builder.Default
     private List<Favorite> favorites = new ArrayList<>();
 
-    @Column(length = 500)
+    @Column(nullable = false, length = 500)
     private String imageUrl;
 
+    @Column(nullable = false)
+    private boolean bestSeller; //베스트셀러 여부
+
     @Builder
-    public Book(Long bookId, Genre genre, String bookTitle, String publisher, LocalDateTime publishedDate, String isbn, Integer pageCount, String description, Integer roomCount, String authorName, String imageUrl) {
+    public Book(Long bookId, GenreType genre, String bookTitle, String publisher, LocalDateTime publishedDate, String isbn, Integer pageCount, String description, Integer roomCount, String authorName, String imageUrl, boolean bestSeller) {
         this.bookId = bookId;
         this.genre = genre;
         this.bookTitle = bookTitle;
@@ -69,6 +73,7 @@ public class Book extends BaseEntity {
         this.roomCount = roomCount;
         this.authorName = authorName;
         this.imageUrl = imageUrl;
+        this.bestSeller = bestSeller;
     }
 
     public void addFavorite(Favorite favorite) {
