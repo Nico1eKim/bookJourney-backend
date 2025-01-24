@@ -1,5 +1,6 @@
 package com.example.bookjourneybackend.domain.room.domain;
 
+import com.example.bookjourneybackend.domain.book.domain.Book;
 import com.example.bookjourneybackend.domain.favorite.domain.Favorite;
 import com.example.bookjourneybackend.domain.record.domain.Record;
 import com.example.bookjourneybackend.domain.user.domain.User;
@@ -26,6 +27,10 @@ public class Room extends BaseEntity {
 
     @Column(nullable = false, length = 60)
     private String roomName;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "book_id", nullable = false)
+    private Book book;
 
     @Column(nullable = false)
     private boolean isPublic;
@@ -63,9 +68,10 @@ public class Room extends BaseEntity {
     private List<Record> records = new ArrayList<>();
 
     @Builder
-    public Room(Long roomId, String roomName, boolean isPublic, LocalDateTime lastActivityTime, Integer password, Double roomPercentage, LocalDateTime progressStartDate, LocalDateTime progressEndDate, LocalDateTime recruitStartDate, LocalDateTime recruitEndDate, Integer recruitCount, Integer recordCount) {
+    public Room(Long roomId, String roomName, Book book, boolean isPublic, LocalDateTime lastActivityTime, Integer password, Double roomPercentage, LocalDateTime progressStartDate, LocalDateTime progressEndDate, LocalDateTime recruitStartDate, LocalDateTime recruitEndDate, Integer recruitCount, Integer recordCount) {
         this.roomId = roomId;
         this.roomName = roomName;
+        this.book = book;
         this.isPublic = isPublic;
         this.lastActivityTime = lastActivityTime;
         this.password = password;
