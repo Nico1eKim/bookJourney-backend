@@ -41,6 +41,10 @@ public class User extends BaseEntity{
     @Builder.Default
     private List<Favorite> favorites = new ArrayList<>();
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<FavoriteGenre> favoriteGenres = new ArrayList<>();
+
     @Builder
     public User(Long userId, String email, String password, String nickname) {
         this.userId = userId;
@@ -53,4 +57,11 @@ public class User extends BaseEntity{
         this.favorites.add(favorite);
         favorite.setUser(this);
     }
+
+    public void addFavoriteGenres(FavoriteGenre favoriteGenre) {
+        this.favoriteGenres.add(favoriteGenre);
+        favoriteGenre.setUser(this);
+    }
+
+
 }

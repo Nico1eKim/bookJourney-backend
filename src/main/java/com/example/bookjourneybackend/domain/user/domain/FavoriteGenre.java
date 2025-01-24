@@ -7,6 +7,7 @@ import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "favorite_genres")
@@ -18,6 +19,7 @@ public class FavoriteGenre extends BaseEntity {
     @Column(name = "favorite_genre_id")
     private Long favoriteGenreId;
 
+    @Setter
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
