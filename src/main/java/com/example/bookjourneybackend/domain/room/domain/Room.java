@@ -30,6 +30,9 @@ public class Room extends BaseEntity {
     @Column(nullable = false)
     private boolean isPublic;
 
+    @Column(nullable = false)
+    private LocalDateTime lastActivityTime;
+
     private Integer password;
 
     @Column(nullable = false)
@@ -60,11 +63,11 @@ public class Room extends BaseEntity {
     private List<Record> records = new ArrayList<>();
 
     @Builder
-    public Room(Long roomId, UserRoom userRoom, String roomName, boolean isPublic, Integer password, Double roomPercentage, LocalDateTime progressStartDate, LocalDateTime progressEndDate, LocalDateTime recruitStartDate, LocalDateTime recruitEndDate, Integer recruitCount, Integer recordCount) {
+    public Room(Long roomId, String roomName, boolean isPublic, LocalDateTime lastActivityTime, Integer password, Double roomPercentage, LocalDateTime progressStartDate, LocalDateTime progressEndDate, LocalDateTime recruitStartDate, LocalDateTime recruitEndDate, Integer recruitCount, Integer recordCount) {
         this.roomId = roomId;
-//        this.userRoom = userRoom;
         this.roomName = roomName;
         this.isPublic = isPublic;
+        this.lastActivityTime = lastActivityTime;
         this.password = password;
         this.roomPercentage = roomPercentage;
         this.progressStartDate = progressStartDate;
