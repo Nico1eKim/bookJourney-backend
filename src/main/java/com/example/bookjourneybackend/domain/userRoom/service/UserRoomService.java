@@ -1,4 +1,4 @@
 package com.example.bookjourneybackend.domain.userRoom.service;
 
-public class RoomService {
+public class UserRoomService {
 }
