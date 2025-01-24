@@ -6,15 +6,17 @@ import com.example.bookjourneybackend.domain.room.dto.response.GetRoomInfoRespon
 import com.example.bookjourneybackend.domain.room.dto.response.RoomMemberInfo;
 import com.example.bookjourneybackend.domain.user.domain.User;
 import com.example.bookjourneybackend.domain.user.domain.UserImage;
+import com.example.bookjourneybackend.global.exception.GlobalException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.CANNOT_FIND_ROOM;
+import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.CANNOT_FOUND_EMAIL;
 
 @Service
 @RequiredArgsConstructor
@@ -44,7 +46,7 @@ public class RoomService {
 
     private Room findRoomById(Long roomId) {
         return roomRepository.findById(roomId)
-                .orElseThrow(() -> new IllegalArgumentException("해당하는 방이 존재하지 않습니다."));
+                .orElseThrow(()-> new GlobalException(CANNOT_FIND_ROOM));
     }
 
     private List<RoomMemberInfo> getRoomMemberInfoList(Room room) {
@@ -62,7 +64,10 @@ public class RoomService {
     }
 
     private String calculateDday(LocalDateTime endDate) {
-        long days = java.time.temporal.ChronoUnit.DAYS.between(endDate, LocalDateTime.now());
+        long days = java.time.temporal.ChronoUnit.DAYS.between(LocalDateTime.now(), endDate);
+        if (days < 0) {
+            return "D+" + Math.abs(days);
+        }
         return "D-" + days;
     }
 }

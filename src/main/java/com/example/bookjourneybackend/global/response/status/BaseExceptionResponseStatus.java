@@ -43,7 +43,12 @@ public enum BaseExceptionResponseStatus implements ResponseStatus{
      */
     ALREADY_EXIST_EMAIL(7001, BAD_REQUEST, "이미 존재하는 이메일입니다."),
     CANNOT_FOUND_EMAIL(7002,BAD_REQUEST, "이메일이 존재하지 않습니다."),
-    INVALID_PASSWORD(7003,BAD_REQUEST, "비밀번호가 일치하지 않습니다.");
+    INVALID_PASSWORD(7003,BAD_REQUEST, "비밀번호가 일치하지 않습니다."),
+
+    /**
+     * 8000 : room 관련
+     */
+    CANNOT_FIND_ROOM(8001 ,BAD_REQUEST, "방을 찾을 수 없습니다.");
 
     private final int code;
     private final HttpStatus status;
