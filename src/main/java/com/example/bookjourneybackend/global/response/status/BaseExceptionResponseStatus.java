@@ -48,7 +48,8 @@ public enum BaseExceptionResponseStatus implements ResponseStatus{
     /**
      * 8000 : room 관련
      */
-    CANNOT_FIND_ROOM(8001 ,BAD_REQUEST, "방을 찾을 수 없습니다.");
+    CANNOT_FIND_ROOM(8001 ,BAD_REQUEST, "방을 찾을 수 없습니다."),
+    INVALID_ROOM_TYPE(8002, BAD_REQUEST, "알맞은 방 타입을 찾을 수 없습니다.");
 
     private final int code;
     private final HttpStatus status;

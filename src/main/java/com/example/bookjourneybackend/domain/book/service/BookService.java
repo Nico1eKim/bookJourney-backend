@@ -1,6 +1,7 @@
 package com.example.bookjourneybackend.domain.book.service;
 
 import com.example.bookjourneybackend.domain.book.domain.Book;
+import com.example.bookjourneybackend.domain.book.domain.GenreType;
 import com.example.bookjourneybackend.domain.book.domain.repository.BookRepository;
 import com.example.bookjourneybackend.domain.book.dto.request.GetBookListRequest;
 import com.example.bookjourneybackend.domain.book.dto.response.BookInfo;
@@ -91,11 +92,11 @@ public class BookService {
 
 //                    String link = item.get("link").asText();
                     String description = item.get("description").asText();
-                    String categoryName = item.get("categoryName").asText();
+                    GenreType genreType = GenreType.parsingGenreType(item.get("categoryName").asText());
                     String publisher = item.get("publisher").asText();
                     String publishedDate = item.get("pubDate").asText();
 
-                    GetBookInfoResponse g = bookCacheService.cachingBookInfo(title, author, isbn, cover, description, categoryName, publisher, publishedDate);
+                    GetBookInfoResponse g = bookCacheService.cachingBookInfo(title, author, isbn, cover, description, genreType.getGenreType(), publisher, publishedDate);
 
                     bookList.add(new BookInfo(g.getBookTitle(), g.getAuthorName(), g.getIsbn(), g.getImageUrl()));
                 }
