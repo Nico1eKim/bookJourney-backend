@@ -20,14 +20,12 @@ public class RoomController {
     private final RoomService roomService;
 
     @GetMapping("/{roomId}")
-    public BaseResponse<GetRoomDetailResponse> getRoomDetail(@PathVariable("roomId") Long roomId) {
-
+    public BaseResponse<GetRoomDetailResponse> getRoomDetail(@PathVariable("roomId") final Long roomId) {
         return BaseResponse.ok(roomService.showRoomDetails(roomId));
     }
 
     @GetMapping("/{roomId}/info")
-    public BaseResponse<GetRoomInfoResponse> getRoomInfo(@PathVariable("roomId") Long roomId) {
-
+    public BaseResponse<GetRoomInfoResponse> getRoomInfo(@PathVariable("roomId") final Long roomId) {
         return BaseResponse.ok(roomService.showRoomInfo(roomId));
     }
 }

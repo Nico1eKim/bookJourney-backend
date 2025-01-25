@@ -27,7 +27,8 @@ public class RoomService {
     private final RoomRepository roomRepository;
 
     public GetRoomDetailResponse showRoomDetails(Long roomId) {
-        Room room = findRoomById(roomId);
+        Room room = roomRepository.findById(roomId)
+                .orElseThrow(() -> new GlobalException(CANNOT_FIND_ROOM));
         List<RoomMemberInfo> members = getRoomMemberInfoList(room);
 
         LocalDateTime recruitEndDate = room.getRecruitEndDate(); // recruitEndDate를 Room 객체에서 직접 가져옴
@@ -49,7 +50,8 @@ public class RoomService {
     }
 
     public GetRoomInfoResponse showRoomInfo(Long roomId) {
-        Room room = findRoomById(roomId);
+        Room room = roomRepository.findById(roomId)
+                .orElseThrow(() -> new GlobalException(CANNOT_FIND_ROOM));
         List<RoomMemberInfo> members = getRoomMemberInfoList(room);
 
         return GetRoomInfoResponse.of(
@@ -62,11 +64,6 @@ public class RoomService {
                 room.getRecordCount(),
                 members
         );
-    }
-
-    private Room findRoomById(Long roomId) {
-        return roomRepository.findById(roomId)
-                .orElseThrow(()-> new GlobalException(CANNOT_FIND_ROOM));
     }
 
     private List<RoomMemberInfo> getRoomMemberInfoList(Room room) {
