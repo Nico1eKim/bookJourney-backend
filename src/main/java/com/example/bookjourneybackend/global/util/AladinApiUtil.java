@@ -129,8 +129,8 @@ public class AladinApiUtil {
                     String publishedDate = item.get("pubDate").asText();
 
                     //전체 페이지 수 파싱
-                    Integer pageCount = item.has("subInfo") && item.get("subInfo").has("itemPage")
-                            ? item.get("subInfo").get("itemPage").asInt() : null;
+                    Integer pageCount = item.has("bookinfo") && item.get("bookinfo").has("itemPage")
+                            ? item.get("bookinfo").get("itemPage").asInt() : null;
 
                     return Book.builder()
                             .isbn(isbn)
