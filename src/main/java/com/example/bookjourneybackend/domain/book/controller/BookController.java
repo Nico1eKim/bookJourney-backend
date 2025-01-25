@@ -25,7 +25,7 @@ public class BookController {
 
     @GetMapping("/info/{isbn}")
     public BaseResponse<GetBookInfoResponse> viewBookInfo(@PathVariable("isbn") final String isbn,
-                                                          @LoginUserId Long userId) {
+                                                          @LoginUserId final Long userId) {
         return BaseResponse.ok(bookService.showBookInfo(isbn, userId));
     }
 
