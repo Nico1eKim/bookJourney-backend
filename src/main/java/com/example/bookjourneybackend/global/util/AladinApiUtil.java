@@ -143,7 +143,6 @@ public class AladinApiUtil {
                             .imageUrl(imageUrl)
                             .bestSeller(false)
                             .pageCount(pageCount)
-                            .roomCount(0) // 초기값 설정
                             .build();
                 }
             }

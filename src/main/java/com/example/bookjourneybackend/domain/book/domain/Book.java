@@ -46,9 +46,6 @@ public class Book extends BaseEntity {
     @Column(length = 1000)
     private String description;
 
-    @Column(nullable = false)
-    private Integer roomCount;
-
     @Column(nullable = false, length = 50)
     private String authorName;
 
@@ -67,7 +64,7 @@ public class Book extends BaseEntity {
     private boolean bestSeller; //베스트셀러 여부
 
     @Builder
-    public Book(Long bookId, GenreType genre, String bookTitle, String publisher, LocalDate publishedDate, String isbn, Integer pageCount, String description, Integer roomCount, String authorName, String imageUrl, boolean bestSeller) {
+    public Book(Long bookId, GenreType genre, String bookTitle, String publisher, LocalDate publishedDate, String isbn, Integer pageCount, String description, String authorName, String imageUrl, boolean bestSeller) {
         this.bookId = bookId;
         this.genre = genre;
         this.bookTitle = bookTitle;
@@ -76,7 +73,6 @@ public class Book extends BaseEntity {
         this.isbn = isbn;
         this.pageCount = pageCount;
         this.description = description;
-        this.roomCount = roomCount;
         this.authorName = authorName;
         this.imageUrl = imageUrl;
         this.bestSeller = bestSeller;
