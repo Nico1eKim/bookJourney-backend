@@ -5,6 +5,7 @@ import com.example.bookjourneybackend.domain.room.dto.response.GetRoomDetailResp
 import com.example.bookjourneybackend.domain.room.dto.response.GetRoomInfoResponse;
 import com.example.bookjourneybackend.domain.room.dto.response.PostRoomCreateResponse;
 import com.example.bookjourneybackend.domain.room.service.RoomService;
+import com.example.bookjourneybackend.global.annotation.LoginUserId;
 import com.example.bookjourneybackend.global.response.BaseResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +33,8 @@ public class RoomController {
     }
 
     @PostMapping
-    public BaseResponse<PostRoomCreateResponse> createRoom(@RequestBody @Valid final PostRoomCreateRequest postRoomCreateRequest) {
-        return BaseResponse.ok(roomService.createRoom(postRoomCreateRequest));
+    public BaseResponse<PostRoomCreateResponse> createRoom(@RequestBody @Valid final PostRoomCreateRequest postRoomCreateRequest,
+                                                           @LoginUserId final Long userId) {
+        return BaseResponse.ok(roomService.createRoom(postRoomCreateRequest, userId));
     }
 }

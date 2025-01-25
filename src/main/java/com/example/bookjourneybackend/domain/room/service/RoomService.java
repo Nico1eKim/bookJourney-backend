@@ -11,7 +11,11 @@ import com.example.bookjourneybackend.domain.room.dto.response.PostRoomCreateRes
 import com.example.bookjourneybackend.domain.room.dto.response.RoomMemberInfo;
 import com.example.bookjourneybackend.domain.user.domain.User;
 import com.example.bookjourneybackend.domain.user.domain.UserImage;
+import com.example.bookjourneybackend.domain.user.domain.repository.UserRepository;
+import com.example.bookjourneybackend.domain.userRoom.domain.UserRole;
+import com.example.bookjourneybackend.domain.userRoom.domain.UserRoom;
 import com.example.bookjourneybackend.global.exception.GlobalException;
+import com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus;
 import com.example.bookjourneybackend.global.util.AladinApiUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +32,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static com.example.bookjourneybackend.domain.room.domain.RoomType.TOGETHER;
 import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.CANNOT_FIND_ROOM;
 
 @Slf4j
@@ -37,7 +42,9 @@ public class RoomService {
 
     private final RoomRepository roomRepository;
     private final BookRepository bookRepository;
+    private final UserRepository userRepository;
     private final AladinApiUtil aladinApiUtil;
+
 
     public GetRoomDetailResponse showRoomDetails(Long roomId) {
         Room room = findRoomById(roomId);
@@ -122,31 +129,44 @@ public class RoomService {
      * @return
      */
     @Transactional
-    public PostRoomCreateResponse createRoom(PostRoomCreateRequest postRoomCreateRequest) {
+    public PostRoomCreateResponse createRoom(PostRoomCreateRequest postRoomCreateRequest, Long userId) {
         log.info("------------------------[RoomService.createRoom]------------------------");
         Book book = bookRepository.findByIsbn(postRoomCreateRequest.getIsbn())
                 .orElseGet(() -> saveBookFromAladinApi(postRoomCreateRequest.getIsbn()));
 
-        //String -> LocalDate 파싱
-        LocalDate startDate = parseToLocalDate(postRoomCreateRequest.getProgressStartDate());
-        LocalDate progressEndDate = parseToLocalDate(postRoomCreateRequest.getProgressEndDate());
-
-        Room room = Room.builder()
-                .roomName(postRoomCreateRequest.getRoomName())
-                .book(book)
-                .isPublic(postRoomCreateRequest.isPublic())
-                .password(Integer.parseInt(postRoomCreateRequest.getPassword()))
-                .startDate(startDate)    //방의 생성기간 = 방의 시작 기간 = 방의 모집 시작 기간
-                .progressEndDate(progressEndDate)
-                .recruitEndDate(calculateRecruitEndDate(startDate, progressEndDate)) //방의 모집종료 기간 = {(방의 종료기간 - 방의 시작기간)/2} + 방의 시작기간
-                .recruitCount(postRoomCreateRequest.getRecruitCount())
-                .roomPercentage(0.0)
+        UserRoom userRoom = UserRoom.builder()
+                .user(userRepository.findById(userId)
+                        .orElseThrow(() -> new GlobalException(BaseExceptionResponseStatus.CANNOT_FOUND_USER)))
+                .userRole(UserRole.HOST)
+                .currentPage(0)
+                .userPercentage(0.0)
                 .build();
 
-        book.addRoom(room);
-        bookRepository.save(book);  //Cascade.All 옵션에 의해 room도 save
-//        roomRepository.save(room);
+        Room room;
 
+        if (postRoomCreateRequest.getRecruitCount() == 1) { //혼자읽기
+            room = Room.makeReadAloneRoom(book);
+            room.addUserRoom(userRoom);
+        } else {    //같이읽기
+            //String -> LocalDate 파싱
+            LocalDate startDate = parseToLocalDate(postRoomCreateRequest.getProgressStartDate());
+            LocalDate progressEndDate = parseToLocalDate(postRoomCreateRequest.getProgressEndDate());
+
+            room = Room.makeReadTogetherRoom(postRoomCreateRequest.getRoomName(), book,
+                    postRoomCreateRequest.isPublic(), postRoomCreateRequest.getPassword(),
+                    startDate, progressEndDate, calculateRecruitEndDate(startDate, progressEndDate), postRoomCreateRequest.getRecruitCount());
+            room.addUserRoom(userRoom);
+        }
+
+        book.addRoom(room);
+        bookRepository.save(book);
+        roomRepository.save(room); //CascadeType.All 옵션을 제거하고 room도 save (이유 : CascadeType.ALL을 했더니 roomRepository에 메서드가 종료되고 저장되어서 roomId가 null이 뜨는 현상이 발생
+
+        //DB에 존재하는 book을 매핑할 경우 영속성 컨텍스트에만 Room이 존재하고 Repository에는 바로 저장이 안되므로 RoomId가 null로 반환되는 현상이 발생.
+        //따라서 flush() 호출 또는 명시적으로 save 호출
+//        roomRepository.flush();
+//        bookRepository.flush();
+        log.info("Created RoomID: {}", room.getRoomId());
         return PostRoomCreateResponse.of(room);
     }
 
