@@ -1,5 +1,6 @@
 package com.example.bookjourneybackend.domain.room.controller;
 
+import com.example.bookjourneybackend.domain.room.dto.response.GetRoomDetailResponse;
 import com.example.bookjourneybackend.domain.room.dto.response.GetRoomInfoResponse;
 import com.example.bookjourneybackend.domain.room.service.RoomService;
 import com.example.bookjourneybackend.global.response.BaseResponse;
@@ -17,6 +18,12 @@ import org.springframework.web.bind.annotation.RestController;
 public class RoomController {
 
     private final RoomService roomService;
+
+    @GetMapping("/{roomId}")
+    public BaseResponse<GetRoomDetailResponse> getRoomDetail(@PathVariable("roomId") Long roomId) {
+
+        return BaseResponse.ok(roomService.showRoomDetails(roomId));
+    }
 
     @GetMapping("/{roomId}/info")
     public BaseResponse<GetRoomInfoResponse> getRoomInfo(@PathVariable("roomId") Long roomId) {
