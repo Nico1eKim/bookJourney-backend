@@ -1,7 +1,7 @@
 ---
 name: "Issue:\U0001F6E0️REFACTOR"
 about: Refactoring 시 작성해주세요
-title: "[Refactor]"
+title: "[REFACTOR]"
 labels: ''
 assignees: ''
 
