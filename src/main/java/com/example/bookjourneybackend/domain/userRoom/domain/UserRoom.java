@@ -1,6 +1,5 @@
 package com.example.bookjourneybackend.domain.userRoom.domain;
 
-import com.example.bookjourneybackend.domain.book.domain.Book;
 import com.example.bookjourneybackend.domain.room.domain.Room;
 import com.example.bookjourneybackend.domain.user.domain.User;
 import com.example.bookjourneybackend.global.entity.BaseEntity;
@@ -20,10 +19,6 @@ public class UserRoom extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long userRoomId;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private RoomType roomType;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -47,9 +42,7 @@ public class UserRoom extends BaseEntity {
     private Room room;
 
     @Builder
-    public UserRoom(Long userRoomId, RoomType roomType, UserRole userRole, Double userPercentage, User user, Integer currentPage, Room room) {
-        this.userRoomId = userRoomId;
-        this.roomType = roomType;
+    public UserRoom(UserRole userRole, Double userPercentage, User user, Integer currentPage, Room room) {
         this.userRole = userRole;
         this.userPercentage = userPercentage;
         this.user = user;
