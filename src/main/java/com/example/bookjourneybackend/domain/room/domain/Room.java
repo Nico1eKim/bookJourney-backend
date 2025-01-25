@@ -25,7 +25,11 @@ public class Room extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long roomId;
 
-    @Column(nullable = false, length = 60)
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private RoomType roomType;
+
+    @Column(length = 60)
     private String roomName;
 
     @Setter
@@ -33,10 +37,8 @@ public class Room extends BaseEntity {
     @JoinColumn(name = "book_id", nullable = false)
     private Book book;
 
-    @Column(nullable = false)
     private boolean isPublic;
 
-    @Column(nullable = true)
     private LocalDateTime lastActivityTime;
 
     private Integer password;
@@ -44,13 +46,10 @@ public class Room extends BaseEntity {
     @Column(nullable = false)
     private Double roomPercentage;
 
-    @Column(nullable = false)
     private LocalDate startDate;    //방을 생성한 시점 = 방의 모집 시작 기간 = 방의 시작 기간
 
-    @Column(nullable = false)
     private LocalDate progressEndDate;
 
-    @Column(nullable = false)
     private LocalDate recruitEndDate;
 
     @Column(nullable = false)
@@ -64,19 +63,28 @@ public class Room extends BaseEntity {
     @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Record> records = new ArrayList<>();
 
-    @Builder
-    public Room(Long roomId, String roomName, Book book, boolean isPublic, LocalDateTime lastActivityTime, Integer password, Double roomPercentage, LocalDate startDate, LocalDate progressEndDate, LocalDate recruitEndDate, Integer recruitCount) {
-        this.roomId = roomId;
-        this.roomName = roomName;
-        this.book = book;
-        this.isPublic = isPublic;
-        this.lastActivityTime = lastActivityTime;
-        this.password = password;
-        this.roomPercentage = roomPercentage;
-        this.startDate = startDate;
-        this.progressEndDate = progressEndDate;
-        this.recruitEndDate = recruitEndDate;
-        this.recruitCount = recruitCount;
+    public static Room makeReadTogetherRoom(String roomName, Book book, boolean isPublic, Integer password, LocalDate startDate, LocalDate progressEndDate, LocalDate recruitEndDate, Integer recruitCount) {
+        return Room.builder()
+                .roomType(RoomType.TOGETHER)
+                .roomName(roomName)
+                .book(book)
+                .isPublic(isPublic)
+                .password(password)
+                .roomPercentage(0.0)
+                .startDate(startDate)
+                .progressEndDate(progressEndDate)
+                .recruitEndDate(recruitEndDate)
+                .recruitCount(recruitCount)
+                .build();
+    }
+
+    public static Room makeReadAloneRoom(Book book) {
+        return Room.builder()
+                .roomType(RoomType.ALONE)
+                .book(book)
+                .roomPercentage(0.0)
+                .recruitCount(1)
+                .build();
     }
 
     public void addUserRoom(UserRoom userRoom) {
