@@ -127,6 +127,7 @@ public class RoomService {
         Book book = bookRepository.findByIsbn(postRoomCreateRequest.getIsbn())
                 .orElseGet(() -> saveBookFromAladinApi(postRoomCreateRequest.getIsbn()));
 
+        //String -> LocalDate 파싱
         LocalDate startDate = parseToLocalDate(postRoomCreateRequest.getProgressStartDate());
         LocalDate progressEndDate = parseToLocalDate(postRoomCreateRequest.getProgressEndDate());
 
