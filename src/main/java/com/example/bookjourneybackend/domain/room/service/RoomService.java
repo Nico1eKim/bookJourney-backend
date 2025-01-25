@@ -62,8 +62,6 @@ public class RoomService {
                 room.isPublic(),
                 room.getRoomPercentage().intValue(),
                 calculateDday(room.getProgressEndDate()),
-                room.getRecruitCount(),
-                room.getRecordCount(),
                 members
         );
     }
@@ -95,7 +93,6 @@ public class RoomService {
         LocalDateTime lastModifiedAt = lastModifiedAtOpt.get();
         long minutes = Duration.between(lastModifiedAt, LocalDateTime.now()).toMinutes();
 
-        // 분 단위로 표시하거나, 시간 단위로 표시하거나, "방금 전"을 반환합니다.
         if (minutes < 1) {
             return "방금 전";
         } else if (minutes < 60) {
