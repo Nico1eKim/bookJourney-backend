@@ -25,7 +25,8 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
             "AND (:roomStartDate IS NULL OR r.startDate >= :roomStartDate) " +
             "AND (:roomEndDate IS NULL OR r.progressEndDate <= :roomEndDate) " +
             "AND (:recordCount IS NULL OR SIZE(r.records) >= :recordCount) " +
-            "ORDER BY r.roomId DESC")
+            "ORDER BY r.recruitEndDate ASC, r.progressEndDate DESC, SIZE(r.records) DESC")
+        // 정렬 우선순위 모집마감일이 가까운 순 > 방 기간이 많이 남은 순 > 기록 많은 순
     Slice<Room> findRoomsByFilters(@Param("searchTerm") String searchTerm,
                                    @Param("searchType") String searchType,
                                    @Param("genre") GenreType genre,
