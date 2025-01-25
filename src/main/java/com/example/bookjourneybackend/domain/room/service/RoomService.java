@@ -8,6 +8,7 @@ import com.example.bookjourneybackend.domain.room.dto.response.RoomMemberInfo;
 import com.example.bookjourneybackend.domain.user.domain.User;
 import com.example.bookjourneybackend.domain.user.domain.UserImage;
 import com.example.bookjourneybackend.global.exception.GlobalException;
+import com.example.bookjourneybackend.domain.record.domain.Record;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -18,6 +19,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
 import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.CANNOT_FIND_ROOM;
 
 @Service
@@ -37,7 +39,7 @@ public class RoomService {
         return GetRoomDetailResponse.of(
                 room.getRoomName(),
                 room.isPublic(),
-                calculateLastActivityTime(room.getLastActivityTime()),
+                calculateLastActivityTime(room.getRecords()),
                 room.getRoomPercentage().intValue(),
                 formatDate(room.getProgressStartDate()),
                 formatDate(room.getProgressEndDate()),
@@ -80,10 +82,28 @@ public class RoomService {
         }).collect(Collectors.toList());
     }
 
-    private String calculateLastActivityTime(LocalDateTime lastActivityTime) {
-        LocalDateTime now = LocalDateTime.now();
-        long hours = Duration.between(lastActivityTime, now).toHours();
-        return hours + "시간 전";
+    private String calculateLastActivityTime(List<Record> records) {
+        Optional<LocalDateTime> lastModifiedAtOpt = records.stream()
+                .map(Record::getModifiedAt)
+                .max(LocalDateTime::compareTo);
+
+        // 수정 기록이 없는 경우
+        if (lastModifiedAtOpt.isEmpty()) {
+            return "기록 없음";
+        }
+
+        LocalDateTime lastModifiedAt = lastModifiedAtOpt.get();
+        long minutes = Duration.between(lastModifiedAt, LocalDateTime.now()).toMinutes();
+
+        // 분 단위로 표시하거나, 시간 단위로 표시하거나, "방금 전"을 반환합니다.
+        if (minutes < 1) {
+            return "방금 전";
+        } else if (minutes < 60) {
+            return minutes + "분 전";
+        } else {
+            long hours = minutes / 60;
+            return hours + "시간 전";
+        }
     }
 
     private String formatDate(LocalDateTime date) {
