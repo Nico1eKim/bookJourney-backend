@@ -1,9 +1,7 @@
 package com.example.bookjourneybackend.domain.room.domain;
 
 import com.example.bookjourneybackend.domain.book.domain.Book;
-import com.example.bookjourneybackend.domain.favorite.domain.Favorite;
 import com.example.bookjourneybackend.domain.record.domain.Record;
-import com.example.bookjourneybackend.domain.user.domain.User;
 import com.example.bookjourneybackend.domain.userRoom.domain.UserRoom;
 import com.example.bookjourneybackend.global.entity.BaseEntity;
 import jakarta.persistence.*;
@@ -46,13 +44,10 @@ public class Room extends BaseEntity {
     private Double roomPercentage;
 
     @Column(nullable = false)
-    private LocalDateTime progressStartDate;
+    private LocalDateTime startDate;    //방을 생성한 시점 = 방의 모집 시작 기간 = 방의 시작 기간
 
     @Column(nullable = false)
     private LocalDateTime progressEndDate;
-
-    @Column(nullable = false)
-    private LocalDateTime recruitStartDate;
 
     @Column(nullable = false)
     private LocalDateTime recruitEndDate;
@@ -72,7 +67,7 @@ public class Room extends BaseEntity {
     private List<Record> records = new ArrayList<>();
 
     @Builder
-    public Room(Long roomId, String roomName, Book book, boolean isPublic, LocalDateTime lastActivityTime, Integer password, Double roomPercentage, LocalDateTime progressStartDate, LocalDateTime progressEndDate, LocalDateTime recruitStartDate, LocalDateTime recruitEndDate, Integer recruitCount, Integer recordCount) {
+    public Room(Long roomId, String roomName, Book book, boolean isPublic, LocalDateTime lastActivityTime, Integer password, Double roomPercentage, LocalDateTime startDate, LocalDateTime progressEndDate, LocalDateTime recruitEndDate, Integer recruitCount, Integer recordCount) {
         this.roomId = roomId;
         this.roomName = roomName;
         this.book = book;
@@ -80,9 +75,8 @@ public class Room extends BaseEntity {
         this.lastActivityTime = lastActivityTime;
         this.password = password;
         this.roomPercentage = roomPercentage;
-        this.progressStartDate = progressStartDate;
+        this.startDate = startDate;
         this.progressEndDate = progressEndDate;
-        this.recruitStartDate = recruitStartDate;
         this.recruitEndDate = recruitEndDate;
         this.recruitCount = recruitCount;
         this.recordCount = recordCount;
