@@ -7,6 +7,7 @@ import com.example.bookjourneybackend.domain.book.dto.request.GetBookListRequest
 import com.example.bookjourneybackend.domain.book.dto.response.BookInfo;
 import com.example.bookjourneybackend.domain.book.dto.response.GetBookInfoResponse;
 import com.example.bookjourneybackend.domain.book.dto.response.GetBookListResponse;
+import com.example.bookjourneybackend.domain.book.dto.response.GetBookPopularResponse;
 import com.example.bookjourneybackend.domain.favorite.domain.repository.FavoriteRepository;
 import com.example.bookjourneybackend.global.exception.GlobalException;
 import com.fasterxml.jackson.core.JsonParser;
@@ -124,4 +125,20 @@ public class BookService {
 
         return getBookInfoResponse;
     }
+
+    public GetBookPopularResponse showPopularBook() {
+        return bookRepository.findBookWithMostRooms().stream()
+                .findFirst()
+                .map(book -> GetBookPopularResponse.of(
+                        book.getBookId(),
+                        book.getIsbn(),
+                        book.getBookTitle(),
+                        book.getImageUrl(),
+                        book.getAuthorName(),
+                        book.getRooms().size(),
+                        book.getDescription()
+                ))
+                .orElseThrow(() -> new GlobalException(CANNOT_FOUND_POPULAR_BOOK));
+    }
+
 }

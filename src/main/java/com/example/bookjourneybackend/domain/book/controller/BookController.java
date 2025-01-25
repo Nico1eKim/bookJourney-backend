@@ -3,10 +3,10 @@ package com.example.bookjourneybackend.domain.book.controller;
 import com.example.bookjourneybackend.domain.book.dto.request.GetBookListRequest;
 import com.example.bookjourneybackend.domain.book.dto.response.GetBookInfoResponse;
 import com.example.bookjourneybackend.domain.book.dto.response.GetBookListResponse;
+import com.example.bookjourneybackend.domain.book.dto.response.GetBookPopularResponse;
 import com.example.bookjourneybackend.domain.book.service.BookService;
 import com.example.bookjourneybackend.global.annotation.LoginUserId;
 import com.example.bookjourneybackend.global.response.BaseResponse;
-import com.example.bookjourneybackend.global.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -27,6 +27,11 @@ public class BookController {
     public BaseResponse<GetBookInfoResponse> viewBookInfo(@PathVariable("isbn") final String isbn,
                                                           @LoginUserId final Long userId) {
         return BaseResponse.ok(bookService.showBookInfo(isbn, userId));
+    }
+
+    @GetMapping("/popular")
+    public BaseResponse<GetBookPopularResponse> viewPopularBook() {
+        return BaseResponse.ok(bookService.showPopularBook());
     }
 
 }
