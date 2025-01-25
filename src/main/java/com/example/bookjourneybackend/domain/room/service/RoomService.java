@@ -71,8 +71,8 @@ public class RoomService {
                 room.isPublic(),
                 room.getRoomPercentage().intValue(),
                 calculateDday(room.getProgressEndDate()),
+                members.size(),
                 room.getRecruitCount(),
-                room.getRecordCount(),
                 members
         );
     }
@@ -141,7 +141,6 @@ public class RoomService {
                 .recruitEndDate(calculateRecruitEndDate(startDate, progressEndDate)) //방의 모집종료 기간 = {(방의 종료기간 - 방의 시작기간)/2} + 방의 시작기간
                 .recruitCount(postRoomCreateRequest.getRecruitCount())
                 .roomPercentage(0.0)
-                .recordCount(0)
                 .build();
 
         book.addRoom(room);

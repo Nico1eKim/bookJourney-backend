@@ -56,9 +56,6 @@ public class Room extends BaseEntity {
     @Column(nullable = false)
     private Integer recruitCount;
 
-    @Column(nullable = false)
-    private Integer recordCount;
-
     @Builder.Default
     @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserRoom> userRooms = new ArrayList<>();
@@ -68,7 +65,7 @@ public class Room extends BaseEntity {
     private List<Record> records = new ArrayList<>();
 
     @Builder
-    public Room(Long roomId, String roomName, Book book, boolean isPublic, LocalDateTime lastActivityTime, Integer password, Double roomPercentage, LocalDate startDate, LocalDate progressEndDate, LocalDate recruitEndDate, Integer recruitCount, Integer recordCount) {
+    public Room(Long roomId, String roomName, Book book, boolean isPublic, LocalDateTime lastActivityTime, Integer password, Double roomPercentage, LocalDate startDate, LocalDate progressEndDate, LocalDate recruitEndDate, Integer recruitCount) {
         this.roomId = roomId;
         this.roomName = roomName;
         this.book = book;
@@ -80,7 +77,6 @@ public class Room extends BaseEntity {
         this.progressEndDate = progressEndDate;
         this.recruitEndDate = recruitEndDate;
         this.recruitCount = recruitCount;
-        this.recordCount = recordCount;
     }
 
     public void addUserRoom(UserRoom userRoom) {
