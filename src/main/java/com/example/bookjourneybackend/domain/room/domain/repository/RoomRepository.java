@@ -17,9 +17,9 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
             "WHERE (:searchTerm IS NULL OR r.roomName LIKE CONCAT('%', :searchTerm, '%') " +
             "OR r.book.bookTitle LIKE CONCAT('%', :searchTerm, '%')) " +
             "AND (:genre IS NULL OR r.book.genre = :genre) " +
-            "AND (:recruitStartDate IS NULL OR r.recruitStartDate >= :recruitStartDate) " +
+            "AND (:recruitStartDate IS NULL OR r.startDate >= :recruitStartDate) " +
             "AND (:recruitEndDate IS NULL OR r.recruitEndDate <= :recruitEndDate) " +
-            "AND (:roomStartDate IS NULL OR r.progressStartDate >= :roomStartDate) " +
+            "AND (:roomStartDate IS NULL OR r.startDate >= :roomStartDate) " +
             "AND (:roomEndDate IS NULL OR r.progressEndDate <= :roomEndDate) " +
             "AND (:recordCount IS NULL OR SIZE(r.records) >= :recordCount) " +
             "ORDER BY r.roomId DESC")
