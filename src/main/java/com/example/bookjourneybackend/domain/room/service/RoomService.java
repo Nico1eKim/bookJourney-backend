@@ -16,6 +16,7 @@ import com.example.bookjourneybackend.global.util.AladinApiUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 
@@ -28,7 +29,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.CANNOT_FIND_ROOM;
-import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.CANNOT_FOUND_EMAIL;
 
 @Slf4j
 @Service
@@ -43,7 +43,7 @@ public class RoomService {
         Room room = findRoomById(roomId);
         List<RoomMemberInfo> members = getRoomMemberInfoList(room);
 
-        LocalDateTime recruitEndDate = room.getRecruitEndDate(); // recruitEndDate를 Room 객체에서 직접 가져옴
+        LocalDate recruitEndDate = room.getRecruitEndDate(); // recruitEndDate를 Room 객체에서 직접 가져옴
         String recruitDday = calculateDday(recruitEndDate); // D-day 계산
 
         return GetRoomDetailResponse.of(
@@ -102,13 +102,13 @@ public class RoomService {
         return hours + "시간 전";
     }
 
-    private String formatDate(LocalDateTime date) {
+    private String formatDate(LocalDate date) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd");
         return date.format(formatter);
     }
 
-    private String calculateDday(LocalDateTime endDate) {
-        long days = ChronoUnit.DAYS.between(LocalDateTime.now(), endDate);
+    private String calculateDday(LocalDate endDate) {
+        long days = ChronoUnit.DAYS.between(LocalDate.now(), endDate);
         if (days < 0) {
             return "D+" + Math.abs(days);
         }
@@ -121,14 +121,14 @@ public class RoomService {
      * @param postRoomCreateRequest
      * @return
      */
+    @Transactional
     public PostRoomCreateResponse createRoom(PostRoomCreateRequest postRoomCreateRequest) {
         log.info("------------------------[RoomService.createRoom]------------------------");
         Book book = bookRepository.findByIsbn(postRoomCreateRequest.getIsbn())
                 .orElseGet(() -> saveBookFromAladinApi(postRoomCreateRequest.getIsbn()));
 
-        LocalDateTime startDate = parseToLocalDateTime(postRoomCreateRequest.getProgressStartDate());
-        LocalDateTime progressEndDate = parseToLocalDateTime(postRoomCreateRequest.getProgressEndDate());
-
+        LocalDate startDate = parseToLocalDate(postRoomCreateRequest.getProgressStartDate());
+        LocalDate progressEndDate = parseToLocalDate(postRoomCreateRequest.getProgressEndDate());
 
         Room room = Room.builder()
                 .roomName(postRoomCreateRequest.getRoomName())
@@ -144,8 +144,8 @@ public class RoomService {
                 .build();
 
         book.addRoom(room);
-        bookRepository.save(book);
-        roomRepository.save(room);
+        bookRepository.save(book);  //Cascade.All 옵션에 의해 room도 save
+//        roomRepository.save(room);
 
         return PostRoomCreateResponse.of(room);
     }
@@ -155,7 +155,6 @@ public class RoomService {
 
         String requestUrl = aladinApiUtil.buildLookUpApiUrl(isbn);
         String currentResponse = aladinApiUtil.requestBookInfoFromAladinApi(requestUrl);
-        log.info("알라딘 API 응답 Body: {}", currentResponse);
 
         return aladinApiUtil.parseAladinApiResponseToBook(currentResponse);
     }
@@ -166,14 +165,14 @@ public class RoomService {
      * @param progressEndDate
      * @return
      */
-    private LocalDateTime calculateRecruitEndDate(LocalDateTime startDate, LocalDateTime progressEndDate) {
+    private LocalDate calculateRecruitEndDate(LocalDate startDate, LocalDate progressEndDate) {
         long totalDays = ChronoUnit.DAYS.between(startDate, progressEndDate);
         long halfDays = Math.round(totalDays / 2.0);
 
         return startDate.plusDays(halfDays);
     }
 
-    private LocalDateTime parseToLocalDateTime(String date) {
-        return LocalDate.parse(date, DateTimeFormatter.ofPattern("yyyy.MM.dd")).atStartOfDay();
+    private LocalDate parseToLocalDate(String date) {
+        return LocalDate.parse(date, DateTimeFormatter.ofPattern("yyyy.MM.dd"));
     }
 }

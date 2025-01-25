@@ -7,6 +7,7 @@ import com.example.bookjourneybackend.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,7 +36,7 @@ public class Room extends BaseEntity {
     @Column(nullable = false)
     private boolean isPublic;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private LocalDateTime lastActivityTime;
 
     private Integer password;
@@ -44,13 +45,13 @@ public class Room extends BaseEntity {
     private Double roomPercentage;
 
     @Column(nullable = false)
-    private LocalDateTime startDate;    //방을 생성한 시점 = 방의 모집 시작 기간 = 방의 시작 기간
+    private LocalDate startDate;    //방을 생성한 시점 = 방의 모집 시작 기간 = 방의 시작 기간
 
     @Column(nullable = false)
-    private LocalDateTime progressEndDate;
+    private LocalDate progressEndDate;
 
     @Column(nullable = false)
-    private LocalDateTime recruitEndDate;
+    private LocalDate recruitEndDate;
 
     @Column(nullable = false)
     private Integer recruitCount;
@@ -67,7 +68,7 @@ public class Room extends BaseEntity {
     private List<Record> records = new ArrayList<>();
 
     @Builder
-    public Room(Long roomId, String roomName, Book book, boolean isPublic, LocalDateTime lastActivityTime, Integer password, Double roomPercentage, LocalDateTime startDate, LocalDateTime progressEndDate, LocalDateTime recruitEndDate, Integer recruitCount, Integer recordCount) {
+    public Room(Long roomId, String roomName, Book book, boolean isPublic, LocalDateTime lastActivityTime, Integer password, Double roomPercentage, LocalDate startDate, LocalDate progressEndDate, LocalDate recruitEndDate, Integer recruitCount, Integer recordCount) {
         this.roomId = roomId;
         this.roomName = roomName;
         this.book = book;
