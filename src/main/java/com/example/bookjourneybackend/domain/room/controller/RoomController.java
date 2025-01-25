@@ -22,7 +22,7 @@ public class RoomController {
     @GetMapping("/{roomId}")
     public BaseResponse<GetRoomDetailResponse> getRoomDetail(@PathVariable("roomId") Long roomId) {
 
-        return BaseResponse.ok(roomService.showRoomDetail(roomId));
+        return BaseResponse.ok(roomService.showRoomDetails(roomId));
     }
 
     @GetMapping("/{roomId}/info")

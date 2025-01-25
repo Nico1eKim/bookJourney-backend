@@ -10,8 +10,11 @@ import com.example.bookjourneybackend.domain.user.domain.UserImage;
 import com.example.bookjourneybackend.global.exception.GlobalException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -23,12 +26,11 @@ public class RoomService {
 
     private final RoomRepository roomRepository;
 
-    public GetRoomDetailResponse showRoomDetail(Long roomId) {
+    public GetRoomDetailResponse showRoomDetails(Long roomId) {
         Room room = findRoomById(roomId);
         List<RoomMemberInfo> members = getRoomMemberInfoList(room);
 
-        // recruitEndDate 계산
-        LocalDateTime recruitEndDate = calculateMidPoint(room.getProgressStartDate(), room.getProgressEndDate());
+        LocalDateTime recruitEndDate = room.getRecruitEndDate(); // recruitEndDate를 Room 객체에서 직접 가져옴
         String recruitDday = calculateDday(recruitEndDate); // D-day 계산
 
         return GetRoomDetailResponse.of(
@@ -83,7 +85,7 @@ public class RoomService {
 
     private String calculateLastActivityTime(LocalDateTime lastActivityTime) {
         LocalDateTime now = LocalDateTime.now();
-        long hours = java.time.Duration.between(lastActivityTime, now).toHours();
+        long hours = Duration.between(lastActivityTime, now).toHours();
         return hours + "시간 전";
     }
 
@@ -92,13 +94,8 @@ public class RoomService {
         return date.format(formatter);
     }
 
-    private LocalDateTime calculateMidPoint(LocalDateTime startDate, LocalDateTime endDate) {
-        long secondsBetween = java.time.Duration.between(startDate, endDate).getSeconds();
-        return startDate.plusSeconds(secondsBetween / 2);
-    }
-
     private String calculateDday(LocalDateTime endDate) {
-        long days = java.time.temporal.ChronoUnit.DAYS.between(LocalDateTime.now(), endDate);
+        long days = ChronoUnit.DAYS.between(LocalDateTime.now(), endDate);
         if (days < 0) {
             return "D+" + Math.abs(days);
         }
