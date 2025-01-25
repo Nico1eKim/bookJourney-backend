@@ -36,6 +36,7 @@ public class RoomController {
     @GetMapping("/search")
     public BaseResponse<GetRoomSearchResponse> searchRooms(
             @RequestParam(required = false) String searchTerm,
+            @RequestParam(required = false) String searchType,
             @RequestParam(required = false) String genre,
             @RequestParam(required = false) String recruitStartDate,
             @RequestParam(required = false) String recruitEndDate,
@@ -46,7 +47,7 @@ public class RoomController {
     ) {
 
         return BaseResponse.ok(
-                roomService.searchRooms(searchTerm, genre, recruitStartDate, recruitEndDate, roomStartDate, roomEndDate, recordCount, page)
+                roomService.searchRooms(searchTerm, searchType, genre, recruitStartDate, recruitEndDate, roomStartDate, roomEndDate, recordCount, page)
         );
     }
 

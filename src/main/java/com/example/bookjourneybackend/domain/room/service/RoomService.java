@@ -2,6 +2,7 @@ package com.example.bookjourneybackend.domain.room.service;
 
 import com.example.bookjourneybackend.domain.book.domain.GenreType;
 import com.example.bookjourneybackend.domain.room.domain.Room;
+import com.example.bookjourneybackend.domain.room.domain.SearchType;
 import com.example.bookjourneybackend.domain.room.domain.repository.RoomRepository;
 import com.example.bookjourneybackend.domain.room.dto.response.*;
 import com.example.bookjourneybackend.domain.book.domain.Book;
@@ -88,6 +89,7 @@ public class RoomService {
 
     public GetRoomSearchResponse searchRooms(
             String searchTerm,
+            String searchType,
             String genre,
             String recruitStartDate,
             String recruitEndDate,
@@ -96,6 +98,10 @@ public class RoomService {
             Integer recordCount,
             Integer page
     ) {
+        SearchType effectiveSearchType = (searchType == null || searchType.isEmpty())
+                ? SearchType.BOOK_TITLE
+                : SearchType.from(searchType);
+
         // page가 null이면 기본값 0 설정
         int pageNumber = (page != null) ? page : 0;
 
@@ -106,6 +112,7 @@ public class RoomService {
 
         Slice<Room> rooms = roomRepository.findRoomsByFilters(
                 searchTerm,
+                effectiveSearchType.toDescription(),
                 genreType,
                 recruitStartDate != null ? LocalDate.parse(recruitStartDate) : null,
                 recruitEndDate != null ? LocalDate.parse(recruitEndDate) : null,
