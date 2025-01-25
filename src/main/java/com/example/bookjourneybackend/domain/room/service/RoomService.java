@@ -12,26 +12,32 @@ import com.example.bookjourneybackend.domain.room.dto.response.RoomMemberInfo;
 import com.example.bookjourneybackend.domain.user.domain.User;
 import com.example.bookjourneybackend.domain.user.domain.UserImage;
 import com.example.bookjourneybackend.global.exception.GlobalException;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
+import com.example.bookjourneybackend.global.util.AladinApiUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
+
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.CANNOT_FIND_ROOM;
 
+import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.CANNOT_FIND_ROOM;
+import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.CANNOT_FOUND_EMAIL;
+
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class RoomService {
 
     private final RoomRepository roomRepository;
     private final BookRepository bookRepository;
+    private final AladinApiUtil aladinApiUtil;
 
     public GetRoomDetailResponse showRoomDetails(Long roomId) {
         Room room = findRoomById(roomId);
@@ -116,36 +122,58 @@ public class RoomService {
      * @return
      */
     public PostRoomCreateResponse createRoom(PostRoomCreateRequest postRoomCreateRequest) {
+        log.info("------------------------[RoomService.createRoom]------------------------");
         Book book = bookRepository.findByIsbn(postRoomCreateRequest.getIsbn())
                 .orElseGet(() -> saveBookFromAladinApi(postRoomCreateRequest.getIsbn()));
 
-        return PostRoomCreateResponse.of(Room.builder()
+        LocalDateTime startDate = parseToLocalDateTime(postRoomCreateRequest.getProgressStartDate());
+        LocalDateTime progressEndDate = parseToLocalDateTime(postRoomCreateRequest.getProgressEndDate());
+
+
+        Room room = Room.builder()
                 .roomName(postRoomCreateRequest.getRoomName())
                 .book(book)
                 .isPublic(postRoomCreateRequest.isPublic())
-                .password(postRoomCreateRequest.getPassword())
-                .startDate(postRoomCreateRequest.getProgressStartDate())    //방의 생성기간 = 방의 시작 기간 = 방의 모집 시작 기간
-                .progressEndDate(postRoomCreateRequest.getProgressEndDate())
-                .recruitEndDate(calculateRecruitEndDate(postRoomCreateRequest)) //방의 모집종료 기간 = {(방의 종료기간 - 방의 시작기간)/2} + 방의 시작기간
+                .password(Integer.parseInt(postRoomCreateRequest.getPassword()))
+                .startDate(startDate)    //방의 생성기간 = 방의 시작 기간 = 방의 모집 시작 기간
+                .progressEndDate(progressEndDate)
+                .recruitEndDate(calculateRecruitEndDate(startDate, progressEndDate)) //방의 모집종료 기간 = {(방의 종료기간 - 방의 시작기간)/2} + 방의 시작기간
                 .recruitCount(postRoomCreateRequest.getRecruitCount())
                 .roomPercentage(0.0)
                 .recordCount(0)
-                .build());
+                .build();
+
+        book.addRoom(room);
+        bookRepository.save(book);
+        roomRepository.save(room);
+
+        return PostRoomCreateResponse.of(room);
     }
 
-    private Book saveBookFromAladinApi(@NotBlank(message = "ISBN cannot be blank.") @Pattern(regexp = "\\d{10,13}", message = "ISBN은 10이나 13자리로 이루어집니다.") String isbn) {
-        return null;
+    private Book saveBookFromAladinApi(String isbn) {
+        log.info("[saveBookFromAladinApi] isbn: {}", isbn);
+
+        String requestUrl = aladinApiUtil.buildLookUpApiUrl(isbn);
+        String currentResponse = aladinApiUtil.requestBookInfoFromAladinApi(requestUrl);
+        log.info("알라딘 API 응답 Body: {}", currentResponse);
+
+        return aladinApiUtil.parseAladinApiResponseToBook(currentResponse);
     }
 
     /**
-     * //방의 모집종료 기간 = {(방의 종료기간 - 방의 시작기간)/2} + 방의 시작기간
-     * @param postRoomCreateRequest
+     * 방의 모집종료 기간 = {(방의 종료기간 - 방의 시작기간)/2} + 방의 시작기간
+     * @param startDate
+     * @param progressEndDate
      * @return
      */
-    private LocalDateTime calculateRecruitEndDate(PostRoomCreateRequest postRoomCreateRequest) {
-        long totalDays = ChronoUnit.DAYS.between(postRoomCreateRequest.getProgressStartDate(), postRoomCreateRequest.getProgressEndDate());
+    private LocalDateTime calculateRecruitEndDate(LocalDateTime startDate, LocalDateTime progressEndDate) {
+        long totalDays = ChronoUnit.DAYS.between(startDate, progressEndDate);
         long halfDays = Math.round(totalDays / 2.0);
 
-        return postRoomCreateRequest.getProgressStartDate().plusDays(halfDays);
+        return startDate.plusDays(halfDays);
+    }
+
+    private LocalDateTime parseToLocalDateTime(String date) {
+        return LocalDate.parse(date, DateTimeFormatter.ofPattern("yyyy.MM.dd")).atStartOfDay();
     }
 }
