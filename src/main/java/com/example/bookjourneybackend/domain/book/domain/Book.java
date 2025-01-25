@@ -54,7 +54,7 @@ public class Book extends BaseEntity {
     private List<Favorite> favorites = new ArrayList<>();
 
     @Builder.Default
-    @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "book", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Room> rooms = new ArrayList<>();
 
     @Column(nullable = false, length = 500)
