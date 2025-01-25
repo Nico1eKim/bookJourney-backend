@@ -9,6 +9,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,7 +36,7 @@ public class Book extends BaseEntity {
     @Column(length = 255)
     private String publisher;
 
-    private LocalDateTime publishedDate;
+    private LocalDate publishedDate;
 
     @Column(nullable = false, length = 13)
     private String isbn;
@@ -66,7 +67,7 @@ public class Book extends BaseEntity {
     private boolean bestSeller; //베스트셀러 여부
 
     @Builder
-    public Book(Long bookId, GenreType genre, String bookTitle, String publisher, LocalDateTime publishedDate, String isbn, Integer pageCount, String description, Integer roomCount, String authorName, String imageUrl, boolean bestSeller) {
+    public Book(Long bookId, GenreType genre, String bookTitle, String publisher, LocalDate publishedDate, String isbn, Integer pageCount, String description, Integer roomCount, String authorName, String imageUrl, boolean bestSeller) {
         this.bookId = bookId;
         this.genre = genre;
         this.bookTitle = bookTitle;
