@@ -61,8 +61,8 @@ public class AuthService {
 
         String accessToken = jwtUtil.createAccessToken(user.getUserId());
         String refreshToken = jwtUtil.createRefreshToken(user.getUserId());
+
         jwtUtil.setHeaderAccessToken(response,accessToken);
-        jwtUtil.setHeaderRefreshToken(response,refreshToken);
         tokenService.storeRefreshToken(refreshToken, user.getUserId());
 
         // 인증 정보 SecurityContext에 설정
@@ -80,13 +80,9 @@ public class AuthService {
 
         String refreshToken = authAccessTokenReissueRequest.getRefreshToken();
 
-        //리프레쉬 토큰이 존재하지 않는 경우
-        if (refreshToken == null)
-            throw new GlobalException(NOT_EXIST_TOKEN);
-
         // 리프레시 토큰 검증
         if (!jwtUtil.validateToken(refreshToken)) {
-            throw new GlobalException(INVALID_TOKEN);
+            throw new GlobalException(EXPIRED_TOKEN);
         }
 
         /// 리프레시 토큰으로 유저 정보 가져오기
@@ -100,12 +96,12 @@ public class AuthService {
             String newAccessToken = jwtUtil.createAccessToken(userId);
             /// 헤더에 엑세스 토큰 추가
             jwtUtil.setHeaderAccessToken(response, newAccessToken);
-
+            //인증된 사용자 권한 설정
             jwtAuthenticationFilter.setAuthentication(request,userId);
 
             return PostAuthAccessTokenReissueResponse.of(newAccessToken);
 
-        } else throw new GlobalException(NOT_EXIST_TOKEN);
+        } throw new GlobalException(NOT_EXIST_TOKEN);
 
     }
 
