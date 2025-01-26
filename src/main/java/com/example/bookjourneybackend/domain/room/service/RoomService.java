@@ -36,6 +36,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
 import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.CANNOT_FIND_ROOM;
 
 @Slf4j
@@ -98,17 +99,20 @@ public class RoomService {
             Integer recordCount,
             Integer page
     ) {
-        SearchType effectiveSearchType = (searchType == null || searchType.isEmpty())
-                ? SearchType.BOOK_TITLE
-                : SearchType.from(searchType);
-
-        // page가 null이면 기본값 0 설정
-        int pageNumber = (page != null) ? page : 0;
-
-        GenreType genreType = null;
-        if (genre != null && !genre.isEmpty()) {
-            genreType = GenreType.fromGenreType(genre);
+        // 필수 값 검증
+        if (searchTerm == null || searchTerm.trim().isEmpty()) {
+            throw new GlobalException(BaseExceptionResponseStatus.EMPTY_SEARCH_TERM);
         }
+        if (searchType == null || searchType.trim().isEmpty()) {
+            throw new GlobalException(BaseExceptionResponseStatus.INVALID_SEARCH_TYPE);
+        }
+        if (page == null) {
+            throw new GlobalException(BaseExceptionResponseStatus.INVALID_PAGE);
+        }
+
+        SearchType effectiveSearchType = SearchType.from(searchType);
+        GenreType genreType = genre != null && !genre.isEmpty() ? GenreType.fromGenreType(genre) : null;
+
 
         Slice<Room> rooms = roomRepository.findRoomsByFilters(
                 searchTerm,
@@ -119,7 +123,7 @@ public class RoomService {
                 roomStartDate != null ? LocalDate.parse(roomStartDate) : null,
                 roomEndDate != null ? LocalDate.parse(roomEndDate) : null,
                 recordCount,
-                PageRequest.of(pageNumber, 10) // 한 페이지당 10개
+                PageRequest.of(page, 10)
         );
 
         List<RoomInfo> roomInfos = rooms.stream().map(room ->
@@ -193,6 +197,7 @@ public class RoomService {
     /**
      * 1. Book 테이블에 존재하면, 그대로 매핑
      * 2. Book 테이블에 존재하지 않으면, 알라딘 api를 통해 book 정보를 가져와서 repository에 저장후 매핑
+     *
      * @param postRoomCreateRequest
      * @return
      */
@@ -249,6 +254,7 @@ public class RoomService {
 
     /**
      * 방의 모집종료 기간 = {(방의 종료기간 - 방의 시작기간)/2} + 방의 시작기간
+     *
      * @param startDate
      * @param progressEndDate
      * @return
