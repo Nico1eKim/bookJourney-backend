@@ -17,7 +17,9 @@ public class PostAuthLoginRequest {
      * 로그인 request dto
      */
 
+    @NotBlank(message = "이메일은 필수 입력 항목입니다.")
     private String email;
+    @NotBlank(message = "비밀번호 입력은 필수입니다.")
     private String password;
 
     @Builder
