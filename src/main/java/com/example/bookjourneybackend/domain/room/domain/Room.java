@@ -1,14 +1,13 @@
 package com.example.bookjourneybackend.domain.room.domain;
 
 import com.example.bookjourneybackend.domain.book.domain.Book;
-import com.example.bookjourneybackend.domain.favorite.domain.Favorite;
 import com.example.bookjourneybackend.domain.record.domain.Record;
-import com.example.bookjourneybackend.domain.user.domain.User;
 import com.example.bookjourneybackend.domain.userRoom.domain.UserRoom;
 import com.example.bookjourneybackend.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,7 +25,11 @@ public class Room extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long roomId;
 
-    @Column(nullable = false, length = 60)
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private RoomType roomType;
+
+    @Column(length = 60)
     private String roomName;
 
     @Setter
@@ -34,10 +37,8 @@ public class Room extends BaseEntity {
     @JoinColumn(name = "book_id", nullable = false)
     private Book book;
 
-    @Column(nullable = false)
     private boolean isPublic;
 
-    @Column(nullable = false)
     private LocalDateTime lastActivityTime;
 
     private Integer password;
@@ -45,23 +46,14 @@ public class Room extends BaseEntity {
     @Column(nullable = false)
     private Double roomPercentage;
 
-    @Column(nullable = false)
-    private LocalDateTime progressStartDate;
+    private LocalDate startDate;    //방을 생성한 시점 = 방의 모집 시작 기간 = 방의 시작 기간
 
-    @Column(nullable = false)
-    private LocalDateTime progressEndDate;
+    private LocalDate progressEndDate;
 
-    @Column(nullable = false)
-    private LocalDateTime recruitStartDate;
-
-    @Column(nullable = false)
-    private LocalDateTime recruitEndDate;
+    private LocalDate recruitEndDate;
 
     @Column(nullable = false)
     private Integer recruitCount;
-
-    @Column(nullable = false)
-    private Integer recordCount;
 
     @Builder.Default
     @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -71,21 +63,28 @@ public class Room extends BaseEntity {
     @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Record> records = new ArrayList<>();
 
-    @Builder
-    public Room(Long roomId, String roomName, Book book, boolean isPublic, LocalDateTime lastActivityTime, Integer password, Double roomPercentage, LocalDateTime progressStartDate, LocalDateTime progressEndDate, LocalDateTime recruitStartDate, LocalDateTime recruitEndDate, Integer recruitCount, Integer recordCount) {
-        this.roomId = roomId;
-        this.roomName = roomName;
-        this.book = book;
-        this.isPublic = isPublic;
-        this.lastActivityTime = lastActivityTime;
-        this.password = password;
-        this.roomPercentage = roomPercentage;
-        this.progressStartDate = progressStartDate;
-        this.progressEndDate = progressEndDate;
-        this.recruitStartDate = recruitStartDate;
-        this.recruitEndDate = recruitEndDate;
-        this.recruitCount = recruitCount;
-        this.recordCount = recordCount;
+    public static Room makeReadTogetherRoom(String roomName, Book book, boolean isPublic, Integer password, LocalDate startDate, LocalDate progressEndDate, LocalDate recruitEndDate, Integer recruitCount) {
+        return Room.builder()
+                .roomType(RoomType.TOGETHER)
+                .roomName(roomName)
+                .book(book)
+                .isPublic(isPublic)
+                .password(password)
+                .roomPercentage(0.0)
+                .startDate(startDate)
+                .progressEndDate(progressEndDate)
+                .recruitEndDate(recruitEndDate)
+                .recruitCount(recruitCount)
+                .build();
+    }
+
+    public static Room makeReadAloneRoom(Book book) {
+        return Room.builder()
+                .roomType(RoomType.ALONE)
+                .book(book)
+                .roomPercentage(0.0)
+                .recruitCount(1)
+                .build();
     }
 
     public void addUserRoom(UserRoom userRoom) {

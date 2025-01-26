@@ -1,7 +1,10 @@
 package com.example.bookjourneybackend.global.util;
 
+import com.example.bookjourneybackend.domain.book.domain.Book;
+import com.example.bookjourneybackend.domain.book.domain.GenreType;
 import com.example.bookjourneybackend.domain.book.dto.request.GetBookListRequest;
 import com.example.bookjourneybackend.global.exception.GlobalException;
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -9,8 +12,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestTemplate;
+
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.ALADIN_API_ERROR;
+import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.ALADIN_API_PARSING_ERROR;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -37,6 +46,7 @@ public class AladinApiUtil {
     private final String COVER_SIZE = "MidBig";
 
     private final ObjectMapper objectMapper;
+    private final RestTemplate restTemplate;
 
 
     public String buildSearchApiUrl(GetBookListRequest request) {
@@ -76,5 +86,70 @@ public class AladinApiUtil {
         } catch (JsonProcessingException e) {
 //            throw new RuntimeException(e);
         }
+    }
+
+    public String requestBookInfoFromAladinApi(String requestUrl) {
+        try {
+            String currentResponse = restTemplate.getForEntity(requestUrl, String.class).getBody();
+            this.checkValidatedResponse(currentResponse);
+            log.info("알라딘 API 응답 Body: {}", currentResponse);
+
+            return currentResponse;
+        } catch (RestClientException e) {
+            throw new GlobalException(ALADIN_API_ERROR);
+        }
+    }
+
+    public Book parseAladinApiResponseToBook(String currentResponse) {
+        try {
+            //JSON 형식 오류 허용 -> "Unrecognized character escape ''' (code 39)" 에러 해결용
+            objectMapper.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
+            objectMapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
+//            currentResponse = currentResponse.replace("'", "\"");
+
+            JsonNode root = objectMapper.readTree(currentResponse);
+//            GenreType genreType = GenreType.fromCategoryId(root.get("searchCategoryId").asInt());
+            JsonNode items = root.get("item");
+
+            if (items != null && items.isArray()) {
+                for (JsonNode item : items) {
+                    String title = item.get("title").asText();
+                    String author = item.get("author").asText();
+
+//                    isbn 13자리가 비어있는 경우 10자리 사용
+                    String isbn = item.has("isbn13") && !item.get("isbn13").asText().isEmpty()
+                            ? item.get("isbn13").asText()
+                            : item.get("isbn").asText();
+                    String imageUrl = item.get("cover").asText();
+
+//                    String link = item.get("link").asText();
+                    String description = item.get("description").asText();
+                    String categoryName = item.get("categoryName").asText();
+                    String publisher = item.get("publisher").asText();
+                    String publishedDate = item.get("pubDate").asText();
+
+                    //전체 페이지 수 파싱
+                    Integer pageCount = item.has("bookinfo") && item.get("bookinfo").has("itemPage")
+                            ? item.get("bookinfo").get("itemPage").asInt() : null;
+
+                    return Book.builder()
+                            .isbn(isbn)
+                            .bookTitle(title)
+                            .authorName(author)
+                            .genre(GenreType.parsingGenreType(categoryName))
+                            .publisher(publisher)
+                            .publishedDate(LocalDate.parse(publishedDate, DateTimeFormatter.ofPattern("yyyy-MM-dd")))
+                            .description(description)
+                            .imageUrl(imageUrl)
+                            .bestSeller(false)
+                            .pageCount(pageCount)
+                            .build();
+                }
+            }
+        } catch (JsonProcessingException e) {
+            log.info("Json 파싱 에러 메시지: {}", e.getMessage());
+            throw new GlobalException(ALADIN_API_PARSING_ERROR);
+        }
+        throw new GlobalException(ALADIN_API_ERROR);
     }
 }
