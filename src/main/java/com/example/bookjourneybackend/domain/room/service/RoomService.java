@@ -1,9 +1,12 @@
 package com.example.bookjourneybackend.domain.room.service;
 
+import com.example.bookjourneybackend.domain.book.domain.GenreType;
+import com.example.bookjourneybackend.domain.room.domain.Room;
+import com.example.bookjourneybackend.domain.room.domain.SearchType;
+import com.example.bookjourneybackend.domain.room.domain.repository.RoomRepository;
+import com.example.bookjourneybackend.domain.room.dto.response.*;
 import com.example.bookjourneybackend.domain.book.domain.Book;
 import com.example.bookjourneybackend.domain.book.domain.repository.BookRepository;
-import com.example.bookjourneybackend.domain.room.domain.Room;
-import com.example.bookjourneybackend.domain.room.domain.repository.RoomRepository;
 import com.example.bookjourneybackend.domain.room.dto.request.PostRoomCreateRequest;
 import com.example.bookjourneybackend.domain.room.dto.response.GetRoomDetailResponse;
 import com.example.bookjourneybackend.domain.room.dto.response.GetRoomInfoResponse;
@@ -15,15 +18,16 @@ import com.example.bookjourneybackend.domain.user.domain.repository.UserReposito
 import com.example.bookjourneybackend.domain.userRoom.domain.UserRole;
 import com.example.bookjourneybackend.domain.userRoom.domain.UserRoom;
 import com.example.bookjourneybackend.global.exception.GlobalException;
-import com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus;
-import com.example.bookjourneybackend.global.util.AladinApiUtil;
+import com.example.bookjourneybackend.domain.record.domain.Record;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
+import com.example.bookjourneybackend.global.util.AladinApiUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -32,8 +36,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static com.example.bookjourneybackend.domain.room.domain.RoomType.TOGETHER;
-import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.CANNOT_FIND_ROOM;
+import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.*;
 
 @Slf4j
 @Service
@@ -47,7 +50,8 @@ public class RoomService {
 
 
     public GetRoomDetailResponse showRoomDetails(Long roomId) {
-        Room room = findRoomById(roomId);
+        Room room = roomRepository.findById(roomId)
+                .orElseThrow(() -> new GlobalException(CANNOT_FIND_ROOM));
         List<RoomMemberInfo> members = getRoomMemberInfoList(room);
 
         LocalDate recruitEndDate = room.getRecruitEndDate(); // recruitEndDate를 Room 객체에서 직접 가져옴
@@ -56,7 +60,7 @@ public class RoomService {
         return GetRoomDetailResponse.of(
                 room.getRoomName(),
                 room.isPublic(),
-                calculateLastActivityTime(room.getLastActivityTime()),
+                calculateLastActivityTime(room.getRecords()),
                 room.getRoomPercentage().intValue(),
                 formatDate(room.getStartDate()),
                 formatDate(room.getProgressEndDate()),
@@ -69,7 +73,8 @@ public class RoomService {
     }
 
     public GetRoomInfoResponse showRoomInfo(Long roomId) {
-        Room room = findRoomById(roomId);
+        Room room = roomRepository.findById(roomId)
+                .orElseThrow(() -> new GlobalException(CANNOT_FIND_ROOM));
         List<RoomMemberInfo> members = getRoomMemberInfoList(room);
 
         return GetRoomInfoResponse.of(
@@ -78,15 +83,70 @@ public class RoomService {
                 room.isPublic(),
                 room.getRoomPercentage().intValue(),
                 calculateDday(room.getProgressEndDate()),
-                members.size(),
-                room.getRecruitCount(),
                 members
         );
     }
 
-    private Room findRoomById(Long roomId) {
-        return roomRepository.findById(roomId)
-                .orElseThrow(()-> new GlobalException(CANNOT_FIND_ROOM));
+    public GetRoomSearchResponse searchRooms(
+            String searchTerm,
+            String searchType,
+            String genre,
+            String recruitStartDate,
+            String recruitEndDate,
+            String roomStartDate,
+            String roomEndDate,
+            Integer recordCount,
+            Integer page
+    ) {
+        // 필수 값 검증
+        if (searchTerm == null || searchTerm.trim().isEmpty()) {
+            throw new GlobalException(EMPTY_SEARCH_TERM);
+        }
+        if (searchType == null || searchType.trim().isEmpty()) {
+            throw new GlobalException(INVALID_SEARCH_TYPE);
+        }
+        if (page == null) {
+            throw new GlobalException(INVALID_PAGE);
+        }
+
+        SearchType effectiveSearchType = SearchType.from(searchType);
+        GenreType genreType = genre != null && !genre.isEmpty() ? GenreType.fromGenreType(genre) : null;
+
+        Slice<Room> rooms = roomRepository.findRoomsByFilters(
+                genreType,
+                recruitStartDate != null ? LocalDate.parse(recruitStartDate) : null,
+                recruitEndDate != null ? LocalDate.parse(recruitEndDate) : null,
+                roomStartDate != null ? LocalDate.parse(roomStartDate) : null,
+                roomEndDate != null ? LocalDate.parse(roomEndDate) : null,
+                recordCount,
+                PageRequest.of(page, 10)
+        );
+
+        List<Room> filteredRooms = rooms.stream()
+                .filter(room -> switch (effectiveSearchType) {
+                    case ROOM_NAME -> room.getRoomName().contains(searchTerm);
+                    case BOOK_TITLE -> room.getBook().getBookTitle().contains(searchTerm);
+                    case AUTHOR_NAME -> room.getBook().getAuthorName().contains(searchTerm);
+                })
+                .toList();
+
+        // Response 변환
+        List<RoomInfo> roomInfos = filteredRooms.stream()
+                .map(room -> new RoomInfo(
+                        room.getRoomId(),
+                        room.isPublic(),
+                        room.getBook().getBookTitle(),
+                        room.getBook().getAuthorName(),
+                        room.getRoomName(),
+                        room.getUserRooms().size(),
+                        room.getRecruitCount(),
+                        room.getRoomPercentage().intValue(),
+                        formatDate(room.getStartDate()),
+                        formatDate(room.getProgressEndDate())
+                ))
+                .collect(Collectors.toList());
+
+        return GetRoomSearchResponse.of(roomInfos);
     }
 
     private List<RoomMemberInfo> getRoomMemberInfoList(Room room) {
@@ -103,10 +163,27 @@ public class RoomService {
         }).collect(Collectors.toList());
     }
 
-    private String calculateLastActivityTime(LocalDateTime lastActivityTime) {
-        LocalDateTime now = LocalDateTime.now();
-        long hours = Duration.between(lastActivityTime, now).toHours();
-        return hours + "시간 전";
+    private String calculateLastActivityTime(List<Record> records) {
+        Optional<LocalDateTime> lastModifiedAtOpt = records.stream()
+                .map(Record::getModifiedAt)
+                .max(LocalDateTime::compareTo);
+
+        // 수정 기록이 없는 경우
+        if (lastModifiedAtOpt.isEmpty()) {
+            return "기록 없음";
+        }
+
+        LocalDateTime lastModifiedAt = lastModifiedAtOpt.get();
+        long minutes = Duration.between(lastModifiedAt, LocalDateTime.now()).toMinutes();
+
+        if (minutes < 1) {
+            return "방금 전";
+        } else if (minutes < 60) {
+            return minutes + "분 전";
+        } else {
+            long hours = minutes / 60;
+            return hours + "시간 전";
+        }
     }
 
     private String formatDate(LocalDate date) {
@@ -125,6 +202,7 @@ public class RoomService {
     /**
      * 1. Book 테이블에 존재하면, 그대로 매핑
      * 2. Book 테이블에 존재하지 않으면, 알라딘 api를 통해 book 정보를 가져와서 repository에 저장후 매핑
+     *
      * @param postRoomCreateRequest
      * @return
      */
@@ -136,7 +214,7 @@ public class RoomService {
 
         UserRoom userRoom = UserRoom.builder()
                 .user(userRepository.findById(userId)
-                        .orElseThrow(() -> new GlobalException(BaseExceptionResponseStatus.CANNOT_FOUND_USER)))
+                        .orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER)))
                 .userRole(UserRole.HOST)
                 .currentPage(0)
                 .userPercentage(0.0)
@@ -181,6 +259,7 @@ public class RoomService {
 
     /**
      * 방의 모집종료 기간 = {(방의 종료기간 - 방의 시작기간)/2} + 방의 시작기간
+     *
      * @param startDate
      * @param progressEndDate
      * @return

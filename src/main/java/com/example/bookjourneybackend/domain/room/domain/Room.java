@@ -39,8 +39,6 @@ public class Room extends BaseEntity {
 
     private boolean isPublic;
 
-    private LocalDateTime lastActivityTime;
-
     private Integer password;
 
     @Column(nullable = false)
