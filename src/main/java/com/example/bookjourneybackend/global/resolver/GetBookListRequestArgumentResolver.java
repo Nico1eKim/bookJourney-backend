@@ -1,6 +1,8 @@
 package com.example.bookjourneybackend.global.resolver;
 
+import com.example.bookjourneybackend.domain.book.domain.GenreType;
 import com.example.bookjourneybackend.domain.book.dto.request.GetBookListRequest;
+import com.example.bookjourneybackend.domain.room.domain.SearchType;
 import com.example.bookjourneybackend.global.exception.GlobalException;
 import org.springframework.core.MethodParameter;
 import org.springframework.stereotype.Component;
@@ -23,19 +25,19 @@ public class GetBookListRequestArgumentResolver implements HandlerMethodArgument
     public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer, NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
         String searchTerm = webRequest.getParameter("searchTerm");
         String genre = webRequest.getParameter("genre");
-        String queryType = webRequest.getParameter("queryType");
+        String searchType = webRequest.getParameter("searchType");
 
         String pageParam = webRequest.getParameter("page");
         int page = (pageParam == null || pageParam.trim().isEmpty()) ? 0 : Integer.parseInt(pageParam);
 
         page++;
 
-        validateRequest(searchTerm, page, queryType);
+        validateRequest(searchTerm, page, searchType);
 
         return GetBookListRequest.builder()
                 .searchTerm(searchTerm)
-                .genre(genre)
-                .queryType(queryType)
+                .genre(genre == null? null: GenreType.fromGenreType(genre))
+                .queryType(SearchType.from(searchType).getQueryType())
                 .page(page)
                 .build();
 
@@ -52,9 +54,8 @@ public class GetBookListRequestArgumentResolver implements HandlerMethodArgument
             throw new GlobalException(INVALID_PAGE);
         }
         // queryType 유효성 검사
-        if (queryType == null || queryType.isBlank() ||
-                !(queryType.equals("Title") || queryType.equals("Author"))) {
-            throw new GlobalException(INVALID_QUERY_TYPE);
+        if (queryType == null || queryType.isBlank()) {
+            throw new GlobalException(INVALID_SEARCH_TYPE);
         }
     }
 
