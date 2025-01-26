@@ -1,7 +1,6 @@
 package com.example.bookjourneybackend.global.resolver;
 
 import com.example.bookjourneybackend.global.annotation.LoginUserId;
-import com.example.bookjourneybackend.global.util.HttpHeader;
 import com.example.bookjourneybackend.global.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.MethodParameter;
