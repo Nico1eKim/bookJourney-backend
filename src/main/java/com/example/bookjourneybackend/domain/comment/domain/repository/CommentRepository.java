@@ -1,4 +1,9 @@
 package com.example.bookjourneybackend.domain.comment.domain.repository;
 
-public interface CommentRepository {
+import com.example.bookjourneybackend.domain.comment.domain.Comment;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface CommentRepository extends JpaRepository<Comment, Long> {
 }
