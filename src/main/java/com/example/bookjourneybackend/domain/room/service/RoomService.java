@@ -132,7 +132,18 @@ public class RoomService {
     public PostRoomCreateResponse createRoom(PostRoomCreateRequest postRoomCreateRequest, Long userId) {
         log.info("------------------------[RoomService.createRoom]------------------------");
         Book book = bookRepository.findByIsbn(postRoomCreateRequest.getIsbn())
-                .orElseGet(() -> saveBookFromAladinApi(postRoomCreateRequest.getIsbn()));
+                .map(existingBook -> {
+                    if (existingBook.getPageCount() == null) {
+                        Book updatedBook = saveBookFromAladinApi(postRoomCreateRequest.getIsbn());
+                        existingBook.setPageCount(updatedBook.getPageCount());
+                        return bookRepository.save(existingBook); // 기존 book 업데이트
+                    }
+                    return existingBook; // 기존 book 그대로 반환
+                })
+                .orElseGet(() -> saveBookFromAladinApi(postRoomCreateRequest.getIsbn())); // book이 없을 경우 새로 생성
+
+
+
 
         UserRoom userRoom = UserRoom.builder()
                 .user(userRepository.findById(userId)
