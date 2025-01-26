@@ -113,10 +113,7 @@ public class RoomService {
         SearchType effectiveSearchType = SearchType.from(searchType);
         GenreType genreType = genre != null && !genre.isEmpty() ? GenreType.fromGenreType(genre) : null;
 
-
         Slice<Room> rooms = roomRepository.findRoomsByFilters(
-                searchTerm,
-                effectiveSearchType.toDescription(),
                 genreType,
                 recruitStartDate != null ? LocalDate.parse(recruitStartDate) : null,
                 recruitEndDate != null ? LocalDate.parse(recruitEndDate) : null,
@@ -126,8 +123,17 @@ public class RoomService {
                 PageRequest.of(page, 10)
         );
 
-        List<RoomInfo> roomInfos = rooms.stream().map(room ->
-                new RoomInfo(
+        List<Room> filteredRooms = rooms.stream()
+                .filter(room -> switch (effectiveSearchType) {
+                    case ROOM_NAME -> room.getRoomName().contains(searchTerm);
+                    case BOOK_TITLE -> room.getBook().getBookTitle().contains(searchTerm);
+                    case AUTHOR_NAME -> room.getBook().getAuthorName().contains(searchTerm);
+                })
+                .toList();
+
+        // Response 변환
+        List<RoomInfo> roomInfos = filteredRooms.stream()
+                .map(room -> new RoomInfo(
                         room.getRoomId(),
                         room.isPublic(),
                         room.getBook().getBookTitle(),
@@ -138,8 +144,8 @@ public class RoomService {
                         room.getRoomPercentage().intValue(),
                         formatDate(room.getStartDate()),
                         formatDate(room.getProgressEndDate())
-                )
-        ).collect(Collectors.toList());
+                ))
+                .collect(Collectors.toList());
 
         return GetRoomSearchResponse.of(roomInfos);
     }

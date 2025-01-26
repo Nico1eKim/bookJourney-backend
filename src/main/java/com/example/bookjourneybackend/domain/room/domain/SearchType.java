@@ -9,14 +9,16 @@ import static com.example.bookjourneybackend.global.response.status.BaseExceptio
 @Getter
 public enum SearchType {
 
-    ROOM_NAME("방 이름"),
-    BOOK_TITLE("책 제목"),
-    AUTHOR_NAME("작가 이름");
+    ROOM_NAME("방 이름", ""),
+    BOOK_TITLE("책 제목", "Title"),
+    AUTHOR_NAME("작가 이름", "Author"),;
 
     private final String description;
+    private final String queryType;     //알라딘 api용
 
-    SearchType(String description) {
+    SearchType(String description, String queryType) {
         this.description = description;
+        this.queryType = queryType;
     }
 
     public static SearchType from(String description) throws GlobalException {
@@ -26,9 +28,5 @@ public enum SearchType {
             }
         }
         throw new GlobalException(INVALID_SEARCH_TYPE);
-    }
-
-    public String toDescription() {
-        return this.description;
     }
 }
