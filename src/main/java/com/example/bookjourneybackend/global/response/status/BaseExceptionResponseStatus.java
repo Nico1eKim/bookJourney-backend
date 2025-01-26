@@ -36,6 +36,8 @@ public enum BaseExceptionResponseStatus implements ResponseStatus{
     ALADIN_API_ERROR(6002, BAD_REQUEST, "알라딘 API 호출에 실패하였습니다."),
     ALADIN_API_PARSING_ERROR(6003, BAD_REQUEST, "알라딘 API 응답 파싱에 실패하였습니다."),
 
+    CANNOT_FOUND_POPULAR_BOOK(6004, BAD_REQUEST, "읽기횟수가 가장 많은 책을 찾을 수 없습니다."),
+
 
 
     /**
