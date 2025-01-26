@@ -59,5 +59,4 @@ public class GlobalControllerAdvice {
 
         return BaseResponse.of(HttpStatus.BAD_REQUEST, errorMessage, null);
     }
-
 }
