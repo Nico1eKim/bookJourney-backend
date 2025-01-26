@@ -38,7 +38,6 @@ public class Record extends BaseEntity {
     @Column(nullable = false)
     private RecordType recordType;
 
-    @Column(nullable = false)
     private Integer recordPage;
 
     @Column(nullable = false, length = 3000)

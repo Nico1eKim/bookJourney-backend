@@ -20,7 +20,7 @@ public class GetBookListRequest {
     @Builder
     public GetBookListRequest(String searchTerm, String genre, String queryType, int page) {
         this.searchTerm = searchTerm;
-        this.genreType = GenreType.fromGenreType(genre);
+        this.genreType = genre == null? null: GenreType.fromGenreType(genre);
         this.queryType = queryType;
         this.page = page;
     }
