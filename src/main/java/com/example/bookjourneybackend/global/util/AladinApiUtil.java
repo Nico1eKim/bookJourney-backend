@@ -59,7 +59,7 @@ public class AladinApiUtil {
                 request.getPage(),
                 MAX_RESULTS,
                 OUTPUT,
-                request.getGenreType().getCategoryId(),
+                request.getGenreType()==null? null: request.getGenreType().getCategoryId(),
                 COVER_SIZE
         );
     }

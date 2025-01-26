@@ -28,6 +28,8 @@ public class GetBookListRequestArgumentResolver implements HandlerMethodArgument
         String pageParam = webRequest.getParameter("page");
         int page = (pageParam == null || pageParam.trim().isEmpty()) ? 0 : Integer.parseInt(pageParam);
 
+        page++;
+
         validateRequest(searchTerm, page, queryType);
 
         return GetBookListRequest.builder()
