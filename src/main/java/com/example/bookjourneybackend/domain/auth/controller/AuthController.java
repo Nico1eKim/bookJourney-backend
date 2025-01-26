@@ -31,7 +31,7 @@ public class AuthController {
      * @return PostAuthLoginResponse
      */
     @PostMapping("/login")
-    public BaseResponse<PostAuthLoginResponse> login(@RequestBody final PostAuthLoginRequest authLoginRequest
+    public BaseResponse<PostAuthLoginResponse> login(@Valid @RequestBody final PostAuthLoginRequest authLoginRequest
             ,HttpServletResponse response) {
         log.info("[AuthController.login]");
         return BaseResponse.ok(authService.login(authLoginRequest, response));
@@ -39,7 +39,7 @@ public class AuthController {
 
     //엑세스 토큰 재발급
     @PostMapping("/reissue")
-    public BaseResponse<PostAuthAccessTokenReissueResponse> tokenReissue(@RequestBody final PostAuthAccessTokenReissueRequest
+    public BaseResponse<PostAuthAccessTokenReissueResponse> tokenReissue(@Valid @RequestBody final PostAuthAccessTokenReissueRequest
                                                                                      authAccessTokenReissueRequest,
                                                                          HttpServletResponse response, HttpServletRequest request) {
         log.info("[AuthController.tokenReissue]");
