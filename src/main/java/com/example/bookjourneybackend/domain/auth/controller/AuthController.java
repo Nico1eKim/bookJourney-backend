@@ -38,11 +38,11 @@ public class AuthController {
     }
 
     //엑세스 토큰 재발급
-    @PostMapping("/refresh")
+    @PostMapping("/reissue")
     public BaseResponse<PostAuthAccessTokenReissueResponse> tokenReissue(@RequestBody final PostAuthAccessTokenReissueRequest
                                                                                      authAccessTokenReissueRequest,
                                                                          HttpServletResponse response, HttpServletRequest request) {
-        log.info("[AuthController.tokenReissue");
+        log.info("[AuthController.tokenReissue]");
         return BaseResponse.ok(authService.tokenReissue(authAccessTokenReissueRequest,response,request));
     }
 
