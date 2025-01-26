@@ -4,10 +4,7 @@ import com.example.bookjourneybackend.domain.favorite.domain.Favorite;
 import com.example.bookjourneybackend.domain.room.domain.Room;
 import com.example.bookjourneybackend.global.entity.BaseEntity;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -41,6 +38,7 @@ public class Book extends BaseEntity {
     @Column(nullable = false, length = 13)
     private String isbn;
 
+    @Setter
     private Integer pageCount;
 
     @Column(length = 1000)
