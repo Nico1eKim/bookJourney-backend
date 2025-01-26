@@ -1,4 +1,7 @@
 package com.example.bookjourneybackend.domain.record.domain.repository;
 
-public interface RecordRepository {
+import com.example.bookjourneybackend.domain.record.domain.Record;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface RecordRepository extends JpaRepository<Record, Long> {
 }
