@@ -1,5 +1,6 @@
 package com.example.bookjourneybackend.global.util;
 
+import com.example.bookjourneybackend.global.exception.GlobalException;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -7,6 +8,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.AuthenticationServiceException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
@@ -14,6 +17,8 @@ import java.util.Date;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
+import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.EXPIRED_TOKEN;
+import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.INVALID_TOKEN;
 import static com.example.bookjourneybackend.global.util.HttpHeader.*;
 
 @Slf4j
@@ -77,14 +82,9 @@ public class JwtUtil {
                 .compact();
     }
 
-    // 어세스 토큰 헤더 설정
+    // 엑세스 토큰 헤더 설정
     public void setHeaderAccessToken(HttpServletResponse response, String accessToken) {
         response.setHeader(AUTHORIZATION.getValue(), BEARER.getValue() + accessToken);
-    }
-
-    // 리프레시 토큰 헤더 설정
-    public void setHeaderRefreshToken(HttpServletResponse response, String refreshToken) {
-        response.setHeader(refreshToken, BEARER.getValue() + refreshToken);
     }
 
     // Request Header에서 Bearer Token 값 추출
@@ -98,11 +98,6 @@ public class JwtUtil {
     // AccessToken 추출
     public String resolveAccessToken(HttpServletRequest request) {
         return parseBearerToken(request, AUTHORIZATION.getValue());
-    }
-
-    // RefreshToken 추출
-    public String resolveRefreshToken(HttpServletRequest request) {
-        return parseBearerToken(request, REFRESH_TOKEN.getValue());
     }
 
 
@@ -165,10 +160,12 @@ public class JwtUtil {
         try {
             Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(token);
             return true;
-        } catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
-            log.info("잘못된 JWT 토큰입니다.", e);
         } catch (ExpiredJwtException e) {
             log.info("만료된 JWT 토큰입니다.", e);
+            throw new GlobalException(EXPIRED_TOKEN);
+        } catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
+            log.info("잘못된 JWT 토큰입니다.", e);
+            throw new GlobalException(INVALID_TOKEN);
         } catch (UnsupportedJwtException e) {
             log.info("지원되지 않는 JWT 토큰입니다.", e);
         } catch (IllegalArgumentException e) {

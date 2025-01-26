@@ -6,7 +6,6 @@ import lombok.Getter;
 public enum HttpHeader {
 
     AUTHORIZATION("Authorization"),
-    REFRESH_TOKEN("RefreshToken"),
     BEARER("Bearer ");
 
     private final String value;

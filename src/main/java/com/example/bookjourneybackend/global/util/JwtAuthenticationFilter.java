@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
+import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.EXPIRED_TOKEN;
 import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.INVALID_TOKEN;
 
 
@@ -40,23 +41,26 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
+        try {
+            // request 헤더에서 액세스 토큰 추출
+            String accessToken = jwtUtil.resolveAccessToken(request);
 
-        // request 헤더에서 액세스 토큰 추출
-        String accessToken = jwtUtil.resolveAccessToken(request);
+            if(accessToken != null) {
 
-        if(accessToken != null) {
-
-            // 엑세스 토큰이 유효한 상황
-            if (jwtUtil.validateToken(accessToken)) {
-                // Authorization 헤더에서 User ID 추출
-                Long userId = jwtUtil.extractUserIdFromJwtToken(accessToken);
-                setAuthentication(request, userId);
-            } else throw new GlobalException(INVALID_TOKEN);
+                // 엑세스 토큰이 유효한 상황
+                if (jwtUtil.validateToken(accessToken)) {
+                    // Authorization 헤더에서 User ID 추출
+                    Long userId = jwtUtil.extractUserIdFromJwtToken(accessToken);
+                    setAuthentication(request, userId);
+                }
+            }
+        } catch (Exception e) {
+            request.setAttribute("exception", e);
         }
-
         filterChain.doFilter(request, response);
 
     }
+
 
     // SecurityContext 에 Authentication 객체 저장
     public void setAuthentication(HttpServletRequest request,Long userId) {
