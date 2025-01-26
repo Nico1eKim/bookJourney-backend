@@ -32,14 +32,16 @@ public class SecurityConfig {
             "/v3/api-docs/**", "/api-docs/**", "/swagger-ui.html",
             "/auth/login","/users/signup","/users/emails/verification-requests","/users/emails/verifications",
             "/users/nickname","/h2-console/**"
-            , "/books/**", "/rooms/**"   //개발을 위해 일시적으로 허용..
+
+
+            , "/books/**", "/rooms/**","/auth/reissue"    //개발을 위해 일시적으로 허용..,
     };
 
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
         //CSRF, CORS
-        http.csrf(CsrfConfigurer<HttpSecurity>::disable)
+        httpSecurity.csrf(CsrfConfigurer<HttpSecurity>::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(requests ->
                         requests
@@ -60,7 +62,7 @@ public class SecurityConfig {
                                 .contentSecurityPolicy("frame-ancestors 'self'") // X-Frame-Options 대체
                 );
 
-        return http.build();
+        return httpSecurity.build();
     }
 
     @Bean
