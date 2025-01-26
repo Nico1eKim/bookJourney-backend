@@ -21,7 +21,7 @@ public class RecordController {
     @PostMapping("/{roomId}")
     public BaseResponse<PostRecordResponse> createRecord(
             @PathVariable Long roomId,
-            @RequestBody @Valid PostRecordRequest postRecordRequest,
+            @RequestBody @Valid final PostRecordRequest postRecordRequest,
             @LoginUserId final Long userId
     ) {
         return BaseResponse.ok(recordService.createRecord(postRecordRequest, roomId, userId));
