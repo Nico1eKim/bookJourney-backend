@@ -22,7 +22,6 @@ import com.example.bookjourneybackend.domain.record.domain.Record;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
-import com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus;
 import com.example.bookjourneybackend.global.util.AladinApiUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -37,7 +36,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.CANNOT_FIND_ROOM;
+import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.*;
 
 @Slf4j
 @Service
@@ -101,13 +100,13 @@ public class RoomService {
     ) {
         // 필수 값 검증
         if (searchTerm == null || searchTerm.trim().isEmpty()) {
-            throw new GlobalException(BaseExceptionResponseStatus.EMPTY_SEARCH_TERM);
+            throw new GlobalException(EMPTY_SEARCH_TERM);
         }
         if (searchType == null || searchType.trim().isEmpty()) {
-            throw new GlobalException(BaseExceptionResponseStatus.INVALID_SEARCH_TYPE);
+            throw new GlobalException(INVALID_SEARCH_TYPE);
         }
         if (page == null) {
-            throw new GlobalException(BaseExceptionResponseStatus.INVALID_PAGE);
+            throw new GlobalException(INVALID_PAGE);
         }
 
         SearchType effectiveSearchType = SearchType.from(searchType);
@@ -215,7 +214,7 @@ public class RoomService {
 
         UserRoom userRoom = UserRoom.builder()
                 .user(userRepository.findById(userId)
-                        .orElseThrow(() -> new GlobalException(BaseExceptionResponseStatus.CANNOT_FOUND_USER)))
+                        .orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER)))
                 .userRole(UserRole.HOST)
                 .currentPage(0)
                 .userPercentage(0.0)
