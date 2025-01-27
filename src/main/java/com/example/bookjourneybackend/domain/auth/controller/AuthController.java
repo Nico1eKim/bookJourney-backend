@@ -46,5 +46,13 @@ public class AuthController {
         return BaseResponse.ok(authService.tokenReissue(authAccessTokenReissueRequest,response,request));
     }
 
+    //로그아웃
+    @PostMapping("/logout")
+    public BaseResponse<Void> logout(@LoginUserId final Long userId){
+        log.info("[AuthController.logout]");
+        authService.logout(userId);
+        return BaseResponse.ok(null);
+    }
+
 
 }
