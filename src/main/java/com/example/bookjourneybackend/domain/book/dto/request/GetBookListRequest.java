@@ -18,9 +18,9 @@ public class GetBookListRequest {
     private int page;
 
     @Builder
-    public GetBookListRequest(String searchTerm, String genre, String queryType, int page) {
+    public GetBookListRequest(String searchTerm, GenreType genre, String queryType, int page) {
         this.searchTerm = searchTerm;
-        this.genreType = genre == null? null: GenreType.fromGenreType(genre);
+        this.genreType = genre;
         this.queryType = queryType;
         this.page = page;
     }

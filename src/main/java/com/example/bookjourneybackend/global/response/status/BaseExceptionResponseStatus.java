@@ -29,13 +29,11 @@ public enum BaseExceptionResponseStatus implements ResponseStatus{
     INVALID_GENRE(6001, BAD_REQUEST, "알맞은 장르를 찾을 수 없습니다"),
     EMPTY_SEARCH_TERM(6001, BAD_REQUEST, "검색어는 비워둘 수 없습니다."),
     INVALID_PAGE(6001, BAD_REQUEST, "페이지 번호는 0 이상입니다."),
-    INVALID_QUERY_TYPE(6001, BAD_REQUEST, "알맞은 검색 종류가 아닙니다."),
 
     ALADIN_API_ERROR(6002, BAD_REQUEST, "알라딘 API 호출에 실패하였습니다."),
     ALADIN_API_PARSING_ERROR(6003, BAD_REQUEST, "알라딘 API 응답 파싱에 실패하였습니다."),
 
     CANNOT_FOUND_POPULAR_BOOK(6004, BAD_REQUEST, "읽기횟수가 가장 많은 책을 찾을 수 없습니다."),
-
 
 
     /**
