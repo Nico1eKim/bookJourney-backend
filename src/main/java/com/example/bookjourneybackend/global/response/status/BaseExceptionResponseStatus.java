@@ -3,9 +3,7 @@ package com.example.bookjourneybackend.global.response.status;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.OK;
-import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static org.springframework.http.HttpStatus.*;
 
 
 @RequiredArgsConstructor
@@ -44,6 +42,9 @@ public enum BaseExceptionResponseStatus implements ResponseStatus{
     ALREADY_EXIST_EMAIL(7001, BAD_REQUEST, "이미 존재하는 이메일입니다."),
     CANNOT_FOUND_EMAIL(7002,BAD_REQUEST, "이메일이 존재하지 않습니다."),
     INVALID_PASSWORD(7003,BAD_REQUEST, "비밀번호가 일치하지 않습니다."),
+    NOT_EXIST_TOKEN(7004, BAD_REQUEST, "토큰이 존재하지 않습니다."),
+    INVALID_TOKEN(7005, BAD_REQUEST, "유효하지 않은 토큰입니다."),
+    EXPIRED_TOKEN(7006, BAD_REQUEST, "만료된 토큰입니다."),
 
     /**
      * 8000 : room 관련

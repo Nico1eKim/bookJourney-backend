@@ -5,12 +5,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -23,30 +21,38 @@ import static org.springframework.security.web.util.matcher.AntPathRequestMatche
 
 @Configuration
 @RequiredArgsConstructor
+@EnableWebSecurity
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final JwtAuthenticationEntryPoint entryPoint;
+
 
     private static final String[] AUTH_WHITELIST = {
             "/swagger-ui/**", "/api-docs", "/swagger-ui-custom.html",
             "/v3/api-docs/**", "/api-docs/**", "/swagger-ui.html",
-            "/auth/login","/users/signup","/users/emails/verification-requests","/users/emails/verifications",
+            "/auth/login","/auth/reissue",
+            "/users/signup","/users/emails/verification-requests","/users/emails/verifications",
             "/users/nickname","/h2-console/**"
-            , "/books/**", "/rooms/**"   //개발을 위해 일시적으로 허용..
+
+            , "/books/**", "/rooms/**",    //개발을 위해 일시적으로 허용..,
     };
 
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
         //CSRF, CORS
-        http.csrf(CsrfConfigurer<HttpSecurity>::disable)
+        httpSecurity.csrf(CsrfConfigurer<HttpSecurity>::disable)
+
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(requests ->
                         requests
-                                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                                .requestMatchers(AUTH_WHITELIST).permitAll()
-                                .anyRequest().authenticated()
+                                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // OPTIONS 요청 허용
+                                .requestMatchers(AUTH_WHITELIST).permitAll()  // 화이트리스트 경로 허용
+                                .anyRequest().authenticated()                 // 나머지는 인증 필요
 
+                )
+                .exceptionHandling(handler -> handler.authenticationEntryPoint(entryPoint) // 커스텀 엔트리 포인트 등록
                 )
                 //세션 관리 상태 없음으로 구성, Spring Security가 세션 생성 or 사용 X
                 .sessionManagement(sessionManagement ->
@@ -54,14 +60,16 @@ public class SecurityConfig {
                 )
                 //JwtAuthFilter를 UsernamePasswordAuthenticationFilter 앞에 추가
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+
                 .headers(headers ->
                         headers
                                 .frameOptions().sameOrigin() // H2 콘솔을 허용하도록 프레임 옵션을 sameOrigin으로 설정
                                 .contentSecurityPolicy("frame-ancestors 'self'") // X-Frame-Options 대체
                 );
 
-        return http.build();
+        return httpSecurity.build();
     }
+
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {

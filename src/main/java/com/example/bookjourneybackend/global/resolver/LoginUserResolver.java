@@ -10,12 +10,13 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
+import static com.example.bookjourneybackend.global.util.HttpHeader.AUTHORIZATION;
+
 @Component
 @RequiredArgsConstructor
 public class LoginUserResolver implements HandlerMethodArgumentResolver {
 
     private final JwtUtil jwtUtil;
-    private final String AUTHORIZATION_HEADER = "Authorization";
 
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
@@ -25,6 +26,6 @@ public class LoginUserResolver implements HandlerMethodArgumentResolver {
 
     @Override
     public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer, NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
-        return jwtUtil.extractIdFromHeader(webRequest.getHeader(AUTHORIZATION_HEADER));
+        return jwtUtil.extractIdFromHeader(webRequest.getHeader(AUTHORIZATION.getValue()));
     }
 }

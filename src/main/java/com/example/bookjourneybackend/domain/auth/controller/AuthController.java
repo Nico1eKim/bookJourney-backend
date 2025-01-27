@@ -1,9 +1,14 @@
 package com.example.bookjourneybackend.domain.auth.controller;
 
+import com.example.bookjourneybackend.domain.auth.domain.dto.request.PostAuthAccessTokenReissueRequest;
 import com.example.bookjourneybackend.domain.auth.domain.dto.request.PostAuthLoginRequest;
+import com.example.bookjourneybackend.domain.auth.domain.dto.response.PostAuthAccessTokenReissueResponse;
 import com.example.bookjourneybackend.domain.auth.domain.dto.response.PostAuthLoginResponse;
 import com.example.bookjourneybackend.domain.auth.service.AuthService;
+import com.example.bookjourneybackend.global.annotation.LoginUserId;
 import com.example.bookjourneybackend.global.response.BaseResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,9 +31,19 @@ public class AuthController {
      * @return PostAuthLoginResponse
      */
     @PostMapping("/login")
-    public BaseResponse<PostAuthLoginResponse> login(@Valid @RequestBody PostAuthLoginRequest authLoginRequest) {
+    public BaseResponse<PostAuthLoginResponse> login(@Valid @RequestBody final PostAuthLoginRequest authLoginRequest
+            ,HttpServletRequest request,HttpServletResponse response) {
         log.info("[AuthController.login]");
-        return BaseResponse.ok(authService.login(authLoginRequest));
+        return BaseResponse.ok(authService.login(authLoginRequest, request,response));
+    }
+
+    //엑세스 토큰 재발급
+    @PostMapping("/reissue")
+    public BaseResponse<PostAuthAccessTokenReissueResponse> tokenReissue(@Valid @RequestBody final PostAuthAccessTokenReissueRequest
+                                                                                     authAccessTokenReissueRequest,
+                                                                         HttpServletResponse response, HttpServletRequest request) {
+        log.info("[AuthController.tokenReissue]");
+        return BaseResponse.ok(authService.tokenReissue(authAccessTokenReissueRequest,response,request));
     }
 
 

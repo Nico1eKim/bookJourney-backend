@@ -3,6 +3,7 @@ package com.example.bookjourneybackend.global.response;
 import com.example.bookjourneybackend.global.response.status.ResponseStatus;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 
 import java.time.LocalDateTime;
@@ -18,6 +19,13 @@ public class BaseErrorResponse implements ResponseStatus {
     public BaseErrorResponse(ResponseStatus status, String message) {
         this.code = status.getCode();
         this.status = status.getStatus();
+        this.message = message;
+        this.timestamp = LocalDateTime.now();
+    }
+
+    public BaseErrorResponse(int code, String message) {
+        this.code = code;
+        this.status = HttpStatus.BAD_REQUEST;
         this.message = message;
         this.timestamp = LocalDateTime.now();
     }

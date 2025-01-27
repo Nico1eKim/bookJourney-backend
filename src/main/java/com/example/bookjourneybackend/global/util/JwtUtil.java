@@ -1,22 +1,31 @@
 package com.example.bookjourneybackend.global.util;
 
+import com.example.bookjourneybackend.global.exception.GlobalException;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import lombok.RequiredArgsConstructor;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.AuthenticationServiceException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
 import java.util.Date;
 import java.util.NoSuchElementException;
+import java.util.Optional;
+
+import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.EXPIRED_TOKEN;
+import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.INVALID_TOKEN;
+import static com.example.bookjourneybackend.global.util.HttpHeader.*;
 
 @Slf4j
 @Component
 public class JwtUtil {
 
-    private final Key key;
+    private final Key secretKey;
     private final long accessTokenExpTime;
     private final long refreshTokenExpTime;
 
@@ -26,13 +35,14 @@ public class JwtUtil {
             @Value("${jwt.refresh-token-expiration}") long refreshTokenExpTime
     ) {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
-        this.key = Keys.hmacShaKeyFor(keyBytes);
+        this.secretKey = Keys.hmacShaKeyFor(keyBytes);
         this.accessTokenExpTime = accessTokenExpTime;
         this.refreshTokenExpTime = refreshTokenExpTime;
     }
 
     /**
      * Access Token 생성
+     *
      * @param userId
      * @return Access Token String
      */
@@ -42,6 +52,7 @@ public class JwtUtil {
 
     /**
      * Refresh Token 생성
+     *
      * @param userId
      * @return Refresh Token String
      */
@@ -51,28 +62,48 @@ public class JwtUtil {
 
     /**
      * JWT 생성
+     *
      * @param userId
      * @param expireTime
      * @return JWT String
      */
     private String createToken(Long userId, long expireTime) {
         Claims claims = Jwts.claims();
-        claims.put("userId",userId);
+        claims.put("userId", userId);
 
         Date now = new Date();
-        Date tokenValidity =new Date(now.getTime() + expireTime);
+        Date tokenValidity = new Date(now.getTime() + expireTime);
 
         return Jwts.builder()
                 .setClaims(claims)
                 .setIssuedAt(now)
                 .setExpiration(tokenValidity)
-                .signWith(key, SignatureAlgorithm.HS256)
+                .signWith(secretKey, SignatureAlgorithm.HS256)
                 .compact();
+    }
+
+    // 엑세스 토큰 헤더 설정
+    public void setHeaderAccessToken(HttpServletResponse response, String accessToken) {
+        response.setHeader(AUTHORIZATION.getValue(), BEARER.getValue() + accessToken);
+    }
+
+    // Request Header에서 Bearer Token 값 추출
+    private String parseBearerToken(HttpServletRequest request, String header) {
+        return Optional.ofNullable(request.getHeader(header))
+                .filter(token -> token.startsWith(BEARER.getValue()))
+                .map(token -> token.substring(7).trim()) // "Bearer "를 제거하고 공백을 제거
+                .orElse(null);
+    }
+
+    // AccessToken 추출
+    public String resolveAccessToken(HttpServletRequest request) {
+        return parseBearerToken(request, AUTHORIZATION.getValue());
     }
 
 
     /**
      * Token에서 User ID 추출
+     *
      * @param authorization
      * @return User ID
      */
@@ -97,10 +128,9 @@ public class JwtUtil {
         }
 
         return userId;
-
     }
 
-    public String extractJwtToken(String authorizationHeader) {
+    private String extractJwtToken(String authorizationHeader) {
         String[] parts = authorizationHeader.split(" ");
         if (parts.length == 2) {
             return parts[1].trim(); // 토큰 부분 추출 및 공백 제거
@@ -122,57 +152,40 @@ public class JwtUtil {
 
     /**
      * JWT 검증
+     *
      * @param token
      * @return IsValidate
      */
-    public boolean validateAccessToken(String token) {
+    public boolean validateToken(String token) {
         try {
-            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
+            Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(token);
             return true;
-        } catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
-            log.info("Invalid JWT Token", e);
         } catch (ExpiredJwtException e) {
-            log.info("Expired JWT Token", e);
+            log.info("만료된 JWT 토큰입니다.", e);
+            throw new GlobalException(EXPIRED_TOKEN);
+        } catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
+            log.info("잘못된 JWT 토큰입니다.", e);
+            throw new GlobalException(INVALID_TOKEN);
         } catch (UnsupportedJwtException e) {
-            log.info("Unsupported JWT Token", e);
+            log.info("지원되지 않는 JWT 토큰입니다.", e);
         } catch (IllegalArgumentException e) {
-            log.info("JWT claims string is empty.", e);
+            log.info("JWT 클레임 문자열이 비어있습니다.", e);
         }
         return false;
     }
-
 
     /**
      * JWT Claims 추출
+     *
      * @param token
      * @return JWT Claims
      */
-    public Claims parseClaims(String token) {
+    private Claims parseClaims(String token) {
         try {
-            return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
+            return Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(token).getBody();
         } catch (ExpiredJwtException e) {
             return e.getClaims();
         }
-    }
-
-
-    /**
-     * 리프레시 토큰의 유효성을 검사
-     * @param token
-     * @return true/false
-     */
-    public boolean validateRefreshToken(String token) {
-        try {
-            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
-            return true;
-        } catch (ExpiredJwtException e) {
-            log.info("Expired Refresh Token", e);
-        } catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException | UnsupportedJwtException e) {
-            log.info("Invalid Refresh Token", e);
-        } catch (IllegalArgumentException e) {
-            log.info("Refresh JWT claims string is empty.", e);
-        }
-        return false;
     }
 
 }
