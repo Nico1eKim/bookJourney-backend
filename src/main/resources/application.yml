@@ -99,6 +99,10 @@ jwt:
   secret: ${JWT_SECRET}
   access-token-expiration: 604800000 #7일
   refresh-token-expiration: 1209600000 # 14일 (14 * 24 * 60 * 60 * 1000)
+#jwt:
+#  secret: ${JWT_SECRET} #토큰 테스트용
+#  access-token-expiration: 25000 #25초
+#  refresh-token-expiration: 60000 #1분
 
 ---
 #배포용 DB

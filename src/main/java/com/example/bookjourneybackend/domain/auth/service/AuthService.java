@@ -41,7 +41,7 @@ public class AuthService {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @Transactional
-    public PostAuthLoginResponse login(PostAuthLoginRequest authLoginRequest, HttpServletResponse response) {
+    public PostAuthLoginResponse login(PostAuthLoginRequest authLoginRequest, HttpServletRequest request, HttpServletResponse response) {
         log.info("[AuthService.login]");
 
         String email = authLoginRequest.getEmail();
@@ -54,8 +54,8 @@ public class AuthService {
         // 회원가입시 암호화된 비밀번호 저장하는것으로 리펙토링
         //if(!passwordEncoder.matches(password,user.getPassword()))
         if(!user.getPassword().equals(password)) {
-            log.info(password);
-            log.info(user.getPassword());
+//            log.info(password);
+//            log.info(user.getPassword());
             throw new GlobalException(INVALID_PASSWORD);
         }
 
@@ -65,9 +65,8 @@ public class AuthService {
         jwtUtil.setHeaderAccessToken(response,accessToken);
         tokenService.storeRefreshToken(refreshToken, user.getUserId());
 
-        // 인증 정보 SecurityContext에 설정
-        Authentication authentication = new UsernamePasswordAuthenticationToken(user, null, Collections.emptyList());
-        SecurityContextHolder.getContext().setAuthentication(authentication);
+        //인증된 사용자 권한 설정
+        jwtAuthenticationFilter.setAuthentication(request,user.getUserId());
 
         return  PostAuthLoginResponse.of(user.getUserId(),accessToken,refreshToken);
     }

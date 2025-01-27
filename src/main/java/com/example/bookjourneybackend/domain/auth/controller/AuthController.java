@@ -32,9 +32,9 @@ public class AuthController {
      */
     @PostMapping("/login")
     public BaseResponse<PostAuthLoginResponse> login(@Valid @RequestBody final PostAuthLoginRequest authLoginRequest
-            ,HttpServletResponse response) {
+            ,HttpServletRequest request,HttpServletResponse response) {
         log.info("[AuthController.login]");
-        return BaseResponse.ok(authService.login(authLoginRequest, response));
+        return BaseResponse.ok(authService.login(authLoginRequest, request,response));
     }
 
     //엑세스 토큰 재발급
