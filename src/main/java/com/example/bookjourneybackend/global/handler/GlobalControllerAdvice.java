@@ -40,7 +40,7 @@ public class GlobalControllerAdvice {
 
     //API 예외
     @ResponseStatus(BAD_REQUEST)
-    @ExceptionHandler(RuntimeException.class)
+    @ExceptionHandler({GlobalException.class, RuntimeException.class})
     public BaseErrorResponse handleRestApiException(GlobalException e) {
         log.error("[handle_RestApiException]", e);
         return new BaseErrorResponse(e.getExceptionStatus(), e.getMessage());
