@@ -3,7 +3,6 @@ package com.example.bookjourneybackend.domain.room.domain;
 import com.example.bookjourneybackend.global.exception.GlobalException;
 import lombok.Getter;
 
-import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.INVALID_SEARCH_TYPE;
 import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.INVALID_SORT_TYPE;
 
 @Getter
@@ -17,9 +16,9 @@ public enum SortType {
         this.sortType = sortType;
     }
 
-    public static SortType from(String searchType) {
+    public static SortType from(String sortType) {
         for (SortType type : SortType.values()) {
-            if (type.getSortType().equals(searchType)) {
+            if (type.getSortType().equals(sortType)) {
                 return type;
             }
         }
