@@ -52,6 +52,7 @@ public enum BaseExceptionResponseStatus implements ResponseStatus{
     CANNOT_FIND_ROOM(8001 ,BAD_REQUEST, "방을 찾을 수 없습니다."),
     INVALID_ROOM_TYPE(8002, BAD_REQUEST, "알맞은 방 타입을 찾을 수 없습니다."),
     INVALID_SEARCH_TYPE(8003, BAD_REQUEST, "알맞은 검색 조건을 찾을 수 없습니다."),
+    INVALID_SORT_TYPE(8004, BAD_REQUEST, "알맞은 정렬 조건을 찾을 수 없습니다."),
 
     /**
      * 9000 : record 관련
