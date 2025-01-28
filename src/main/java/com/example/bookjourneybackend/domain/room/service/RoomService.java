@@ -294,10 +294,10 @@ public class RoomService {
 
         switch (sortType) {
             //최신순 정렬
-            case LASTEST -> userRooms = userRoomRepository.findUserRoomsByUserIdAndActiveRoomsOrderByRecordModifiedAt(userId);
+            case LASTEST -> userRooms = userRoomRepository.findUserRoomsOrderByModifiedAt(userId);
 
             //유저 진행도순 정렬
-            case PROGRESS -> userRooms = userRoomRepository.findUserRoomsByUserIdAndActiveRoomsOrderByUserPercentage(userId);
+            case PROGRESS -> userRooms = userRoomRepository.findUserRoomsOrderByUserPercentage(userId);
 
             default -> throw new GlobalException(INVALID_SORT_TYPE);
         }
