@@ -38,6 +38,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static com.example.bookjourneybackend.domain.room.domain.SortType.LASTEST;
 import static com.example.bookjourneybackend.global.entity.EntityStatus.*;
 import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.*;
 
@@ -266,9 +267,6 @@ public class RoomService {
     /**
      * 방의 모집종료 기간 = {(방의 종료기간 - 방의 시작기간)/2} + 방의 시작기간
      *
-     * @param startDate
-     * @param progressEndDate
-     * @return
      */
     private LocalDate calculateRecruitEndDate(LocalDate startDate, LocalDate progressEndDate) {
         long totalDays = ChronoUnit.DAYS.between(startDate, progressEndDate);
@@ -284,14 +282,13 @@ public class RoomService {
     /**
      * 최신순, 유저 진행도순 정렬
      * 방이 ACTIVE인 것만 보여줌
-     * @param sort
-     * @param userId
-     * @return
      */
     //todo 추후에 예외처리 메시지 수정
     @Transactional(readOnly = true)
     public GetRoomActiveResponse searchActiveRooms(String sort, Long userId) {
-        SortType sortType = (sort == null)? SortType.LASTEST : SortType.from(sort);
+        log.info("------------------------[RoomService.searchActiveRooms]------------------------");
+        log.info("sort: {}", sort);
+        SortType sortType = (sort == null)? LASTEST : SortType.from(sort);
         List<UserRoom> userRooms;
 
         switch (sortType) {
