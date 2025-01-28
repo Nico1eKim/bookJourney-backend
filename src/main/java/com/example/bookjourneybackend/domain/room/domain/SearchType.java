@@ -21,7 +21,7 @@ public enum SearchType {
         this.queryType = queryType;
     }
 
-    public static SearchType from(String description) throws GlobalException {
+    public static SearchType from(String description) {
         for (SearchType type : SearchType.values()) {
             if (type.description.equals(description)) {
                 return type;

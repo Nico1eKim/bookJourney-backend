@@ -10,12 +10,9 @@ import com.example.bookjourneybackend.domain.userRoom.domain.repository.UserRoom
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-
 import jakarta.transaction.Transactional;
-import org.springframework.stereotype.Component;
-
 import java.util.List;
+import java.util.Random;
 
 @Component
 @RequiredArgsConstructor
@@ -24,29 +21,34 @@ public class UserRoomInitializer {
     private final UserRoomRepository userRoomRepository;
     private final UserRepository userRepository;
     private final RoomRepository roomRepository;
+    private final Random random = new Random(); // 랜덤 객체 생성
 
-    @Transactional // 트랜잭션 추가
+    @Transactional
     public void initializeUserRooms() {
-        List<User> users = userRepository.findAll(); // User 리스트 로드
-        List<Room> rooms = roomRepository.findAll(); // Room 리스트 로드
+        List<User> users = userRepository.findAll();
+        List<Room> rooms = roomRepository.findAll();
+
+        if (users.isEmpty() || rooms.isEmpty()) {
+            throw new IllegalStateException("Users 또는 Rooms가 존재하지 않습니다. 초기 데이터를 확인하세요.");
+        }
 
         for (int i = 0; i < users.size(); i++) {
-            User user = users.get(i);
-            Room room = rooms.get(i % rooms.size());
+            User user = users.get(random.nextInt(users.size())); // 랜덤한 User 선택
+            Room room = rooms.get(i % rooms.size()); // 방 선택 (순환)
+
+            double randomPercentage = Math.round((Math.random() * 100.0) * 10) / 10.0; // 0~100 사이 소수점 첫째 자리까지
 
             UserRoom userRoom = UserRoom.builder()
                     .user(user)
                     .room(room)
-                    .userRole(i % 2 == 0 ? UserRole.HOST : UserRole.MEMBER)
-                    .userPercentage(0.0)
+                    .userRole(random.nextBoolean() ? UserRole.HOST : UserRole.MEMBER) // 랜덤한 역할
+                    .userPercentage(randomPercentage)
                     .currentPage(1)
                     .build();
 
-            // 연관관계 설정
-            room.addUserRoom(userRoom); // Room과 UserRoom의 연관관계 설정
-            user.addUserRoom(userRoom); // User와 UserRoom의 연관관계 설정
+            room.addUserRoom(userRoom);
+            user.addUserRoom(userRoom);
 
-            // UserRoom 저장
             userRoomRepository.save(userRoom);
         }
     }
