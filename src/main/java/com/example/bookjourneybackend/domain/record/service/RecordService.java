@@ -26,7 +26,7 @@ public class RecordService {
     @Transactional
     public PostRecordResponse createRecord(PostRecordRequest postRecordRequest, Long roomId, Long userId) {
 
-        Room room = roomRepository.findById(roomId).orElseThrow(() -> new GlobalException(CANNOT_FIND_ROOM));
+        Room room = roomRepository.findById(roomId).orElseThrow(() -> new GlobalException(CANNOT_FOUND_ROOM));
         User user = userRepository.findById(userId).orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER));
 
         // recordType에 따른 필수값 검증
