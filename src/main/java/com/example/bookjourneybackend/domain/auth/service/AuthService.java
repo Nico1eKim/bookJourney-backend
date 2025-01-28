@@ -30,7 +30,7 @@ import static com.example.bookjourneybackend.global.response.status.BaseExceptio
 
 @Slf4j
 @Service
-@Transactional(readOnly = true)
+@Transactional
 @RequiredArgsConstructor
 public class AuthService {
 
@@ -72,7 +72,7 @@ public class AuthService {
     }
 
 
-    @Transactional
+    @Transactional(readOnly = true)
     public PostAuthAccessTokenReissueResponse tokenReissue(PostAuthAccessTokenReissueRequest authAccessTokenReissueRequest,
                                                            HttpServletResponse response, HttpServletRequest request) {
         log.info("[AuthService.tokenReissue]");
@@ -104,5 +104,16 @@ public class AuthService {
 
     }
 
+    @Transactional
+    public void logout(Long userId) {
+        log.info("[AuthService.logout]");
 
+        //해당하는 유저 찾기
+        userRepository.findByUserIdAndStatus(userId, ACTIVE)
+                .orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER));
+
+        //리프레쉬 토큰 저장소에서 삭제
+        tokenService.invalidateToken(userId);
+
+    }
 }
