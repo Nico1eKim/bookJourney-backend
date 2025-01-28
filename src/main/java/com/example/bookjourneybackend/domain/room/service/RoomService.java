@@ -3,6 +3,7 @@ package com.example.bookjourneybackend.domain.room.service;
 import com.example.bookjourneybackend.domain.book.domain.GenreType;
 import com.example.bookjourneybackend.domain.room.domain.Room;
 import com.example.bookjourneybackend.domain.room.domain.SearchType;
+import com.example.bookjourneybackend.domain.room.domain.SortType;
 import com.example.bookjourneybackend.domain.room.domain.repository.RoomRepository;
 import com.example.bookjourneybackend.domain.room.dto.response.*;
 import com.example.bookjourneybackend.domain.book.domain.Book;
@@ -17,6 +18,7 @@ import com.example.bookjourneybackend.domain.user.domain.UserImage;
 import com.example.bookjourneybackend.domain.user.domain.repository.UserRepository;
 import com.example.bookjourneybackend.domain.userRoom.domain.UserRole;
 import com.example.bookjourneybackend.domain.userRoom.domain.UserRoom;
+import com.example.bookjourneybackend.domain.userRoom.domain.repository.UserRoomRepository;
 import com.example.bookjourneybackend.global.exception.GlobalException;
 import com.example.bookjourneybackend.domain.record.domain.Record;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +38,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static com.example.bookjourneybackend.global.entity.EntityStatus.*;
 import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.*;
 
 @Slf4j
@@ -46,8 +49,8 @@ public class RoomService {
     private final RoomRepository roomRepository;
     private final BookRepository bookRepository;
     private final UserRepository userRepository;
+    private final UserRoomRepository userRoomRepository;
     private final AladinApiUtil aladinApiUtil;
-
 
     public GetRoomDetailResponse showRoomDetails(Long roomId) {
         Room room = roomRepository.findById(roomId)
@@ -88,15 +91,10 @@ public class RoomService {
     }
 
     public GetRoomSearchResponse searchRooms(
-            String searchTerm,
-            String searchType,
-            String genre,
-            String recruitStartDate,
-            String recruitEndDate,
-            String roomStartDate,
-            String roomEndDate,
-            Integer recordCount,
-            Integer page
+            String searchTerm, String searchType, String genre,
+            String recruitStartDate, String recruitEndDate,
+            String roomStartDate, String roomEndDate,
+            Integer recordCount, Integer page
     ) {
         // 필수 값 검증
         if (searchTerm == null || searchTerm.trim().isEmpty()) {
@@ -203,8 +201,8 @@ public class RoomService {
      * 1. Book 테이블에 존재하면, 그대로 매핑
      * 2. Book 테이블에 존재하지 않으면, 알라딘 api를 통해 book 정보를 가져와서 repository에 저장후 매핑
      *
-     * @param postRoomCreateRequest
-     * @return
+     * @param postRoomCreateRequest, userId
+     * @return postRoomCreateResponse
      */
     @Transactional
     public PostRoomCreateResponse createRoom(PostRoomCreateRequest postRoomCreateRequest, Long userId) {
@@ -220,11 +218,8 @@ public class RoomService {
                 })
                 .orElseGet(() -> saveBookFromAladinApi(postRoomCreateRequest.getIsbn())); // book이 없을 경우 새로 생성
 
-
-
-
         UserRoom userRoom = UserRoom.builder()
-                .user(userRepository.findById(userId)
+                .user(userRepository.findByUserIdAndStatus(userId, ACTIVE)
                         .orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER)))
                 .userRole(UserRole.HOST)
                 .currentPage(0)
@@ -285,4 +280,53 @@ public class RoomService {
     private LocalDate parseToLocalDate(String date) {
         return LocalDate.parse(date, DateTimeFormatter.ofPattern("yyyy.MM.dd"));
     }
+
+    /**
+     * 최신순, 유저 진행도순 정렬
+     * 방이 ACTIVE인 것만 보여줌
+     * @param sort
+     * @param userId
+     * @return
+     */
+    //todo 추후에 예외처리 메시지 수정
+    @Transactional(readOnly = true)
+    public GetRoomActiveResponse searchActiveRooms(String sort, Long userId) {
+        SortType sortType = (sort == null)? SortType.LASTEST : SortType.from(sort);
+        List<UserRoom> userRooms;
+
+        switch (sortType) {
+            //최신순 정렬
+            case LASTEST -> userRooms = userRoomRepository.findUserRoomsByUserIdAndActiveRoomsOrderByRecordModifiedAt(userId);
+
+            //유저 진행도순 정렬
+            case PROGRESS -> userRooms = userRoomRepository.findUserRoomsByUserIdAndActiveRoomsOrderByUserPercentage(userId);
+
+            default -> throw new GlobalException(INVALID_SORT_TYPE);
+        }
+
+        return GetRoomActiveResponse.of(parsingUserRoomsToRecordInfo(userRooms));
+    }
+
+    private List<RecordInfo> parsingUserRoomsToRecordInfo(List<UserRoom> userRooms) {
+        if (userRooms.isEmpty()) {
+            throw new GlobalException(CANNOT_FOUND_BOOK);
+        }
+
+        return userRooms.stream()
+                .map(userRoom -> {
+                    Room room = userRoom.getRoom();
+                    Book book = room.getBook();
+                    return RecordInfo.builder()
+                            .roomId(room.getRoomId())
+                            .imageUrl(book.getImageUrl())
+                            .bookTitle(book.getBookTitle())
+                            .authorName(book.getAuthorName())
+                            .roomType(room.getRoomType().getRoomType())
+                            .modifiedAt(calculateLastActivityTime(room.getRecords()))
+                            .userPercentage(userRoom.getUserPercentage())
+                            .build();
+                }).toList();
+    }
+
+
 }
