@@ -7,6 +7,7 @@ import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -33,6 +34,7 @@ public abstract class BaseEntity {
     @Column(nullable = false)
     private LocalDateTime modifiedAt;
 
+    @Setter
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 50)
     @ColumnDefault("'ACTIVE'")
