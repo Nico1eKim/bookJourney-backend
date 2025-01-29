@@ -35,4 +35,9 @@ public class TestController {
     public BaseResponse<String> triggerValidatedException(@RequestBody @Valid final TestRequest testRequest) {
         return BaseResponse.ok("");
     }
+
+    @GetMapping("/")
+    public BaseResponse<String> healthCheck() {
+        return BaseResponse.ok("Service is running!");
+    }
 }
