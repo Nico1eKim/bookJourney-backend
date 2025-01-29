@@ -1,20 +1,29 @@
 package com.example.bookjourneybackend.domain.record.service;
 
+import com.example.bookjourneybackend.domain.record.domain.EntireRecordSortType;
 import com.example.bookjourneybackend.domain.record.domain.Record;
 import com.example.bookjourneybackend.domain.record.domain.RecordType;
+import com.example.bookjourneybackend.domain.record.domain.repository.RecordLikeRepository;
 import com.example.bookjourneybackend.domain.record.domain.repository.RecordRepository;
 import com.example.bookjourneybackend.domain.record.dto.request.PostRecordRequest;
+import com.example.bookjourneybackend.domain.record.dto.response.EntireRecordInfo;
+import com.example.bookjourneybackend.domain.record.dto.response.GetEntireRecordResponse;
 import com.example.bookjourneybackend.domain.record.dto.response.PostRecordResponse;
 import com.example.bookjourneybackend.domain.room.domain.Room;
 import com.example.bookjourneybackend.domain.room.domain.repository.RoomRepository;
 import com.example.bookjourneybackend.domain.user.domain.User;
 import com.example.bookjourneybackend.domain.user.domain.repository.UserRepository;
 import com.example.bookjourneybackend.global.exception.GlobalException;
+import com.example.bookjourneybackend.global.util.DateUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static com.example.bookjourneybackend.domain.record.domain.EntireRecordSortType.LATEST;
 import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.*;
 
 @Slf4j
@@ -24,6 +33,8 @@ public class RecordService {
     private final RecordRepository recordRepository;
     private final RoomRepository roomRepository;
     private final UserRepository userRepository;
+    private final RecordLikeRepository recordLikeRepository;
+    private final DateUtil dateUtil;
 
     @Transactional
     public PostRecordResponse createRecord(PostRecordRequest postRecordRequest, Long roomId, Long userId) {
@@ -49,6 +60,58 @@ public class RecordService {
 
         return PostRecordResponse.of(newRecord.getRecordId());
 
+    }
+
+    /**
+     * 특정 방(roomId)의 전체 기록 조회
+     */
+    @Transactional(readOnly = true)
+    public GetEntireRecordResponse showEntireRecords(Long roomId, Long userId, String sortType) {
+        Room room = roomRepository.findById(roomId)
+                .orElseThrow(() -> new GlobalException(CANNOT_FOUND_ROOM));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER));
+
+        EntireRecordSortType entireRecordSortType = (sortType == null) ? LATEST : EntireRecordSortType.from(sortType);
+
+        List<Record> records = findRecordsByRoomId(roomId, entireRecordSortType)
+                .stream()
+                .filter(record -> record.getRecordType() == RecordType.ENTIRE)
+                .collect(Collectors.toList());
+
+        List<EntireRecordInfo> recordInfoList = parseRecordsToResponse(records, user);
+        return GetEntireRecordResponse.of(recordInfoList);
+    }
+
+    /**
+     * roomId와 전체 기록의 정렬 순서로 기록 찾기
+     */
+    private List<Record> findRecordsByRoomId(Long roomId, EntireRecordSortType sortType) {
+        return switch (sortType) {
+            case LATEST -> recordRepository.findRecordsOrderByLatest(roomId, sortType);
+            case MOST_COMMENTS -> recordRepository.findRecordsOrderByMostComments(roomId, sortType);
+            default -> throw new GlobalException(INVALID_RECORD_SORT_TYPE);
+        };
+    }
+
+    private List<EntireRecordInfo> parseRecordsToResponse(List<Record> records, User user) {
+        return records.stream()
+                .map(record -> {
+                    boolean isLiked = recordLikeRepository.existsByRecordAndUser(record, user);
+                    return EntireRecordInfo.builder()
+                            .userId(record.getUser().getUserId())
+                            .recordId(record.getRecordId())
+                            .imageUrl(record.getUser().getUserImage() != null ? record.getUser().getUserImage().getImageUrl() : null)
+                            .nickName(record.getUser().getNickname())
+                            .recordName(record.getRecordTitle())
+                            .bookPage(record.getRoom().getBook().getPageCount())
+                            .createdAt(dateUtil.formDateTime(record.getCreatedAt()))
+                            .content(record.getContent())
+                            .commentCount(record.getComments().size())
+                            .recordLikeCount(record.getRecordLikes().size())
+                            .isLike(isLiked)
+                            .build();
+                }).collect(Collectors.toList());
     }
 
     private void validateRecordRequest(PostRecordRequest postRecordRequest, RecordType recordType) {
