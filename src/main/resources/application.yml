@@ -111,9 +111,9 @@ spring:
     activate:
       on-profile: prod
   datasource:
-    url: jdbc:mysql://:3306/book_journey
-    username: ${PROD_DB_USER}
-    password: ${PROD_DB_PASSWORD}
+    url: jdbc:mysql://my-db:3306/mydb
+    username: root
+    password: verysecret
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
@@ -127,7 +127,7 @@ spring:
 
   data:
     redis:
-      host: localhost
+      host: my-cache-server
       port: 6379
 
 jwt:
