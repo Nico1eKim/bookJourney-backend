@@ -72,7 +72,7 @@ public class RoomService {
                 recruitDday,
                 formatDate(recruitEndDate),
                 room.getRecruitCount(),
-                members
+                members // DELETED가 아닌 유저들만 포함
         );
 
     }
@@ -88,7 +88,7 @@ public class RoomService {
                 room.isPublic(),
                 room.getRoomPercentage().intValue(),
                 calculateDday(room.getProgressEndDate()),
-                members
+                members // DELETED가 아닌 유저들만 포함
         );
     }
 
@@ -150,17 +150,19 @@ public class RoomService {
     }
 
     private List<RoomMemberInfo> getRoomMemberInfoList(Room room) {
-        return room.getUserRooms().stream().map(userRoom -> {
-            User user = userRoom.getUser();
-            return new RoomMemberInfo(
-                    userRoom.getUserRole(),
-                    Optional.ofNullable(user.getUserImage())
-                            .map(UserImage::getImageUrl)
-                            .orElse(null),
-                    user.getNickname(),
-                    userRoom.getUserPercentage().intValue()
-            );
-        }).collect(Collectors.toList());
+        return room.getUserRooms().stream()
+                .filter(userRoom -> userRoom.getStatus() != EntityStatus.DELETED) // DELETED 상태 제외
+                .map(userRoom -> {
+                    User user = userRoom.getUser();
+                    return new RoomMemberInfo(
+                            userRoom.getUserRole(),
+                            Optional.ofNullable(user.getUserImage())
+                                    .map(UserImage::getImageUrl)
+                                    .orElse(null),
+                            user.getNickname(),
+                            userRoom.getUserPercentage().intValue()
+                    );
+                }).collect(Collectors.toList());
     }
 
     private String calculateLastActivityTime(List<Record> records) {
@@ -267,7 +269,6 @@ public class RoomService {
 
     /**
      * 방의 모집종료 기간 = {(방의 종료기간 - 방의 시작기간)/2} + 방의 시작기간
-     *
      */
     private LocalDate calculateRecruitEndDate(LocalDate startDate, LocalDate progressEndDate) {
         long totalDays = ChronoUnit.DAYS.between(startDate, progressEndDate);
@@ -289,7 +290,7 @@ public class RoomService {
     public GetRoomActiveResponse searchActiveRooms(String sort, Long userId) {
         log.info("------------------------[RoomService.searchActiveRooms]------------------------");
         log.info("sort: {}", sort);
-        SortType sortType = (sort == null)? LASTEST : SortType.from(sort);
+        SortType sortType = (sort == null) ? LASTEST : SortType.from(sort);
         List<UserRoom> userRooms;
 
         switch (sortType) {
