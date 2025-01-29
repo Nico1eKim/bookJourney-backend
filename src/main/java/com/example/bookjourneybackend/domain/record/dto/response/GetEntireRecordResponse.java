@@ -9,10 +9,10 @@ import java.util.List;
 @NoArgsConstructor
 public class GetEntireRecordResponse {
 
-    private List<EntireRecordInfo> entireRecords;
+    private List<EntireRecordInfo> recordList;
 
     public GetEntireRecordResponse(List<EntireRecordInfo> entireRecords) {
-        this.entireRecords = entireRecords;
+        this.recordList = entireRecords;
     }
 
     public static GetEntireRecordResponse of(List<EntireRecordInfo> entireRecords) {

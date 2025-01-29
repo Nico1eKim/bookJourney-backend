@@ -1,14 +1,8 @@
 package com.example.bookjourneybackend.domain.record.dto.response;
 
-import com.example.bookjourneybackend.domain.record.domain.Record;
-import com.example.bookjourneybackend.domain.user.domain.User;
-import com.example.bookjourneybackend.domain.user.domain.UserImage;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-
-import java.time.LocalDateTime;
 
 @Getter
 @Builder
@@ -18,7 +12,7 @@ public class EntireRecordInfo {
     private Long recordId;
     private String imageUrl;
     private String nickName;
-    private String recordName;
+    private String recordTitle;
     private Integer bookPage;
     private String createdAt;
     private String content;

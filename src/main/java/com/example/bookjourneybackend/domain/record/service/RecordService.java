@@ -119,7 +119,7 @@ public class RecordService {
                             .recordId(record.getRecordId())
                             .imageUrl(record.getUser().getUserImage() != null ? record.getUser().getUserImage().getImageUrl() : null)
                             .nickName(record.getUser().getNickname())
-                            .recordName(record.getRecordTitle())
+                            .recordTitle(record.getRecordTitle())
                             .bookPage(record.getRoom().getBook().getPageCount())
                             .createdAt(dateUtil.formDateTime(record.getCreatedAt()))
                             .content(record.getContent())
