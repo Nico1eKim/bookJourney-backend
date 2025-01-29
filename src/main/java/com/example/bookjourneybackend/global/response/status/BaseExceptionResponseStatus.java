@@ -55,6 +55,7 @@ public enum BaseExceptionResponseStatus implements ResponseStatus{
     INVALID_SORT_TYPE(8004, BAD_REQUEST, "알맞은 정렬 조건을 찾을 수 없습니다."),
 
     CANNOT_FOUND_USER_ROOM(8005, BAD_REQUEST, "사용자와 방의 관계가 없습니다."),
+    NOT_PARTICIPATING_IN_ROOM(8005, BAD_REQUEST, "방에 참여해있지 않습니다."),
 
     /**
      * 9000 : record 관련

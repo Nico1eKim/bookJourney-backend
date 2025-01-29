@@ -43,6 +43,7 @@ public class UserRoomInitializer {
                     .room(room)
                     .userRole(random.nextBoolean() ? UserRole.HOST : UserRole.MEMBER) // 랜덤한 역할
                     .userPercentage(randomPercentage)
+                    .isMember(true)
                     .currentPage(1)
                     .build();
 
