@@ -22,6 +22,7 @@ import com.example.bookjourneybackend.domain.userRoom.domain.repository.UserRoom
 import com.example.bookjourneybackend.global.entity.EntityStatus;
 import com.example.bookjourneybackend.global.exception.GlobalException;
 import com.example.bookjourneybackend.domain.record.domain.Record;
+import com.example.bookjourneybackend.global.util.DateUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
@@ -53,6 +54,7 @@ public class RoomService {
     private final UserRepository userRepository;
     private final UserRoomRepository userRoomRepository;
     private final AladinApiUtil aladinApiUtil;
+    private final DateUtil dateUtil;
 
     /**
      * 방 상세정보 조회
@@ -62,18 +64,15 @@ public class RoomService {
                 .orElseThrow(() -> new GlobalException(CANNOT_FOUND_ROOM));
         List<RoomMemberInfo> members = getRoomMemberInfoList(room);
 
-        // recruitEndDate를 Room 객체에서 직접 가져옴
-        String recruitDday = calculateDday(room.getRecruitEndDate()); // D-day 계산
-
         return GetRoomDetailResponse.of(
                 room.getRoomName(),
                 room.isPublic(),
-                calculateLastActivityTime(room.getRecords()),
+                dateUtil.calculateLastActivityTime(room.getRecords()),
                 room.getRoomPercentage().intValue(),
-                formatDate(room.getStartDate()),
-                formatDate(room.getProgressEndDate()),
-                recruitDday,
-                formatDate(room.getRecruitEndDate()),
+                dateUtil.formatDate(room.getStartDate()),
+                dateUtil.formatDate(room.getProgressEndDate()),
+                dateUtil.calculateDday(room.getRecruitEndDate()),   // D-day 계산
+                dateUtil.formatDate(room.getRecruitEndDate()),
                 room.getRecruitCount(),
                 members
         );
@@ -93,7 +92,7 @@ public class RoomService {
                 room.getRoomName(),
                 room.isPublic(),
                 room.getRoomPercentage().intValue(),
-                calculateDday(room.getProgressEndDate()),
+                dateUtil.calculateDday(room.getProgressEndDate()),
                 members
         );
     }
@@ -114,10 +113,10 @@ public class RoomService {
 
         Slice<Room> rooms = roomRepository.findRoomsByFilters(
                 genreType,
-                parseDate(recruitStartDate),
-                parseDate(recruitEndDate),
-                parseDate(roomStartDate),
-                parseDate(roomEndDate),
+                dateUtil.parseDate(recruitStartDate),
+                dateUtil.parseDate(recruitEndDate),
+                dateUtil.parseDate(roomStartDate),
+                dateUtil.parseDate(roomEndDate),
                 recordCount,
                 PageRequest.of(page, 10)
         );
@@ -130,7 +129,7 @@ public class RoomService {
         return GetRoomSearchResponse.of(roomInfos);
     }
 
-    private static void validateSearchParams(String searchTerm, String searchType, Integer page) {
+    private void validateSearchParams(String searchTerm, String searchType, Integer page) {
         // 필수 값 검증
         if (searchTerm == null || searchTerm.trim().isEmpty()) {
             throw new GlobalException(EMPTY_SEARCH_TERM);
@@ -141,11 +140,6 @@ public class RoomService {
         if (page == null) {
             throw new GlobalException(INVALID_PAGE);
         }
-    }
-
-    //문자열을 LocalDate로 변환
-    private LocalDate parseDate(String date) {
-        return date != null ? LocalDate.parse(date) : null;
     }
 
     //검색 조건에 따라 방 필터링
@@ -168,8 +162,8 @@ public class RoomService {
                 .memberCount(room.getUserRooms().size())
                 .recruitCount(room.getRecruitCount())
                 .roomPercentage(room.getRoomPercentage().intValue())
-                .progressStartDate(formatDate(room.getStartDate()))
-                .progressEndDate(formatDate(room.getProgressEndDate()))
+                .progressStartDate(dateUtil.formatDate(room.getStartDate()))
+                .progressEndDate(dateUtil.formatDate(room.getProgressEndDate()))
                 .build();
     }
 
@@ -186,38 +180,6 @@ public class RoomService {
                     .userPercentage(userRoom.getUserPercentage().intValue())
                     .build();
         }).collect(Collectors.toList());
-    }
-
-    //마지막 활동 시간 계산
-    private String calculateLastActivityTime(List<Record> records) {
-        return records.stream()
-                .map(Record::getModifiedAt)
-                .max(LocalDateTime::compareTo)
-                .map(this::formatLastActivityTime)
-                .orElse("기록 없음");
-    }
-
-    //마지막 활동 시간 포맷팅
-    private String formatLastActivityTime(LocalDateTime lastModifiedAt) {
-        long minutes = Duration.between(lastModifiedAt, LocalDateTime.now()).toMinutes();
-        if (minutes < 1) return "방금 전";
-        if (minutes < 60) return minutes + "분 전";
-        return (minutes / 60) + "시간 전";
-    }
-
-    //날짜 포맷팅
-    private String formatDate(LocalDate date) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd");
-        return date.format(formatter);
-    }
-
-    //D-day 계산
-    private String calculateDday(LocalDate endDate) {
-        long days = ChronoUnit.DAYS.between(LocalDate.now(), endDate);
-        if (days < 0) {
-            return "D+" + Math.abs(days);
-        }
-        return "D-" + days;
     }
 
     /**
@@ -287,30 +249,15 @@ public class RoomService {
         if (request.getRecruitCount() == 1) {
             room = Room.makeReadAloneRoom(book);
         } else {
-            LocalDate startDate = parseToLocalDate(request.getProgressStartDate());
-            LocalDate progressEndDate = parseToLocalDate(request.getProgressEndDate());
+            LocalDate startDate = dateUtil.parseToLocalDate(request.getProgressStartDate());
+            LocalDate progressEndDate = dateUtil.parseToLocalDate(request.getProgressEndDate());
             room = Room.makeReadTogetherRoom(
                     request.getRoomName(), book, request.isPublic(), request.getPassword(),
-                    startDate, progressEndDate, calculateRecruitEndDate(startDate, progressEndDate), request.getRecruitCount()
+                    startDate, progressEndDate, dateUtil.calculateRecruitEndDate(startDate, progressEndDate), request.getRecruitCount()
             );
         }
         room.addUserRoom(userRoom);
         return room;
-    }
-
-    /**
-     * 방의 모집종료 기간 = {(방의 종료기간 - 방의 시작기간)/2} + 방의 시작기간
-     *
-     */
-    private LocalDate calculateRecruitEndDate(LocalDate startDate, LocalDate progressEndDate) {
-        long totalDays = ChronoUnit.DAYS.between(startDate, progressEndDate);
-        long halfDays = Math.round(totalDays / 2.0);
-
-        return startDate.plusDays(halfDays);
-    }
-
-    private LocalDate parseToLocalDate(String date) {
-        return LocalDate.parse(date, DateTimeFormatter.ofPattern("yyyy.MM.dd"));
     }
 
     /**
@@ -353,7 +300,7 @@ public class RoomService {
                             .bookTitle(book.getBookTitle())
                             .authorName(book.getAuthorName())
                             .roomType(room.getRoomType().getRoomType())
-                            .modifiedAt(calculateLastActivityTime(room.getRecords()))
+                            .modifiedAt(dateUtil.calculateLastActivityTime(room.getRecords()))
                             .userPercentage(userRoom.getUserPercentage())
                             .build();
                 }).toList();
