@@ -12,7 +12,6 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class PostRoomCreateRequest {
 
-    @JsonProperty("isPublic")
     private boolean isPublic;
 
     @Size(max = 20, message = "방 제목은 20자 이내입니다.")
