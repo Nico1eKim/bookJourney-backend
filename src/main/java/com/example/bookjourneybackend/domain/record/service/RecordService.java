@@ -13,12 +13,14 @@ import com.example.bookjourneybackend.domain.userRoom.domain.UserRoom;
 import com.example.bookjourneybackend.domain.userRoom.domain.repository.UserRoomRepository;
 import com.example.bookjourneybackend.global.exception.GlobalException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import static com.example.bookjourneybackend.global.entity.EntityStatus.*;
 import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.*;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class RecordService {
@@ -29,6 +31,7 @@ public class RecordService {
 
     @Transactional
     public PostRecordResponse createRecord(PostRecordRequest postRecordRequest, Long roomId, Long userId) {
+        log.info("------------------------[RecordService.createRecord]------------------------");
 
         Room room = roomRepository.findById(roomId).orElseThrow(() -> new GlobalException(CANNOT_FOUND_ROOM));
         User user = userRepository.findById(userId).orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER));
@@ -45,26 +48,32 @@ public class RecordService {
             throw new GlobalException(NOT_PARTICIPATING_IN_ROOM);
         }
 
-        // recordType에 따른 필수값 검증
-        if (postRecordRequest.getRecordType() == RecordType.PAGE && postRecordRequest.getRecordPage() == null) {
-            throw new GlobalException(INVALID_RECORD_PAGE);
-        }
-        if (postRecordRequest.getRecordType() == RecordType.ENTIRE && postRecordRequest.getRecordTitle() == null) {
-            throw new GlobalException(INVALID_RECORD_TITLE);
-        }
+        RecordType recordType = RecordType.from(postRecordRequest.getRecordType());
+        validateRecordRequest(postRecordRequest, recordType);
 
         Record newRecord = Record.builder()
                 .room(room)
                 .user(user)
-                .recordType(postRecordRequest.getRecordType())
+                .recordType(recordType)
                 .recordTitle(postRecordRequest.getRecordTitle())
                 .recordPage(postRecordRequest.getRecordPage())
                 .content(postRecordRequest.getContent())
                 .build();
 
         recordRepository.save(newRecord);
+//        room.addRecord(newRecord);
 
         return PostRecordResponse.of(newRecord.getRecordId());
 
+    }
+
+    private void validateRecordRequest(PostRecordRequest postRecordRequest, RecordType recordType) {
+        // recordType에 따른 필수값 검증
+        if (recordType == RecordType.PAGE && postRecordRequest.getRecordPage() == null) {
+            throw new GlobalException(INVALID_RECORD_PAGE);
+        }
+        if (recordType == RecordType.ENTIRE && postRecordRequest.getRecordTitle() == null) {
+            throw new GlobalException(INVALID_RECORD_TITLE);
+        }
     }
 }

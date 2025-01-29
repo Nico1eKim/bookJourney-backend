@@ -2,7 +2,6 @@ package com.example.bookjourneybackend.domain.room.service;
 
 import com.example.bookjourneybackend.domain.book.domain.GenreType;
 import com.example.bookjourneybackend.domain.room.domain.Room;
-import com.example.bookjourneybackend.domain.room.domain.RoomType;
 import com.example.bookjourneybackend.domain.room.domain.SearchType;
 import com.example.bookjourneybackend.domain.room.domain.SortType;
 import com.example.bookjourneybackend.domain.room.domain.repository.RoomRepository;
@@ -22,7 +21,7 @@ import com.example.bookjourneybackend.domain.userRoom.domain.UserRoom;
 import com.example.bookjourneybackend.domain.userRoom.domain.repository.UserRoomRepository;
 import com.example.bookjourneybackend.global.entity.EntityStatus;
 import com.example.bookjourneybackend.global.exception.GlobalException;
-import com.example.bookjourneybackend.domain.record.domain.Record;
+import com.example.bookjourneybackend.global.util.DateUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
@@ -31,11 +30,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Duration;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -55,30 +50,34 @@ public class RoomService {
     private final UserRepository userRepository;
     private final UserRoomRepository userRoomRepository;
     private final AladinApiUtil aladinApiUtil;
+    private final DateUtil dateUtil;
 
+    /**
+     * 방 상세정보 조회
+     */
     public GetRoomDetailResponse showRoomDetails(Long roomId) {
         Room room = roomRepository.findById(roomId)
                 .orElseThrow(() -> new GlobalException(CANNOT_FOUND_ROOM));
         List<RoomMemberInfo> members = getRoomMemberInfoList(room);
 
-        LocalDate recruitEndDate = room.getRecruitEndDate(); // recruitEndDate를 Room 객체에서 직접 가져옴
-        String recruitDday = calculateDday(recruitEndDate); // D-day 계산
-
         return GetRoomDetailResponse.of(
                 room.getRoomName(),
                 room.isPublic(),
-                calculateLastActivityTime(room.getRecords()),
+                dateUtil.calculateLastActivityTime(room.getRecords()),
                 room.getRoomPercentage().intValue(),
-                formatDate(room.getStartDate()),
-                formatDate(room.getProgressEndDate()),
-                recruitDday,
-                formatDate(recruitEndDate),
+                dateUtil.formatDate(room.getStartDate()),
+                dateUtil.formatDate(room.getProgressEndDate()),
+                dateUtil.calculateDday(room.getRecruitEndDate()),   // D-day 계산
+                dateUtil.formatDate(room.getRecruitEndDate()),
                 room.getRecruitCount(),
                 members // DELETED가 아닌 유저들만 포함
         );
 
     }
 
+    /**
+     * 방 정보 조회
+     */
     public GetRoomInfoResponse showRoomInfo(Long roomId) {
         Room room = roomRepository.findById(roomId)
                 .orElseThrow(() -> new GlobalException(CANNOT_FOUND_ROOM));
@@ -89,17 +88,46 @@ public class RoomService {
                 room.getRoomName(),
                 room.isPublic(),
                 room.getRoomPercentage().intValue(),
-                calculateDday(room.getProgressEndDate()),
+                dateUtil.calculateDday(room.getProgressEndDate()),
                 members // DELETED가 아닌 유저들만 포함
         );
     }
 
+    /**
+     * 방 검색
+     */
     public GetRoomSearchResponse searchRooms(
             String searchTerm, String searchType, String genre,
             String recruitStartDate, String recruitEndDate,
             String roomStartDate, String roomEndDate,
             Integer recordCount, Integer page
     ) {
+        validateSearchParams(searchTerm, searchType, page);
+
+        SearchType effectiveSearchType = SearchType.from(searchType);
+        GenreType genreType = genre != null && !genre.isEmpty() ? GenreType.fromGenreType(genre) : null;
+
+        Slice<Room> rooms = roomRepository.findRoomsByFilters(
+                genreType,
+                dateUtil.parseDate(recruitStartDate),
+                dateUtil.parseDate(recruitEndDate),
+                dateUtil.parseDate(roomStartDate),
+                dateUtil.parseDate(roomEndDate),
+                recordCount,
+                PageRequest.of(page, 10)
+        );
+
+        List<RoomInfo> roomInfos = rooms.stream()
+                .filter(room -> room.getStatus() == ACTIVE) // 상태가 ACTIVE인 방
+                .filter(room -> room.getRoomType() == TOGETHER) // 같이읽기 방만 포함
+                .filter(room -> filterRooms(room, effectiveSearchType, searchTerm))
+                .map(this::mapRoomToRoomInfo)
+                .toList();
+
+        return GetRoomSearchResponse.of(roomInfos);
+    }
+
+    private void validateSearchParams(String searchTerm, String searchType, Integer page) {
         // 필수 값 검증
         if (searchTerm == null || searchTerm.trim().isEmpty()) {
             throw new GlobalException(EMPTY_SEARCH_TERM);
@@ -110,98 +138,48 @@ public class RoomService {
         if (page == null) {
             throw new GlobalException(INVALID_PAGE);
         }
-
-        SearchType effectiveSearchType = SearchType.from(searchType);
-        GenreType genreType = genre != null && !genre.isEmpty() ? GenreType.fromGenreType(genre) : null;
-
-        Slice<Room> rooms = roomRepository.findRoomsByFilters(
-                genreType,
-                recruitStartDate != null ? LocalDate.parse(recruitStartDate) : null,
-                recruitEndDate != null ? LocalDate.parse(recruitEndDate) : null,
-                roomStartDate != null ? LocalDate.parse(roomStartDate) : null,
-                roomEndDate != null ? LocalDate.parse(roomEndDate) : null,
-                recordCount,
-                PageRequest.of(page, 10)
-        );
-
-        List<Room> filteredRooms = rooms.stream()
-                .filter(room -> room.getStatus() == ACTIVE) // 상태가 ACTIVE인 방
-                .filter(room -> room.getRoomType() == TOGETHER) // 같이읽기 방만 포함
-                .filter(room -> switch (effectiveSearchType) {
-                    case ROOM_NAME -> room.getRoomName().contains(searchTerm);
-                    case BOOK_TITLE -> room.getBook().getBookTitle().contains(searchTerm);
-                    case AUTHOR_NAME -> room.getBook().getAuthorName().contains(searchTerm);
-                })
-                .toList();
-
-        List<RoomInfo> roomInfos = filteredRooms.stream()
-                .map(room -> new RoomInfo(
-                        room.getRoomId(),
-                        room.isPublic(),
-                        room.getBook().getBookTitle(),
-                        room.getBook().getAuthorName(),
-                        room.getRoomName(),
-                        room.getUserRooms().size(),
-                        room.getRecruitCount(),
-                        room.getRoomPercentage().intValue(),
-                        formatDate(room.getStartDate()),
-                        formatDate(room.getProgressEndDate())
-                ))
-                .collect(Collectors.toList());
-
-        return GetRoomSearchResponse.of(roomInfos);
     }
 
+    //검색 조건에 따라 방 필터링
+    private boolean filterRooms(Room room, SearchType searchType, String searchTerm) {
+        return switch (searchType) {
+            case ROOM_NAME -> room.getRoomName().contains(searchTerm);
+            case BOOK_TITLE -> room.getBook().getBookTitle().contains(searchTerm);
+            case AUTHOR_NAME -> room.getBook().getAuthorName().contains(searchTerm);
+        };
+    }
+
+    //Room 객체를 RoomInfo 객체로 매핑
+    private RoomInfo mapRoomToRoomInfo(Room room) {
+        return RoomInfo.builder()
+                .roomId(room.getRoomId())
+                .isPublic(room.isPublic())
+                .bookTitle(room.getBook().getBookTitle())
+                .authorName(room.getBook().getAuthorName())
+                .roomName(room.getRoomName())
+                .memberCount(room.getUserRooms().size())
+                .recruitCount(room.getRecruitCount())
+                .roomPercentage(room.getRoomPercentage().intValue())
+                .progressStartDate(dateUtil.formatDate(room.getStartDate()))
+                .progressEndDate(dateUtil.formatDate(room.getProgressEndDate()))
+                .build();
+    }
+
+    //Room 객체의 UserRoom 정보를 RoomMemberInfo 객체로 매핑
     private List<RoomMemberInfo> getRoomMemberInfoList(Room room) {
         return room.getUserRooms().stream()
                 .filter(userRoom -> userRoom.getStatus() != DELETED) // DELETED 상태 제외
                 .map(userRoom -> {
                     User user = userRoom.getUser();
-                    return new RoomMemberInfo(
-                            userRoom.getUserRole(),
-                            Optional.ofNullable(user.getUserImage())
+                    return RoomMemberInfo.builder()
+                            .userRole(userRoom.getUserRole())
+                            .imageUrl(Optional.ofNullable(user.getUserImage())
                                     .map(UserImage::getImageUrl)
-                                    .orElse(null),
-                            user.getNickname(),
-                            userRoom.getUserPercentage().intValue()
-                    );
+                                    .orElse(null))
+                            .nickName(user.getNickname())
+                            .userPercentage(userRoom.getUserPercentage().intValue())
+                            .build();
                 }).collect(Collectors.toList());
-    }
-
-    private String calculateLastActivityTime(List<Record> records) {
-        Optional<LocalDateTime> lastModifiedAtOpt = records.stream()
-                .map(Record::getModifiedAt)
-                .max(LocalDateTime::compareTo);
-
-        // 수정 기록이 없는 경우
-        if (lastModifiedAtOpt.isEmpty()) {
-            return "기록 없음";
-        }
-
-        LocalDateTime lastModifiedAt = lastModifiedAtOpt.get();
-        long minutes = Duration.between(lastModifiedAt, LocalDateTime.now()).toMinutes();
-
-        if (minutes < 1) {
-            return "방금 전";
-        } else if (minutes < 60) {
-            return minutes + "분 전";
-        } else {
-            long hours = minutes / 60;
-            return hours + "시간 전";
-        }
-    }
-
-    private String formatDate(LocalDate date) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd");
-        return date.format(formatter);
-    }
-
-    private String calculateDday(LocalDate endDate) {
-        long days = ChronoUnit.DAYS.between(LocalDate.now(), endDate);
-        if (days < 0) {
-            return "D+" + Math.abs(days);
-        }
-        return "D-" + days;
     }
 
     /**
@@ -214,51 +192,34 @@ public class RoomService {
     @Transactional
     public PostRoomCreateResponse createRoom(PostRoomCreateRequest postRoomCreateRequest, Long userId) {
         log.info("------------------------[RoomService.createRoom]------------------------");
-        Book book = bookRepository.findByIsbn(postRoomCreateRequest.getIsbn())
-                .map(existingBook -> {
-                    if (existingBook.getPageCount() == null) {
-                        Book updatedBook = saveBookFromAladinApi(postRoomCreateRequest.getIsbn());
-                        existingBook.setPageCount(updatedBook.getPageCount());
-                        return bookRepository.save(existingBook); // 기존 book 업데이트
-                    }
-                    return existingBook; // 기존 book 그대로 반환
-                })
-                .orElseGet(() -> saveBookFromAladinApi(postRoomCreateRequest.getIsbn())); // book이 없을 경우 새로 생성
+        Book book = findOrCreateBook(postRoomCreateRequest.getIsbn());
 
-        UserRoom userRoom = UserRoom.builder()
-                .user(userRepository.findByUserIdAndStatus(userId, ACTIVE)
-                        .orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER)))
-                .userRole(UserRole.HOST)
-                .currentPage(0)
-                .userPercentage(0.0)
-                .build();
-
-        Room room;
-
-        if (postRoomCreateRequest.getRecruitCount() == 1) { //혼자읽기
-            room = Room.makeReadAloneRoom(book);
-            room.addUserRoom(userRoom);
-        } else {    //같이읽기
-            //String -> LocalDate 파싱
-            LocalDate startDate = parseToLocalDate(postRoomCreateRequest.getProgressStartDate());
-            LocalDate progressEndDate = parseToLocalDate(postRoomCreateRequest.getProgressEndDate());
-
-            room = Room.makeReadTogetherRoom(postRoomCreateRequest.getRoomName(), book,
-                    postRoomCreateRequest.isPublic(), postRoomCreateRequest.getPassword(),
-                    startDate, progressEndDate, calculateRecruitEndDate(startDate, progressEndDate), postRoomCreateRequest.getRecruitCount());
-            room.addUserRoom(userRoom);
-        }
+        UserRoom userRoom = createUserRoom(userId);
+        Room room = createRoom(postRoomCreateRequest, book, userRoom);
 
         book.addRoom(room);
         bookRepository.save(book);
         roomRepository.save(room); //CascadeType.All 옵션을 제거하고 room도 save (이유 : CascadeType.ALL을 했더니 roomRepository에 메서드가 종료되고 저장되어서 roomId가 null이 뜨는 현상이 발생
 
-        //DB에 존재하는 book을 매핑할 경우 영속성 컨텍스트에만 Room이 존재하고 Repository에는 바로 저장이 안되므로 RoomId가 null로 반환되는 현상이 발생.
-        //따라서 flush() 호출 또는 명시적으로 save 호출
-//        roomRepository.flush();
-//        bookRepository.flush();
         log.info("Created RoomID: {}", room.getRoomId());
         return PostRoomCreateResponse.of(room);
+    }
+
+    //isbn을 통해 book을 찾거나, 없을 경우 알라딘 api를 통해 book 정보를 가져와서 저장
+    private Book findOrCreateBook(String isbn) {
+        return bookRepository.findByIsbn(isbn)
+                .map(this::updateBookIfNeeded)
+                .orElseGet(() -> saveBookFromAladinApi(isbn));
+    }
+
+    //책의 페이지수가 없을 경우, 알라딘 api를 통해 페이지수를 가져와서 업데이트
+    private Book updateBookIfNeeded(Book existingBook) {
+        if (existingBook.getPageCount() == null) {
+            Book updatedBook = saveBookFromAladinApi(existingBook.getIsbn());
+            existingBook.setPageCount(updatedBook.getPageCount());
+            return bookRepository.save(existingBook);
+        }
+        return existingBook;
     }
 
     private Book saveBookFromAladinApi(String isbn) {
@@ -270,18 +231,33 @@ public class RoomService {
         return aladinApiUtil.parseAladinApiResponseToBook(currentResponse);
     }
 
-    /**
-     * 방의 모집종료 기간 = {(방의 종료기간 - 방의 시작기간)/2} + 방의 시작기간
-     */
-    private LocalDate calculateRecruitEndDate(LocalDate startDate, LocalDate progressEndDate) {
-        long totalDays = ChronoUnit.DAYS.between(startDate, progressEndDate);
-        long halfDays = Math.round(totalDays / 2.0);
-
-        return startDate.plusDays(halfDays);
+    //유저 정보를 통해 UserRoom 객체 생성
+    private UserRoom createUserRoom(Long userId) {
+        User user = userRepository.findByUserIdAndStatus(userId, ACTIVE)
+                .orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER));
+        return UserRoom.builder()
+                .user(user)
+                .userRole(UserRole.HOST)
+                .currentPage(0)
+                .userPercentage(0.0)
+                .build();
     }
 
-    private LocalDate parseToLocalDate(String date) {
-        return LocalDate.parse(date, DateTimeFormatter.ofPattern("yyyy.MM.dd"));
+    //방 생성
+    private Room createRoom(PostRoomCreateRequest request, Book book, UserRoom userRoom) {
+        Room room;
+        if (request.getRecruitCount() == 1) {
+            room = Room.makeReadAloneRoom(book);
+        } else {
+            LocalDate startDate = dateUtil.parseToLocalDate(request.getProgressStartDate());
+            LocalDate progressEndDate = dateUtil.parseToLocalDate(request.getProgressEndDate());
+            room = Room.makeReadTogetherRoom(
+                    request.getRoomName(), book, request.isPublic(), request.getPassword(),
+                    startDate, progressEndDate, dateUtil.calculateRecruitEndDate(startDate, progressEndDate), request.getRecruitCount()
+            );
+        }
+        room.addUserRoom(userRoom);
+        return room;
     }
 
     /**
@@ -293,22 +269,22 @@ public class RoomService {
     public GetRoomActiveResponse searchActiveRooms(String sort, Long userId) {
         log.info("------------------------[RoomService.searchActiveRooms]------------------------");
         log.info("sort: {}", sort);
-        SortType sortType = (sort == null) ? LASTEST : SortType.from(sort);
-        List<UserRoom> userRooms;
-
-        switch (sortType) {
-            //최신순 정렬
-            case LASTEST -> userRooms = userRoomRepository.findUserRoomsOrderByModifiedAt(userId);
-
-            //유저 진행도순 정렬
-            case PROGRESS -> userRooms = userRoomRepository.findUserRoomsOrderByUserPercentage(userId);
-
-            default -> throw new GlobalException(INVALID_SORT_TYPE);
-        }
+        SortType sortType = (sort == null)? LASTEST : SortType.from(sort);
+        List<UserRoom> userRooms = findUserRoomsBySortType(sortType, userId);
 
         return GetRoomActiveResponse.of(parsingUserRoomsToRecordInfo(userRooms));
     }
 
+    //정렬 타입에 따라 UserRoom 조회
+    private List<UserRoom> findUserRoomsBySortType(SortType sortType, Long userId) {
+        return switch (sortType) {
+            case LASTEST -> userRoomRepository.findUserRoomsOrderByModifiedAt(userId);
+            case PROGRESS -> userRoomRepository.findUserRoomsOrderByUserPercentage(userId);
+            default -> throw new GlobalException(INVALID_SORT_TYPE);
+        };
+    }
+
+    //UserRoom을 RecordInfo로 매핑
     private List<RecordInfo> parsingUserRoomsToRecordInfo(List<UserRoom> userRooms) {
         if (userRooms.isEmpty()) {
             throw new GlobalException(CANNOT_FOUND_BOOK);
@@ -324,7 +300,7 @@ public class RoomService {
                             .bookTitle(book.getBookTitle())
                             .authorName(book.getAuthorName())
                             .roomType(room.getRoomType().getRoomType())
-                            .modifiedAt(calculateLastActivityTime(room.getRecords()))
+                            .modifiedAt(dateUtil.calculateLastActivityTime(room.getRecords()))
                             .userPercentage(userRoom.getUserPercentage())
                             .build();
                 }).toList();
@@ -353,3 +329,4 @@ public class RoomService {
         return null;
     }
 }
+

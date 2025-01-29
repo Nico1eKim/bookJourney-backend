@@ -51,6 +51,7 @@ jobs:
             echo "✋🏻Stopping existing container"
             sudo docker stop bookjourney-backend
             sudo docker rm bookjourney-backend
+            sudo docker-compose down
         
             sudo docker ps -a
             

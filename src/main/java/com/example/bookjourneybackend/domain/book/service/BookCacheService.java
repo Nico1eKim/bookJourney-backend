@@ -27,10 +27,7 @@ public class BookCacheService {
     //Ex) books:searchTerm:해리포터(인코딩 안된상태로 들어감):genreType:NOVEL_POETRY_DRAMA:queryType:Title:page:1
     @Cacheable(
             cacheNames = "getBooks",
-            key = "'books:searchTerm:' + #p0?.searchTerm + " +
-                    "':genreType:' + #p0?.genreType + " +
-                    "':queryType:' + #p0?.queryType + " +
-                    "':page:' + #p0?.page",
+            key = "'books:searchTerm:' + #p0?.searchTerm + " + "':genreType:' + #p0?.genreType + " + "':queryType:' + #p0?.queryType + " + "':page:' + #p0?.page",
             cacheManager = "bookCacheManager"
     )
     public String getCurrentPage(GetBookListRequest getBookListRequest) {
@@ -53,20 +50,12 @@ public class BookCacheService {
         return currentResponse;
     }
 
-    @Cacheable(
-            cacheNames = "getBookInfo",
-            key = "'book:isbn:' + #p2",
-            cacheManager = "bookInfoCacheManager"
-    )
+    @Cacheable(cacheNames = "getBookInfo", key = "'book:isbn:' + #p2", cacheManager = "bookInfoCacheManager")
     public GetBookInfoResponse cachingBookInfo(String title, String author, String isbn, String cover, String description, String categoryName, String publisher, String publishedDate) {
         return GetBookInfoResponse.of(categoryName, cover, title, author, false, publisher, publishedDate, isbn, description);
     }
 
-    @Cacheable(
-            cacheNames = "getBookInfo",
-            key = "'book:isbn:' + #p0",
-            cacheManager = "bookInfoCacheManager"
-    )
+    @Cacheable(cacheNames = "getBookInfo", key = "'book:isbn:' + #p0", cacheManager = "bookInfoCacheManager")
     public GetBookInfoResponse checkBookInfo(String isbn) {
         log.info("[checkBookInfo Caching] isbn: {}", isbn);
 
@@ -89,6 +78,4 @@ public class BookCacheService {
         );
 
     }
-
-
 }
