@@ -58,10 +58,8 @@ public class BookService {
             log.info("Next page caching completed for request page: {}", getBookListRequest.IncreasePage().getPage());
         });
 
-        List<BookInfo> bookList = new ArrayList<>();
-
         //응답 JSON 데이터 파싱
-        bookList = parseBookListFromResponse(currentResponse);
+        List<BookInfo> bookList = parseBookListFromResponse(currentResponse);
 
 
         log.info("Caching completed for current page.");
