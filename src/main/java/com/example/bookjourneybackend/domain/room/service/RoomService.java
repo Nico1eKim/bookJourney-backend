@@ -2,6 +2,7 @@ package com.example.bookjourneybackend.domain.room.service;
 
 import com.example.bookjourneybackend.domain.book.domain.GenreType;
 import com.example.bookjourneybackend.domain.room.domain.Room;
+import com.example.bookjourneybackend.domain.room.domain.RoomType;
 import com.example.bookjourneybackend.domain.room.domain.SearchType;
 import com.example.bookjourneybackend.domain.room.domain.SortType;
 import com.example.bookjourneybackend.domain.room.domain.repository.RoomRepository;
@@ -123,6 +124,8 @@ public class RoomService {
         );
 
         List<Room> filteredRooms = rooms.stream()
+                .filter(room -> room.getStatus() == EntityStatus.ACTIVE) // 상태가 ACTIVE인 방
+                .filter(room -> room.getRoomType() == RoomType.TOGETHER) // 같이읽기 방만 포함
                 .filter(room -> switch (effectiveSearchType) {
                     case ROOM_NAME -> room.getRoomName().contains(searchTerm);
                     case BOOK_TITLE -> room.getBook().getBookTitle().contains(searchTerm);
@@ -130,7 +133,6 @@ public class RoomService {
                 })
                 .toList();
 
-        // Response 변환
         List<RoomInfo> roomInfos = filteredRooms.stream()
                 .map(room -> new RoomInfo(
                         room.getRoomId(),
