@@ -4,12 +4,13 @@ import com.example.bookjourneybackend.domain.book.domain.Book;
 import com.example.bookjourneybackend.domain.book.domain.GenreType;
 import com.example.bookjourneybackend.domain.book.domain.repository.BookRepository;
 import com.example.bookjourneybackend.domain.book.dto.request.GetBookListRequest;
-import com.example.bookjourneybackend.domain.book.dto.response.BookInfo;
-import com.example.bookjourneybackend.domain.book.dto.response.GetBookInfoResponse;
-import com.example.bookjourneybackend.domain.book.dto.response.GetBookListResponse;
-import com.example.bookjourneybackend.domain.book.dto.response.GetBookPopularResponse;
+import com.example.bookjourneybackend.domain.book.dto.response.*;
 import com.example.bookjourneybackend.domain.favorite.domain.repository.FavoriteRepository;
+import com.example.bookjourneybackend.domain.user.domain.FavoriteGenre;
+import com.example.bookjourneybackend.domain.user.domain.User;
+import com.example.bookjourneybackend.domain.user.domain.repository.UserRepository;
 import com.example.bookjourneybackend.global.exception.GlobalException;
+import com.example.bookjourneybackend.global.util.AladinApiUtil;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -24,6 +25,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
+import static com.example.bookjourneybackend.global.entity.EntityStatus.ACTIVE;
 import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.*;
 
 @Slf4j
@@ -36,6 +38,7 @@ public class BookService {
     private final FavoriteRepository favoriteRepository;
     private final ObjectMapper objectMapper;
     private final BookCacheService bookCacheService;
+    private final UserRepository userRepository;
 
     /**
      * 1. Redis에 있는지 확인하고 있으면 Redis에 value로 반환
@@ -78,6 +81,7 @@ public class BookService {
 //            currentResponse = currentResponse.replace("'", "\"");
 
             JsonNode root = objectMapper.readTree(currentResponse);
+            String searchCategoryName = root.get("searchCategoryName").asText();
             JsonNode items = root.get("item");
 
             if (items != null && items.isArray()) {
@@ -91,9 +95,8 @@ public class BookService {
                             : item.get("isbn").asText();
                     String cover = item.get("cover").asText();
 
-//                    String link = item.get("link").asText();
                     String description = item.get("description").asText();
-                    GenreType genreType = GenreType.parsingGenreType(item.get("categoryName").asText());
+                    GenreType genreType = GenreType.parsingGenreType(searchCategoryName);
                     String publisher = item.get("publisher").asText();
                     String publishedDate = item.get("pubDate").asText();
 
@@ -140,5 +143,35 @@ public class BookService {
                 ))
                 .orElseThrow(() -> new GlobalException(CANNOT_FOUND_POPULAR_BOOK));
     }
+
+
+    /**
+     * 로그인 한 유저의 베스트셀러 이미지 조회
+     * @param userId
+     * @return GetBookBestSellersResponse
+     */
+    public GetBookBestSellersResponse showBestSellers(Long userId) {
+        log.info("[BookService.showBestSellers]");
+
+        //로그인 한 유저 찾기
+        User user = userRepository.findByUserIdAndStatus(userId, ACTIVE)
+                .orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER));
+        //유저의 관심장르 찾기
+        List<FavoriteGenre> favoriteGenres = user.getFavoriteGenres();
+
+        List<BestSellerImageUrl> imageUrls = new ArrayList<>();
+
+        //유저의 관심장르 별 베스트셀러의 이미지 불러오기
+        for (FavoriteGenre favoriteGenre : favoriteGenres) {
+            Book bestseller = bookRepository.findByBestSellerTrueAndGenre(favoriteGenre.getGenre())
+                    .orElseThrow(() -> new GlobalException(CANNOT_FOUND_BESTSELLER));
+
+            BestSellerImageUrl imageUrl = new BestSellerImageUrl(bestseller.getImageUrl());
+            imageUrls.add(imageUrl);
+        }
+        return GetBookBestSellersResponse.of(imageUrls);
+
+    }
+
 
 }

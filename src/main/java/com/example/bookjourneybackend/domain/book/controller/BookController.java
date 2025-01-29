@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class BookController {
     private final BookService bookService;
-    private final BestSellerService bestSellerService;
 
     @GetMapping("/search")
     public BaseResponse<GetBookListResponse> viewBookList(@Valid final GetBookListRequest getBookListRequest) {
