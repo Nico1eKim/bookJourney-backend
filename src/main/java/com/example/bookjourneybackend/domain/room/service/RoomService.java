@@ -40,6 +40,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static com.example.bookjourneybackend.domain.room.domain.RoomType.TOGETHER;
 import static com.example.bookjourneybackend.domain.room.domain.SortType.LASTEST;
 import static com.example.bookjourneybackend.global.entity.EntityStatus.*;
 import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.*;
@@ -124,8 +125,8 @@ public class RoomService {
         );
 
         List<Room> filteredRooms = rooms.stream()
-                .filter(room -> room.getStatus() == EntityStatus.ACTIVE) // 상태가 ACTIVE인 방
-                .filter(room -> room.getRoomType() == RoomType.TOGETHER) // 같이읽기 방만 포함
+                .filter(room -> room.getStatus() == ACTIVE) // 상태가 ACTIVE인 방
+                .filter(room -> room.getRoomType() == TOGETHER) // 같이읽기 방만 포함
                 .filter(room -> switch (effectiveSearchType) {
                     case ROOM_NAME -> room.getRoomName().contains(searchTerm);
                     case BOOK_TITLE -> room.getBook().getBookTitle().contains(searchTerm);
@@ -153,7 +154,7 @@ public class RoomService {
 
     private List<RoomMemberInfo> getRoomMemberInfoList(Room room) {
         return room.getUserRooms().stream()
-                .filter(userRoom -> userRoom.getStatus() != EntityStatus.DELETED) // DELETED 상태 제외
+                .filter(userRoom -> userRoom.getStatus() != DELETED) // DELETED 상태 제외
                 .map(userRoom -> {
                     User user = userRoom.getUser();
                     return new RoomMemberInfo(

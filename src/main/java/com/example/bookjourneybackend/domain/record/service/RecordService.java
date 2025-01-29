@@ -9,11 +9,15 @@ import com.example.bookjourneybackend.domain.room.domain.Room;
 import com.example.bookjourneybackend.domain.room.domain.repository.RoomRepository;
 import com.example.bookjourneybackend.domain.user.domain.User;
 import com.example.bookjourneybackend.domain.user.domain.repository.UserRepository;
+import com.example.bookjourneybackend.domain.userRoom.domain.UserRoom;
+import com.example.bookjourneybackend.domain.userRoom.domain.repository.UserRoomRepository;
 import com.example.bookjourneybackend.global.exception.GlobalException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import static com.example.bookjourneybackend.global.entity.EntityStatus.ACTIVE;
+import static com.example.bookjourneybackend.global.entity.EntityStatus.INACTIVE;
 import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.*;
 
 @Service
@@ -22,12 +26,20 @@ public class RecordService {
     private final RecordRepository recordRepository;
     private final RoomRepository roomRepository;
     private final UserRepository userRepository;
+    private final UserRoomRepository userRoomRepository;
 
     @Transactional
     public PostRecordResponse createRecord(PostRecordRequest postRecordRequest, Long roomId, Long userId) {
 
         Room room = roomRepository.findById(roomId).orElseThrow(() -> new GlobalException(CANNOT_FOUND_ROOM));
         User user = userRepository.findById(userId).orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER));
+        UserRoom userRoom = userRoomRepository.findUserRoomByRoomAndUser(room, user).orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER_ROOM));
+
+        // UserRoom이 INACTIVE 상태이면 ACTIVE로 변경
+        if (userRoom.getStatus() == INACTIVE) {
+            userRoom.setStatus(ACTIVE);
+            userRoomRepository.save(userRoom);
+        }
 
         // recordType에 따른 필수값 검증
         if (postRecordRequest.getRecordType() == RecordType.PAGE && postRecordRequest.getRecordPage() == null) {
