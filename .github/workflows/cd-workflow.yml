@@ -51,11 +51,15 @@ jobs:
             echo "✋🏻Stopping existing container"
             sudo docker stop bookjourney-backend
             sudo docker rm bookjourney-backend
+            sudo docker-compose down
         
             sudo docker ps -a
             
             echo "🥳 Pulling new image"
             sudo docker pull ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE }}
+
+            echo "🛠 Running docker-compose"
+            sudo docker-compose up -d --build
             
             echo "🌱 Running new container"
             sudo docker run -d -p 8000:8080 --name bookjourney-backend \
