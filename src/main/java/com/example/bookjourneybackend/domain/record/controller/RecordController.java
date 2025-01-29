@@ -1,6 +1,8 @@
 package com.example.bookjourneybackend.domain.record.controller;
 
+import com.example.bookjourneybackend.domain.record.domain.EntireRecordSortType;
 import com.example.bookjourneybackend.domain.record.dto.request.PostRecordRequest;
+import com.example.bookjourneybackend.domain.record.dto.response.GetEntireRecordResponse;
 import com.example.bookjourneybackend.domain.record.dto.response.PostRecordResponse;
 import com.example.bookjourneybackend.domain.record.service.RecordService;
 import com.example.bookjourneybackend.global.annotation.LoginUserId;
@@ -26,4 +28,14 @@ public class RecordController {
     ) {
         return BaseResponse.ok(recordService.createRecord(postRecordRequest, roomId, userId));
     }
+
+    @GetMapping("/{roomId}/entire/{userId}")
+    public BaseResponse<GetEntireRecordResponse> getEntireRecords(
+            @PathVariable("roomId") Long roomId,
+            @PathVariable("userId") Long userId,
+            @RequestParam(value = "sortingType", required = false, defaultValue = "최신 등록 순") String sortingType) {
+
+        return BaseResponse.ok(recordService.showEntireRecords(roomId, userId, sortingType));
+    }
+
 }
