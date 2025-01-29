@@ -21,7 +21,6 @@ import com.example.bookjourneybackend.domain.userRoom.domain.UserRoom;
 import com.example.bookjourneybackend.domain.userRoom.domain.repository.UserRoomRepository;
 import com.example.bookjourneybackend.global.entity.EntityStatus;
 import com.example.bookjourneybackend.global.exception.GlobalException;
-import com.example.bookjourneybackend.domain.record.domain.Record;
 import com.example.bookjourneybackend.global.util.DateUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -31,15 +30,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Duration;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static com.example.bookjourneybackend.domain.room.domain.RoomType.TOGETHER;
 import static com.example.bookjourneybackend.domain.room.domain.SortType.LASTEST;
 import static com.example.bookjourneybackend.global.entity.EntityStatus.*;
 import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.*;
@@ -74,7 +70,7 @@ public class RoomService {
                 dateUtil.calculateDday(room.getRecruitEndDate()),   // D-day 계산
                 dateUtil.formatDate(room.getRecruitEndDate()),
                 room.getRecruitCount(),
-                members
+                members // DELETED가 아닌 유저들만 포함
         );
 
     }
@@ -93,7 +89,7 @@ public class RoomService {
                 room.isPublic(),
                 room.getRoomPercentage().intValue(),
                 dateUtil.calculateDday(room.getProgressEndDate()),
-                members
+                members // DELETED가 아닌 유저들만 포함
         );
     }
 
@@ -122,7 +118,9 @@ public class RoomService {
         );
 
         List<RoomInfo> roomInfos = rooms.stream()
-                .filter(room ->  filterRooms(room, effectiveSearchType, searchTerm))
+                .filter(room -> room.getStatus() == ACTIVE) // 상태가 ACTIVE인 방
+                .filter(room -> room.getRoomType() == TOGETHER) // 같이읽기 방만 포함
+                .filter(room -> filterRooms(room, effectiveSearchType, searchTerm))
                 .map(this::mapRoomToRoomInfo)
                 .toList();
 
@@ -169,17 +167,19 @@ public class RoomService {
 
     //Room 객체의 UserRoom 정보를 RoomMemberInfo 객체로 매핑
     private List<RoomMemberInfo> getRoomMemberInfoList(Room room) {
-        return room.getUserRooms().stream().map(userRoom -> {
-            User user = userRoom.getUser();
-            return RoomMemberInfo.builder()
-                    .userRole(userRoom.getUserRole())
-                    .imageUrl(Optional.ofNullable(user.getUserImage())
-                            .map(UserImage::getImageUrl)
-                            .orElse(null))
-                    .nickName(user.getNickname())
-                    .userPercentage(userRoom.getUserPercentage().intValue())
-                    .build();
-        }).collect(Collectors.toList());
+        return room.getUserRooms().stream()
+                .filter(userRoom -> userRoom.getStatus() != DELETED) // DELETED 상태 제외
+                .map(userRoom -> {
+                    User user = userRoom.getUser();
+                    return RoomMemberInfo.builder()
+                            .userRole(userRoom.getUserRole())
+                            .imageUrl(Optional.ofNullable(user.getUserImage())
+                                    .map(UserImage::getImageUrl)
+                                    .orElse(null))
+                            .nickName(user.getNickname())
+                            .userPercentage(userRoom.getUserPercentage().intValue())
+                            .build();
+                }).collect(Collectors.toList());
     }
 
     /**

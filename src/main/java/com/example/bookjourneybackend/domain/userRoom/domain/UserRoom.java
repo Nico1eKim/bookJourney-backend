@@ -10,6 +10,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import static com.example.bookjourneybackend.global.entity.EntityStatus.DELETED;
+
 @Entity
 @Table(name = "user_room")
 @NoArgsConstructor
@@ -23,6 +25,9 @@ public class UserRoom extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private UserRole userRole;
+
+    @Column(nullable = false)
+    private boolean isMember; // 유저가 현재 방에 속해있는지 여부
 
     @Column(nullable = false)
     private Double userPercentage;
@@ -42,12 +47,17 @@ public class UserRoom extends BaseEntity {
     private Room room;
 
     @Builder
-    public UserRoom(UserRole userRole, Double userPercentage, User user, Integer currentPage, Room room) {
+    public UserRoom(UserRole userRole, boolean isMember, Double userPercentage, User user, Integer currentPage, Room room) {
         this.userRole = userRole;
+        this.isMember = isMember;
         this.userPercentage = userPercentage;
         this.user = user;
         this.currentPage = currentPage;
         this.room = room;
+    }
+
+    public boolean isUserInRoom() {
+        return this.isMember && this.getStatus() != DELETED;
     }
 
 }

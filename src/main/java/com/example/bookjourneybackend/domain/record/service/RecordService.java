@@ -13,6 +13,8 @@ import com.example.bookjourneybackend.domain.room.domain.Room;
 import com.example.bookjourneybackend.domain.room.domain.repository.RoomRepository;
 import com.example.bookjourneybackend.domain.user.domain.User;
 import com.example.bookjourneybackend.domain.user.domain.repository.UserRepository;
+import com.example.bookjourneybackend.domain.userRoom.domain.UserRoom;
+import com.example.bookjourneybackend.domain.userRoom.domain.repository.UserRoomRepository;
 import com.example.bookjourneybackend.global.exception.GlobalException;
 import com.example.bookjourneybackend.global.util.DateUtil;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import static com.example.bookjourneybackend.global.entity.EntityStatus.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -33,6 +36,7 @@ public class RecordService {
     private final RecordRepository recordRepository;
     private final RoomRepository roomRepository;
     private final UserRepository userRepository;
+    private final UserRoomRepository userRoomRepository;
     private final RecordLikeRepository recordLikeRepository;
     private final DateUtil dateUtil;
 
@@ -42,6 +46,18 @@ public class RecordService {
 
         Room room = roomRepository.findById(roomId).orElseThrow(() -> new GlobalException(CANNOT_FOUND_ROOM));
         User user = userRepository.findById(userId).orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER));
+        UserRoom userRoom = userRoomRepository.findUserRoomByRoomAndUser(room, user).orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER_ROOM));
+
+        // UserRoom이 INACTIVE 상태이면 ACTIVE로 변경
+        if (userRoom.getStatus() == INACTIVE) {
+            userRoom.setStatus(ACTIVE);
+            userRoomRepository.save(userRoom);
+        }
+
+        // 유저가 방에 속해 있지 않거나, 방에서 삭제된 경우 예외 발생
+        if (!userRoom.isMember() || userRoom.getStatus() == DELETED) {
+            throw new GlobalException(NOT_PARTICIPATING_IN_ROOM);
+        }
 
         RecordType recordType = RecordType.from(postRecordRequest.getRecordType());
         validateRecordRequest(postRecordRequest, recordType);
