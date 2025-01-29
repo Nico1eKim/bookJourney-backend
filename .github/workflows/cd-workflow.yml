@@ -61,9 +61,6 @@ jobs:
             echo "🥳 Pulling new image"
             sudo docker pull ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE }}
 
-            echo "📁 Navigating to the project directory"
-            cd ~/book-journey  # 프로젝트 폴더로 이동 (필요에 따라 수정)
-
             echo "🛠 Running docker-compose"
             sudo docker-compose up -d --build
             
