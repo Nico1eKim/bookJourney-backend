@@ -55,14 +55,23 @@ jobs:
         
             sudo docker ps -a
             
+            echo "🧹 Cleaning up old containers and images"
+            sudo docker system prune -af
+            
             echo "🥳 Pulling new image"
             sudo docker pull ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE }}
-            
-            echo "🌱 Running new container"
-            sudo docker run -d -p 8000:8080 --name bookjourney-backend \
-            -e JWT_SECRET="${{ secrets.JWT_SECRET }}" \
-            -e ALADIN_API_KEY="${{ secrets.ALADIN_API_KEY }}" \
-            ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE }}
 
-            echo "🚮 Cleaning up old images"
-            sudo docker image prune -f
+            echo "📁 Navigating to the project directory"
+            cd ~/book-journey  # 프로젝트 폴더로 이동 (필요에 따라 수정)
+
+            echo "🛠 Running docker-compose"
+            sudo docker-compose up -d --build
+            
+            # echo "🌱 Running new container"
+            # sudo docker run -d -p 8000:8080 --name bookjourney-backend \
+            # -e JWT_SECRET="${{ secrets.JWT_SECRET }}" \
+            # -e ALADIN_API_KEY="${{ secrets.ALADIN_API_KEY }}" \
+            # ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE }}
+
+            # echo "🚮 Cleaning up old images"
+            # sudo docker image prune -f
