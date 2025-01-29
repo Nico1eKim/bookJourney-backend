@@ -1,4 +1,4 @@
-FROM amazoncorretto:17
+FROM openjdk:17-jdk
 ENV SPRING_PROFILES_ACTIVE=prod
 EXPOSE 8080
 COPY ./build/libs/*.jar ./app.jar
