@@ -1,9 +1,11 @@
 package com.example.bookjourneybackend.domain.room.dto.response;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 
 @Getter
+@Builder
 @AllArgsConstructor
 public class RoomInfo {
     private Long roomId;
