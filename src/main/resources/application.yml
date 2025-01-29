@@ -77,7 +77,7 @@ spring:
 #    password: ${PROD_DB_PASSWORD}
 #    driver-class-name: com.mysql.cj.jdbc.Driver
   datasource:
-    url: jdbc:mysql://mysql:3306/mydb
+    url: jdbc:mysql://my-db:3306/mydb
     username: root
     password: verysecret
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -93,7 +93,7 @@ spring:
 
   data:
     redis:
-      host: localhost
+      host: my-cache-server
       port: 6379
 
   docker:
