@@ -12,11 +12,9 @@ import java.util.List;
 @Repository
 public interface RecordRepository extends JpaRepository<Record, Long> {
 
-    @Query("SELECT r FROM Record r WHERE r.room.roomId = :roomId ORDER BY r.createdAt DESC")
+    @Query("SELECT r FROM Record r WHERE r.room.roomId = :roomId AND r.status = 'ACTIVE' ORDER BY r.createdAt DESC")
     List<Record> findRecordsOrderByLatest(@Param("roomId") Long roomId, @Param("sortType") RecordSortType sortType);
 
-    @Query("SELECT r FROM Record r WHERE r.room.roomId = :roomId ORDER BY SIZE(r.comments) DESC")
+    @Query("SELECT r FROM Record r WHERE r.room.roomId = :roomId AND r.status = 'ACTIVE' ORDER BY SIZE(r.comments) DESC")
     List<Record> findRecordsOrderByMostComments(@Param("roomId") Long roomId, @Param("sortType") RecordSortType sortType);
-
-
 }
