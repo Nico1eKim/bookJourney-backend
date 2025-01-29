@@ -1,9 +1,11 @@
 package com.example.bookjourneybackend.domain.book.controller;
 
 import com.example.bookjourneybackend.domain.book.dto.request.GetBookListRequest;
+import com.example.bookjourneybackend.domain.book.dto.response.GetBookBestSellersResponse;
 import com.example.bookjourneybackend.domain.book.dto.response.GetBookInfoResponse;
 import com.example.bookjourneybackend.domain.book.dto.response.GetBookListResponse;
 import com.example.bookjourneybackend.domain.book.dto.response.GetBookPopularResponse;
+import com.example.bookjourneybackend.domain.book.service.BestSellerService;
 import com.example.bookjourneybackend.domain.book.service.BookService;
 import com.example.bookjourneybackend.global.annotation.LoginUserId;
 import com.example.bookjourneybackend.global.response.BaseResponse;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class BookController {
     private final BookService bookService;
+    private final BestSellerService bestSellerService;
 
     @GetMapping("/search")
     public BaseResponse<GetBookListResponse> viewBookList(@Valid final GetBookListRequest getBookListRequest) {
@@ -33,6 +36,13 @@ public class BookController {
     @GetMapping("/popular")
     public BaseResponse<GetBookPopularResponse> viewPopularBook() {
         return BaseResponse.ok(bookService.showPopularBook());
+    }
+
+    //사용자별베스트 셀러 조회
+    @GetMapping("/best-sellers")
+    public BaseResponse<GetBookBestSellersResponse> viewBestSellers(@LoginUserId final Long userId) {
+        log.info("[BookController.viewBestSellers]");
+        return BaseResponse.ok(bookService.showBestSellers(userId));
     }
 
 }
