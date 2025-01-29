@@ -1,29 +1,25 @@
 package com.example.bookjourneybackend.domain.room.service;
 
+import com.example.bookjourneybackend.domain.book.domain.Book;
 import com.example.bookjourneybackend.domain.book.domain.GenreType;
+import com.example.bookjourneybackend.domain.book.domain.repository.BookRepository;
+import com.example.bookjourneybackend.domain.record.domain.Record;
 import com.example.bookjourneybackend.domain.room.domain.Room;
 import com.example.bookjourneybackend.domain.room.domain.SearchType;
 import com.example.bookjourneybackend.domain.room.domain.repository.RoomRepository;
-import com.example.bookjourneybackend.domain.room.dto.response.*;
-import com.example.bookjourneybackend.domain.book.domain.Book;
-import com.example.bookjourneybackend.domain.book.domain.repository.BookRepository;
 import com.example.bookjourneybackend.domain.room.dto.request.PostRoomCreateRequest;
-import com.example.bookjourneybackend.domain.room.dto.response.GetRoomDetailResponse;
-import com.example.bookjourneybackend.domain.room.dto.response.GetRoomInfoResponse;
-import com.example.bookjourneybackend.domain.room.dto.response.PostRoomCreateResponse;
-import com.example.bookjourneybackend.domain.room.dto.response.RoomMemberInfo;
+import com.example.bookjourneybackend.domain.room.dto.response.*;
 import com.example.bookjourneybackend.domain.user.domain.User;
 import com.example.bookjourneybackend.domain.user.domain.UserImage;
 import com.example.bookjourneybackend.domain.user.domain.repository.UserRepository;
 import com.example.bookjourneybackend.domain.userRoom.domain.UserRole;
 import com.example.bookjourneybackend.domain.userRoom.domain.UserRoom;
 import com.example.bookjourneybackend.global.exception.GlobalException;
-import com.example.bookjourneybackend.domain.record.domain.Record;
+import com.example.bookjourneybackend.global.util.AladinApiUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
-import com.example.bookjourneybackend.global.util.AladinApiUtil;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -47,7 +43,6 @@ public class RoomService {
     private final BookRepository bookRepository;
     private final UserRepository userRepository;
     private final AladinApiUtil aladinApiUtil;
-
 
     public GetRoomDetailResponse showRoomDetails(Long roomId) {
         Room room = roomRepository.findById(roomId)
@@ -212,13 +207,13 @@ public class RoomService {
         Book book = bookRepository.findByIsbn(postRoomCreateRequest.getIsbn())
                 .map(existingBook -> {
                     if (existingBook.getPageCount() == null) {
-                        Book updatedBook = saveBookFromAladinApi(postRoomCreateRequest.getIsbn());
+                        Book updatedBook =saveBookFromAladinApi(postRoomCreateRequest.getIsbn(),false);
                         existingBook.setPageCount(updatedBook.getPageCount());
                         return bookRepository.save(existingBook); // 기존 book 업데이트
                     }
                     return existingBook; // 기존 book 그대로 반환
                 })
-                .orElseGet(() -> saveBookFromAladinApi(postRoomCreateRequest.getIsbn())); // book이 없을 경우 새로 생성
+                .orElseGet(() -> saveBookFromAladinApi(postRoomCreateRequest.getIsbn(),false)); // book이 없을 경우 새로 생성
 
 
 
@@ -259,13 +254,13 @@ public class RoomService {
         return PostRoomCreateResponse.of(room);
     }
 
-    private Book saveBookFromAladinApi(String isbn) {
+    private Book saveBookFromAladinApi(String isbn,boolean isBestseller) {
         log.info("[saveBookFromAladinApi] isbn: {}", isbn);
 
         String requestUrl = aladinApiUtil.buildLookUpApiUrl(isbn);
         String currentResponse = aladinApiUtil.requestBookInfoFromAladinApi(requestUrl);
 
-        return aladinApiUtil.parseAladinApiResponseToBook(currentResponse);
+        return aladinApiUtil.parseAladinApiResponseToBook(currentResponse,isBestseller);
     }
 
     /**
