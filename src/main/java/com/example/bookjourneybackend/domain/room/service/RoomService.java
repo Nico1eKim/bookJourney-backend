@@ -19,6 +19,7 @@ import com.example.bookjourneybackend.domain.user.domain.repository.UserReposito
 import com.example.bookjourneybackend.domain.userRoom.domain.UserRole;
 import com.example.bookjourneybackend.domain.userRoom.domain.UserRoom;
 import com.example.bookjourneybackend.domain.userRoom.domain.repository.UserRoomRepository;
+import com.example.bookjourneybackend.global.entity.EntityStatus;
 import com.example.bookjourneybackend.global.exception.GlobalException;
 import com.example.bookjourneybackend.domain.record.domain.Record;
 import lombok.RequiredArgsConstructor;
@@ -55,7 +56,7 @@ public class RoomService {
 
     public GetRoomDetailResponse showRoomDetails(Long roomId) {
         Room room = roomRepository.findById(roomId)
-                .orElseThrow(() -> new GlobalException(CANNOT_FIND_ROOM));
+                .orElseThrow(() -> new GlobalException(CANNOT_FOUND_ROOM));
         List<RoomMemberInfo> members = getRoomMemberInfoList(room);
 
         LocalDate recruitEndDate = room.getRecruitEndDate(); // recruitEndDate를 Room 객체에서 직접 가져옴
@@ -78,7 +79,7 @@ public class RoomService {
 
     public GetRoomInfoResponse showRoomInfo(Long roomId) {
         Room room = roomRepository.findById(roomId)
-                .orElseThrow(() -> new GlobalException(CANNOT_FIND_ROOM));
+                .orElseThrow(() -> new GlobalException(CANNOT_FOUND_ROOM));
         List<RoomMemberInfo> members = getRoomMemberInfoList(room);
 
         return GetRoomInfoResponse.of(
@@ -293,10 +294,10 @@ public class RoomService {
 
         switch (sortType) {
             //최신순 정렬
-            case LASTEST -> userRooms = userRoomRepository.findUserRoomsByUserIdAndActiveRoomsOrderByRecordModifiedAt(userId);
+            case LASTEST -> userRooms = userRoomRepository.findUserRoomsOrderByModifiedAt(userId);
 
             //유저 진행도순 정렬
-            case PROGRESS -> userRooms = userRoomRepository.findUserRoomsByUserIdAndActiveRoomsOrderByUserPercentage(userId);
+            case PROGRESS -> userRooms = userRoomRepository.findUserRoomsOrderByUserPercentage(userId);
 
             default -> throw new GlobalException(INVALID_SORT_TYPE);
         }
@@ -325,5 +326,26 @@ public class RoomService {
                 }).toList();
     }
 
+    /**
+     * 진행중인 기록 삭제
+     * UserRoom의 status를 INACTIVE로 변경
+     */
+    @Transactional
+    public Void putRoomsInactive(Long roomId, Long userId) {
+        log.info("------------------------[RoomService.putRoomsInactive]------------------------");
+        Room room = roomRepository.findById(roomId)
+                .orElseThrow(() -> new GlobalException(CANNOT_FOUND_ROOM));
 
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER));
+
+
+        UserRoom userRoom = userRoomRepository.findUserRoomByRoomAndUserAndStatus(room, user, ACTIVE)
+                .orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER_ROOM));
+
+        userRoom.setStatus(EntityStatus.INACTIVE);
+        userRoomRepository.save(userRoom);
+
+        return null;
+    }
 }

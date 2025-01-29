@@ -53,9 +53,15 @@ public class RoomController {
         return BaseResponse.ok(roomService.createRoom(postRoomCreateRequest, userId));
     }
 
-    @GetMapping("/record")
+    @GetMapping("/records")
     public BaseResponse<GetRoomActiveResponse> viewActiveRooms(@RequestParam(required = false) final String sort,
                                                                @LoginUserId final Long userId) {
         return BaseResponse.ok(roomService.searchActiveRooms(sort, userId));
+    }
+
+    @PutMapping("/{roomId}/records")
+    public BaseResponse<Void> deleteActiveRooms(@PathVariable("roomId") final Long roomId,
+                                                @LoginUserId final Long userId) {
+        return BaseResponse.ok(roomService.putRoomsInactive(roomId, userId));
     }
 }
