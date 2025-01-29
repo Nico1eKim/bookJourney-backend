@@ -46,6 +46,7 @@ public class BookInitializer {
             bookRepository.save(bestSellerBook);
 
             index++;
+            uniqueIsbn = String.valueOf(baseIsbn + index);
 
             // bestSeller = false 책 생성
             Book normalBook = Book.builder()
@@ -71,4 +72,3 @@ public class BookInitializer {
         return UUID.randomUUID().toString().replaceAll("-", "").substring(0, 13); // 13자리 ISBN 생성
     }
 }
-
