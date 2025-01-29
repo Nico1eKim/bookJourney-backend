@@ -3,6 +3,8 @@ package com.example.bookjourneybackend.global.util;
 import com.example.bookjourneybackend.domain.book.domain.Book;
 import com.example.bookjourneybackend.domain.book.domain.GenreType;
 import com.example.bookjourneybackend.domain.book.dto.request.GetBookListRequest;
+import com.example.bookjourneybackend.domain.book.dto.response.BestSellerImageUrl;
+import com.example.bookjourneybackend.domain.book.dto.response.GetBookInfoResponse;
 import com.example.bookjourneybackend.global.exception.GlobalException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -17,6 +19,8 @@ import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.ALADIN_API_ERROR;
 import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.ALADIN_API_PARSING_ERROR;
@@ -34,8 +38,11 @@ public class AladinApiUtil {
     private final String ALADIN_ITEM_LOOKUP_PATH = "/ItemLookUp.aspx";
     private final String ALADIN_ITEM_LIST_PATH = "/ItemList.aspx";   //상품 리스트 API (베스트셀러 조회용)
 
-    private final int MAX_RESULTS = 10; //최대 책 검색 결과 개수
+    private final int SEARCH_MAX_RESULTS = 10; //최대 책 검색 결과 개수
+    private final int BESTSELLER_MAX_RESULTS = 1;
     private final String OUTPUT = "js"; // 응답 포맷 (xml 또는 json)
+    private final int VERSION = 20131101;
+    private final String BESTSELLER = "Bestseller";
 
     //Big : 큰 크기 : 너비 200px
     //MidBig : 중간 큰 크기 : 너비 150px
@@ -57,12 +64,13 @@ public class AladinApiUtil {
                 request.getSearchTerm(),
                 request.getQueryType(),
                 request.getPage(),
-                MAX_RESULTS,
+                SEARCH_MAX_RESULTS,
                 OUTPUT,
                 request.getGenreType()==null? null: request.getGenreType().getCategoryId(),
                 COVER_SIZE
         );
     }
+
 
     public String buildLookUpApiUrl(String isbn) {
         return String.format(
@@ -73,6 +81,21 @@ public class AladinApiUtil {
                 isbn,
                 OUTPUT,
                 COVER_SIZE
+        );
+    }
+
+    public String buildSearchListApiUrl(int categoryId) {
+
+        return String.format(
+                ALADIN_BASEL_URL + ALADIN_ITEM_LIST_PATH +
+                        "?ttbkey=%s&QueryType=%s&MaxResults=%d&output=%s&CategoryId=%d&Cover=%s&Version=%d",
+                TTBKey,
+                BESTSELLER,
+                BESTSELLER_MAX_RESULTS,
+                OUTPUT,
+                categoryId,
+                COVER_SIZE,
+                VERSION
         );
     }
 
@@ -100,7 +123,7 @@ public class AladinApiUtil {
         }
     }
 
-    public Book parseAladinApiResponseToBook(String currentResponse) {
+    public Book parseAladinApiResponseToBook(String currentResponse,boolean isBestseller) {
         try {
             //JSON 형식 오류 허용 -> "Unrecognized character escape ''' (code 39)" 에러 해결용
             objectMapper.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
@@ -108,7 +131,7 @@ public class AladinApiUtil {
 //            currentResponse = currentResponse.replace("'", "\"");
 
             JsonNode root = objectMapper.readTree(currentResponse);
-//            GenreType genreType = GenreType.fromCategoryId(root.get("searchCategoryId").asInt());
+            String searchCategoryName = root.get("searchCategoryName").asText();
             JsonNode items = root.get("item");
 
             if (items != null && items.isArray()) {
@@ -124,7 +147,7 @@ public class AladinApiUtil {
 
 //                    String link = item.get("link").asText();
                     String description = item.get("description").asText();
-                    String categoryName = item.get("categoryName").asText();
+//                    String categoryName = item.get("categoryName").asText();
                     String publisher = item.get("publisher").asText();
                     String publishedDate = item.get("pubDate").asText();
 
@@ -136,12 +159,12 @@ public class AladinApiUtil {
                             .isbn(isbn)
                             .bookTitle(title)
                             .authorName(author)
-                            .genre(GenreType.parsingGenreType(categoryName))
+                            .genre(GenreType.parsingGenreType(searchCategoryName))
                             .publisher(publisher)
                             .publishedDate(LocalDate.parse(publishedDate, DateTimeFormatter.ofPattern("yyyy-MM-dd")))
                             .description(description)
                             .imageUrl(imageUrl)
-                            .bestSeller(false)
+                            .bestSeller(isBestseller)
                             .pageCount(pageCount)
                             .build();
                 }
@@ -152,4 +175,30 @@ public class AladinApiUtil {
         }
         throw new GlobalException(ALADIN_API_ERROR);
     }
+
+    public String getIsbnFromBestSellerResponse(String currentResponse) {
+
+        try {
+            objectMapper.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
+            objectMapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
+
+            JsonNode root = objectMapper.readTree(currentResponse);
+            JsonNode items = root.get("item");
+
+            if (items != null && items.isArray() ) {
+                JsonNode firstItem = items.get(0); // 첫 번째 아이템 가져오기
+                String isbn = firstItem.has("isbn13") && !firstItem.get("isbn13").asText().isEmpty()
+                        ? firstItem.get("isbn13").asText()
+                        : firstItem.get("isbn").asText();
+
+                return isbn;
+            }
+        } catch (JsonProcessingException e) {
+            log.info("Json 파싱 에러 메시지: {}", e.getMessage());
+            throw new GlobalException(ALADIN_API_PARSING_ERROR);
+        }
+        throw new GlobalException(ALADIN_API_ERROR);
+    }
+
+
 }
