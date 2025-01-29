@@ -3,7 +3,7 @@ package com.example.bookjourneybackend.domain.book.domain;
 import com.example.bookjourneybackend.global.exception.GlobalException;
 import lombok.Getter;
 
-import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.*;
+import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.INVALID_GENRE;
 
 @Getter
 public enum GenreType {
@@ -19,13 +19,12 @@ public enum GenreType {
     GOOD_PARENTING("좋은부모", 2030),
     COMICS("만화", 2551),
     SELF_DEVELOPMENT("자기계발", 336),
-    HEALTH_HOBBY("건강/취미/레저", 55890),
+    HEALTH_HOBBY("건강/취미", 55890),
     SCIENCE("과학", 987),
     TEENAGERS("청소년", 1137),
     CHILDREN("어린이", 1108),
     INFANTS("유아", 13789),
     UNKNOWN("알 수 없는 장르", -1);
-
     private final String genreType;
     private final int categoryId;
 
