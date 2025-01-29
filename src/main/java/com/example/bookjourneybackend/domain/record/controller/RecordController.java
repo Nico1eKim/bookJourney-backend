@@ -20,7 +20,7 @@ public class RecordController {
 
     @PostMapping("/{roomId}")
     public BaseResponse<PostRecordResponse> createRecord(
-            @PathVariable Long roomId,
+            @PathVariable("roomId") Long roomId,
             @RequestBody @Valid final PostRecordRequest postRecordRequest,
             @LoginUserId final Long userId
     ) {

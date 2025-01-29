@@ -1,5 +1,6 @@
 package com.example.bookjourneybackend.domain.room.dto.request;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.*;
 import lombok.AccessLevel;
 import lombok.Getter;

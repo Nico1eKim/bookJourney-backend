@@ -1,10 +1,7 @@
 package com.example.bookjourneybackend.domain.room.controller;
 
 import com.example.bookjourneybackend.domain.room.dto.request.PostRoomCreateRequest;
-import com.example.bookjourneybackend.domain.room.dto.response.GetRoomDetailResponse;
-import com.example.bookjourneybackend.domain.room.dto.response.GetRoomInfoResponse;
-import com.example.bookjourneybackend.domain.room.dto.response.GetRoomSearchResponse;
-import com.example.bookjourneybackend.domain.room.dto.response.PostRoomCreateResponse;
+import com.example.bookjourneybackend.domain.room.dto.response.*;
 import com.example.bookjourneybackend.domain.room.service.RoomService;
 import com.example.bookjourneybackend.global.annotation.LoginUserId;
 import com.example.bookjourneybackend.global.response.BaseResponse;
@@ -45,7 +42,6 @@ public class RoomController {
             @RequestParam(required = false) Integer recordCount,
             @RequestParam(required = false) Integer page
     ) {
-
         return BaseResponse.ok(
                 roomService.searchRooms(searchTerm, searchType, genre, recruitStartDate, recruitEndDate, roomStartDate, roomEndDate, recordCount, page)
         );
@@ -55,5 +51,17 @@ public class RoomController {
     public BaseResponse<PostRoomCreateResponse> createRoom(@RequestBody @Valid final PostRoomCreateRequest postRoomCreateRequest,
                                                            @LoginUserId final Long userId) {
         return BaseResponse.ok(roomService.createRoom(postRoomCreateRequest, userId));
+    }
+
+    @GetMapping("/records")
+    public BaseResponse<GetRoomActiveResponse> viewActiveRooms(@RequestParam(required = false) final String sort,
+                                                               @LoginUserId final Long userId) {
+        return BaseResponse.ok(roomService.searchActiveRooms(sort, userId));
+    }
+
+    @PutMapping("/{roomId}/records")
+    public BaseResponse<Void> deleteActiveRooms(@PathVariable("roomId") final Long roomId,
+                                                @LoginUserId final Long userId) {
+        return BaseResponse.ok(roomService.putRoomsInactive(roomId, userId));
     }
 }

@@ -3,11 +3,11 @@ name: CD with Gradle and Docker
 on:
   push:
     branches:
-      - 'devlop'
+      - 'develop'
       - 'main'
   pull_request:
     branches:
-      - 'devlop'
+      - 'develop'
       - 'main'
 
 permissions:
@@ -20,7 +20,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: ☕️ set up JDK 17        # 프로젝트의 java 버전에 맞추어 설정
-        uses: actions/setup-java@v
+        uses: actions/setup-java@v3
         with:
           java-version: '17'
           distribution: 'temurin'
@@ -51,6 +51,7 @@ jobs:
             echo "✋🏻Stopping existing container"
             sudo docker stop bookjourney-backend
             sudo docker rm bookjourney-backend
+            sudo docker-compose down
         
             sudo docker ps -a
             
@@ -58,7 +59,10 @@ jobs:
             sudo docker pull ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE }}
             
             echo "🌱 Running new container"
-            sudo docker run -d -p 8000:8080 --name bookjourney-backend ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE }}
+            sudo docker run -d -p 8000:8080 --name bookjourney-backend \
+            -e JWT_SECRET="${{ secrets.JWT_SECRET }}" \
+            -e ALADIN_API_KEY="${{ secrets.ALADIN_API_KEY }}" \
+            ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE }}
 
             echo "🚮 Cleaning up old images"
             sudo docker image prune -f
