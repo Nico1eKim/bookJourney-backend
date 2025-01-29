@@ -71,11 +71,11 @@ spring:
   config:
     activate:
       on-profile: prod
-  #  datasource:
-  #    url: jdbc:mysql://:3306/book_journey
-  #    username: ${PROD_DB_USER}
-  #    password: ${PROD_DB_PASSWORD}
-  #    driver-class-name: com.mysql.cj.jdbc.Driver
+#  datasource:
+#    url: jdbc:mysql://:3306/book_journey
+#    username: ${PROD_DB_USER}
+#    password: ${PROD_DB_PASSWORD}
+#    driver-class-name: com.mysql.cj.jdbc.Driver
   datasource:
     url: jdbc:mysql://my-db:3306/mydb
     username: root
