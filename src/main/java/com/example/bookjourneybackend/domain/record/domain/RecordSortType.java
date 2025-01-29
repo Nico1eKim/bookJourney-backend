@@ -6,19 +6,19 @@ import lombok.Getter;
 import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.INVALID_RECORD_SORT_TYPE;
 
 @Getter
-public enum EntireRecordSortType {
+public enum RecordSortType {
 
     LATEST("최신 등록 순"), MOST_COMMENTS("답글 많은 순");
 
-    private final String entireRecordSortType;
+    private final String recordSortType;
 
-    EntireRecordSortType(String entireRecordSortType) {
-        this.entireRecordSortType = entireRecordSortType;
+    RecordSortType(String recordSortType) {
+        this.recordSortType = recordSortType;
     }
 
-    public static EntireRecordSortType from(String entireRecordSortType) throws GlobalException {
-        for (EntireRecordSortType type : EntireRecordSortType.values()) {
-            if (type.getEntireRecordSortType().equals(entireRecordSortType)) {
+    public static RecordSortType from(String recordSortType) throws GlobalException {
+        for (RecordSortType type : RecordSortType.values()) {
+            if (type.getRecordSortType().equals(recordSortType)) {
                 return type;
             }
         }

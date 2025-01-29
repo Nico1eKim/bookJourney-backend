@@ -1,6 +1,5 @@
 package com.example.bookjourneybackend.domain.record.controller;
 
-import com.example.bookjourneybackend.domain.record.domain.EntireRecordSortType;
 import com.example.bookjourneybackend.domain.record.dto.request.PostRecordRequest;
 import com.example.bookjourneybackend.domain.record.dto.response.GetEntireRecordResponse;
 import com.example.bookjourneybackend.domain.record.dto.response.PostRecordResponse;
