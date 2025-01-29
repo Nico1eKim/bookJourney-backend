@@ -16,8 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static com.example.bookjourneybackend.global.entity.EntityStatus.ACTIVE;
-import static com.example.bookjourneybackend.global.entity.EntityStatus.INACTIVE;
+import static com.example.bookjourneybackend.global.entity.EntityStatus.*;
 import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.*;
 
 @Service
@@ -39,6 +38,11 @@ public class RecordService {
         if (userRoom.getStatus() == INACTIVE) {
             userRoom.setStatus(ACTIVE);
             userRoomRepository.save(userRoom);
+        }
+
+        // 유저가 방에 속해 있지 않거나, 방에서 삭제된 경우 예외 발생
+        if (!userRoom.isMember() || userRoom.getStatus() == DELETED) {
+            throw new GlobalException(NOT_PARTICIPATING_IN_ROOM);
         }
 
         // recordType에 따른 필수값 검증
