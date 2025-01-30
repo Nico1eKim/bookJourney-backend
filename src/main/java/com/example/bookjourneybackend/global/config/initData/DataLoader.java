@@ -12,12 +12,15 @@ import com.example.bookjourneybackend.domain.user.domain.repository.FavoriteGenr
 import com.example.bookjourneybackend.domain.user.domain.repository.UserImageRepository;
 import com.example.bookjourneybackend.domain.user.domain.repository.UserRepository;
 import com.example.bookjourneybackend.domain.userRoom.domain.repository.UserRoomRepository;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 @Component
+@Order(1)
 @RequiredArgsConstructor
 public class DataLoader implements ApplicationRunner {
 
