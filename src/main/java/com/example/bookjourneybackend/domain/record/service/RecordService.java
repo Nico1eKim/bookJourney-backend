@@ -160,7 +160,7 @@ public class RecordService {
                             record.getRecordId(),
                             (record.getUser().getUserImage() != null) ? record.getUser().getUserImage().getImageUrl() : null,
                             record.getUser().getNickname(),
-                            record.getRoom().getBook().getPageCount(),
+                            record.getRecordPage(),
                             dateUtil.formDateTime(record.getCreatedAt()),
                             record.getContent(),
                             record.getComments().size(),
