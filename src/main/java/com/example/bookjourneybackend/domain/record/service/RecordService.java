@@ -93,7 +93,7 @@ public class RecordService {
 
         List<Record> records = findRecordsByRoomId(roomId, recordSortType)
                 .stream()
-                .filter(record -> record.getRecordType() == RecordType.ENTIRE)
+                .filter(this::isEntireRecord)
                 .collect(Collectors.toList());
 
         List<RecordInfo> recordInfoList = parseEntireRecordsToResponse(records, user);
@@ -111,15 +111,37 @@ public class RecordService {
         RecordSortType recordSortType = (sortType == null) ? PAGE_ORDER : RecordSortType.from(sortType);
 
         List<Record> records = findRecordsByRoomId(roomId, recordSortType).stream()
-                .filter(record -> record.getRecordType() == RecordType.PAGE)
-                .filter(record -> record.getRecordPage() != null && (
-                        (pageStart == null || record.getRecordPage() >= pageStart) &&
-                                (pageEnd == null || record.getRecordPage() <= pageEnd)
-                ))
+                .filter(this::isPageRecord)
+                .filter(record -> isWithinPageRange(record, pageStart, pageEnd))
                 .collect(Collectors.toList());
 
         List<RecordInfo> recordInfoList = parsePageRecordsToResponse(records, user);
         return GetRecordResponse.of(recordInfoList);
+    }
+
+    /**
+     * 전체 기록인지 확인
+     */
+    private boolean isEntireRecord(Record record) {
+        return record.getRecordType() == RecordType.ENTIRE;
+    }
+
+    /**
+     * 페이지 기록인지 확인
+     */
+    private boolean isPageRecord(Record record) {
+        return record.getRecordType() == RecordType.PAGE;
+    }
+
+
+    /**
+     * 기록의 페이지가 주어진 범위(pageStart, pageEnd) 내에 있는지 확인
+     */
+    private boolean isWithinPageRange(Record record, Integer pageStart, Integer pageEnd) {
+        Integer recordPage = record.getRecordPage();
+        return recordPage != null &&
+                (pageStart == null || recordPage >= pageStart) &&
+                (pageEnd == null || recordPage <= pageEnd);
     }
 
     /**
