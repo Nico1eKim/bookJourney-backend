@@ -36,8 +36,8 @@ jobs:
       - name: 🐳 Docker build & push
         run:  |
           docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
-          docker build -f Dockerfile -t ${{ secrets.DOCKER_IMAGE }} .
-          docker push ${{ secrets.DOCKER_IMAGE }}
+          # docker build -f Dockerfile -t ${{ secrets.DOCKER_IMAGE }} .
+          # docker push ${{ secrets.DOCKER_IMAGE }}
 
       - name: 🚀 deploy to server
         uses: appleboy/ssh-action@master
@@ -49,19 +49,26 @@ jobs:
           envs: GITHUB_SHA
           script: |
             echo "✋🏻Stopping existing container"
-            sudo docker stop ${{ secrets.DOCKER_IMAGE }} || true
-            sudo docker rm ${{ secrets.DOCKER_IMAGE }} || true
+            # sudo docker stop ${{ secrets.DOCKER_IMAGE }} || true
+            # sudo docker rm ${{ secrets.DOCKER_IMAGE }} || true
         
             sudo docker ps -a
+
+            cd bookJourney-backend
+            git pull origin develop
+            sudo docker-compose down -v
+
+            sudo docker-compose up -d
             
             echo "🥳 Pulling new image"
-            sudo docker pull ${{ secrets.DOCKER_IMAGE }}
+            # sudo docker pull ${{ secrets.DOCKER_IMAGE }}
             
             echo "🌱 Running new container"
-            sudo docker run -d -p 8000:8080 --name ${{ secrets.DOCKER_IMAGE }} \
-            -e JWT_SECRET="${{ secrets.JWT_SECRET }}" \
-            -e ALADIN_API_KEY="${{ secrets.ALADIN_API_KEY }}" \
-            ${{ secrets.DOCKER_IMAGE }}
+            # sudo docker run -d -p 8000:8080 --name ${{ secrets.DOCKER_IMAGE }} \
+            # -e SPRING_PROFILES_ACTIVE=prod \
+            # -e JWT_SECRET="${{ secrets.JWT_SECRET }}" \
+            # -e ALADIN_API_KEY="${{ secrets.ALADIN_API_KEY }}" \
+            # ${{ secrets.DOCKER_IMAGE }}
 
             echo "🚮 Cleaning up old images"
             sudo docker image prune -f
