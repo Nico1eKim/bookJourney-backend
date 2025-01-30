@@ -19,15 +19,18 @@ public class RoomController {
     private final RoomService roomService;
 
     @GetMapping("/{roomId}")
-    public BaseResponse<GetRoomDetailResponse> getRoomDetail(@PathVariable("roomId") final Long roomId) {
+    public BaseResponse<GetRoomDetailResponse> getRoomDetail(@PathVariable("roomId") final Long roomId,
+                                                             @LoginUserId final Long userId
+    ) {
 
-        return BaseResponse.ok(roomService.showRoomDetails(roomId));
+        return BaseResponse.ok(roomService.showRoomDetails(roomId, userId));
     }
 
     @GetMapping("/{roomId}/info")
-    public BaseResponse<GetRoomInfoResponse> getRoomInfo(@PathVariable("roomId") final Long roomId) {
+    public BaseResponse<GetRoomInfoResponse> getRoomInfo(@PathVariable("roomId") final Long roomId,
+                                                         @LoginUserId final Long userId) {
 
-        return BaseResponse.ok(roomService.showRoomInfo(roomId));
+        return BaseResponse.ok(roomService.showRoomInfo(roomId, userId));
     }
 
     @GetMapping("/search")

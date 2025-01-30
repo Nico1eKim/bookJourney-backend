@@ -55,7 +55,7 @@ public class RecordService {
         }
 
         // 유저가 방에 속해 있지 않거나, 방에서 삭제된 경우 예외 발생
-        if (!userRoom.isMember() || userRoom.getStatus() == DELETED) {
+        if (userRoom.getStatus() == DELETED) {
             throw new GlobalException(NOT_PARTICIPATING_IN_ROOM);
         }
 
