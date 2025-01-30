@@ -26,6 +26,7 @@ import static com.example.bookjourneybackend.domain.record.domain.RecordSortType
 import static com.example.bookjourneybackend.global.entity.EntityStatus.*;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.example.bookjourneybackend.domain.record.domain.RecordSortType.LATEST;
@@ -125,12 +126,14 @@ public class RecordService {
      * roomId와 기록의 정렬 순서로 기록 찾기
      */
     private List<Record> findRecordsByRoomId(Long roomId, RecordSortType sortType) {
-        return switch (sortType) {
+        Optional<List<Record>> records = switch (sortType) {
             case LATEST -> recordRepository.findRecordsOrderByLatest(roomId, sortType);
             case MOST_COMMENTS -> recordRepository.findRecordsOrderByMostComments(roomId, sortType);
             case PAGE_ORDER -> recordRepository.findRecordsOrderByPage(roomId, sortType);
             default -> throw new GlobalException(INVALID_RECORD_SORT_TYPE);
         };
+
+        return records.orElseThrow(() -> new GlobalException(RECORD_NOT_FOUND));
     }
 
     private List<RecordInfo> parseEntireRecordsToResponse(List<Record> records, User user) {
