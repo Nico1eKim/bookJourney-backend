@@ -1,6 +1,7 @@
 package com.example.bookjourneybackend.domain.room.service;
 
 import com.example.bookjourneybackend.domain.book.domain.GenreType;
+import com.example.bookjourneybackend.domain.record.domain.repository.RecordRepository;
 import com.example.bookjourneybackend.domain.room.domain.Room;
 import com.example.bookjourneybackend.domain.room.domain.SearchType;
 import com.example.bookjourneybackend.domain.room.domain.SortType;
@@ -51,11 +52,14 @@ public class RoomService {
     private final UserRoomRepository userRoomRepository;
     private final AladinApiUtil aladinApiUtil;
     private final DateUtil dateUtil;
+    private final RecordRepository recordRepository;
 
     /**
      * 방 상세정보 조회
      */
     public GetRoomDetailResponse showRoomDetails(Long roomId) {
+        log.info("------------------------[RoomService.showRoomDetails]------------------------");
+
         Room room = roomRepository.findById(roomId)
                 .orElseThrow(() -> new GlobalException(CANNOT_FOUND_ROOM));
         List<RoomMemberInfo> members = getRoomMemberInfoList(room);
@@ -79,6 +83,8 @@ public class RoomService {
      * 방 정보 조회
      */
     public GetRoomInfoResponse showRoomInfo(Long roomId) {
+        log.info("------------------------[RoomService.showRoomInfo]------------------------");
+
         Room room = roomRepository.findById(roomId)
                 .orElseThrow(() -> new GlobalException(CANNOT_FOUND_ROOM));
         List<RoomMemberInfo> members = getRoomMemberInfoList(room);
@@ -102,6 +108,8 @@ public class RoomService {
             String roomStartDate, String roomEndDate,
             Integer recordCount, Integer page
     ) {
+        log.info("------------------------[RoomService.searchRooms]------------------------");
+
         validateSearchParams(searchTerm, searchType, page);
 
         SearchType effectiveSearchType = SearchType.from(searchType);
@@ -313,6 +321,15 @@ public class RoomService {
     @Transactional
     public Void putRoomsInactive(Long roomId, Long userId) {
         log.info("------------------------[RoomService.putRoomsInactive]------------------------");
+        UserRoom userRoom = getUserRoom(roomId, userId);
+
+        userRoom.setStatus(EntityStatus.INACTIVE);
+        userRoomRepository.save(userRoom);
+
+        return null;
+    }
+
+    private UserRoom getUserRoom(Long roomId, Long userId) {
         Room room = roomRepository.findById(roomId)
                 .orElseThrow(() -> new GlobalException(CANNOT_FOUND_ROOM));
 
@@ -322,10 +339,51 @@ public class RoomService {
 
         UserRoom userRoom = userRoomRepository.findUserRoomByRoomAndUserAndStatus(room, user, ACTIVE)
                 .orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER_ROOM));
+        return userRoom;
+    }
 
-        userRoom.setStatus(EntityStatus.INACTIVE);
-        userRoomRepository.save(userRoom);
+    /**
+     * 혼자읽기일 경우 무조건 Room 삭제
+     * 같이읽기일 경우 UserRole= Member면 -> Room 삭제 X
+     * 같이읽기일 경우 UserRole= Host면 -> 자신만 남았다면 나갈수 있고 Room 삭제
+     */
+    @Transactional
+    public Void exitRoom(Long roomId, Long userId) {
+        log.info("------------------------[RoomService.exitRoom]------------------------");
+
+        UserRoom userRoom = getUserRoom(roomId, userId);
+        Room room = userRoom.getRoom();
+
+        if (room.getRoomType() == TOGETHER) {
+            handleTogetherRoomExit(userRoom, room);
+
+        } else {
+            roomRepository.delete(room);    // 혼자읽기 방은 나가면 방 삭제
+        }
 
         return null;
     }
+
+    private void handleTogetherRoomExit(UserRoom userRoom, Room room) {
+        if (userRoom.getUserRole() == UserRole.HOST) {
+            removeHostFromRoom(room);
+        } else {
+            removeMemberFromRoom(userRoom, room);
+        }
+    }
+
+    private void removeHostFromRoom(Room room) {
+        if (room.getUserRooms().size() == 1) {
+            roomRepository.delete(room);    // 같이읽기 방에서 방장이 혼자 남아 있는 있을때 방을 나가면 방 삭제
+        } else {
+            throw new GlobalException(HOST_CANNOT_LEAVE_ROOM);  // 같이읽기 방에서 방장이 혼자 남아 있지 않으면 방장은 나갈 수 없음
+        }
+    }
+
+    private void removeMemberFromRoom(UserRoom userRoom, Room room) {
+        recordRepository.deleteAllByRoomAndUser(room, userRoom.getUser());
+        userRoomRepository.delete(userRoom);    // 같이읽기 방에서 멤버가 나가도 방 삭제 X (해당 사용자와 관련된 방 정보 삭제)
+    }
+
+
 }
