@@ -100,7 +100,13 @@ public class UserService {
 
     }
 
+    /**
+     * db에서 존재하는 유저중에 해당닉네임이있다면 false반환 없다면 true반환
+     * @param NicknameValidationRequest
+     * @return PostUsersSignUpResponse
+     */
     public PostUsersNicknameValidationResponse validateNickname(PostUsersNicknameValidationRequest NicknameValidationRequest) {
+        log.info("[UserService.validateNickname]");
         return PostUsersNicknameValidationResponse.of(
                 !userRepository.existsByNicknameAndStatus(NicknameValidationRequest.getNickName(), ACTIVE));
     }
