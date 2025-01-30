@@ -66,6 +66,7 @@ public class BestSellerService {
                 Book newBestSeller = existingBookOptional
                         .map(existingBook -> {
                             //현재 이 장르의 베스트셀러가 다른 장르의 베스트셀러일 경우 두번째 베스트셀러를 저장
+                            //TODO 만약 두번째 베스트셀러도 이미 다른책의 베스트셀러일경우 ,,, --> N번째 책을 받아오는 형식으로 수정
                             if (existingBook.getGenre() != genre) {
                                 return aladinApiUtil.parseAladinApiResponseToBook(currentResponse, true,true);
                             }

@@ -46,10 +46,9 @@ public class UserService {
     private final TokenService tokenService;
 
     /**
-     * 1. 이미 회원가입 한 유저인지 중복검사
-     * 2. 회원가입 하려는 유저의 비밀번호는 암호화하여 db에 저장
-     * 3. 회원가입 할때 선택한 관심장르의 베스트셀러 bookId를 관심장르 테이블에 저장
-     * 4. 회원가입 한 유저가 바로 서비스 이용을 할 수 있도록 로그인과 동일하게 토큰 발급 및 인증된 사용자 권한 설정
+     * 1. 회원가입 하려는 유저의 비밀번호는 암호화하여 db에 저장
+     * 2. 회원가입 할때 선택한 관심장르의 베스트셀러 bookId를 관심장르 테이블에 저장
+     * 3. 회원가입 한 유저가 바로 서비스 이용을 할 수 있도록 로그인과 동일하게 토큰 발급 및 인증된 사용자 권한 설정
      * @param userSignUpRequest,request,response
      * @return PostUsersSignUpResponse
      */
@@ -57,9 +56,6 @@ public class UserService {
     public PostUsersSignUpResponse signup(PostUsersSignUpRequest userSignUpRequest,
                                           HttpServletRequest request, HttpServletResponse response) {
         log.info("[UserService.signUp]");
-        //이미 등록된 유저인지 찾기
-        if(userRepository.findByEmailAndStatus(userSignUpRequest.getEmail(),ACTIVE).isPresent())
-            throw new GlobalException(ALREADY_EXIST_USER);
 
         //비밀번호 암호화
         String encodedPassword = passwordEncoder.encode(userSignUpRequest.getPassword());
@@ -79,19 +75,17 @@ public class UserService {
                 .build();
 
         // 관심 장르 매핑
-        List<FavoriteGenre> favoriteGenres = userSignUpRequest.getFavoriteGenres().stream()
-                .map(genre -> FavoriteGenre.builder()
-                        .genre(GenreType.fromGenreType(genre.getGenreName()))  //장르 정보 매핑
-                        .user(newUser)  // 유저 정보 매핑
-                        .book(bookRepository.findByBestSellerTrueAndGenre(GenreType.fromGenreType(genre.getGenreName()))
-                                .orElseThrow(() -> new GlobalException(CANNOT_FOUND_BESTSELLER) //책 정보 매핑
-                        ))
-                        .build())
-                .toList();
+        userSignUpRequest.getFavoriteGenres().forEach(genre -> {
+            FavoriteGenre favoriteGenre = FavoriteGenre.builder()
+                    .genre(GenreType.fromGenreType(genre.getGenreName())) //장르 정보 매핑
+                    .book(bookRepository.findByBestSellerTrueAndGenre(GenreType.fromGenreType(genre.getGenreName()))
+                            .orElseThrow(() -> new GlobalException(CANNOT_FOUND_BESTSELLER))) //책 정보 매핑
+                    .build();
+            newUser.addFavoriteGenres(favoriteGenre); // 유저 정보 매핑
+        });
 
         userRepository.save(newUser);
         userImageRepository.save(userImage);
-        favoriteGenreRepository.saveAll(favoriteGenres);
 
         //토큰 발급
         String accessToken = jwtUtil.createAccessToken(newUser.getUserId());
