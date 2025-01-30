@@ -32,6 +32,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -386,4 +387,49 @@ public class RoomService {
     }
 
 
+
+    /**
+     * 방 참여
+     */
+    @Transactional
+    public PostJoinRoomResponse joinRoom(Long roomId, Long userId, Integer password) {
+        Room room = roomRepository.findById(roomId)
+                .orElseThrow(() -> new GlobalException(CANNOT_FOUND_ROOM));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER));
+
+        // 이미 방에 참여한 유저인지 확인
+        if (userRoomRepository.findUserRoomByRoomAndUser(room, user).isPresent()) {
+            throw new GlobalException(ALREADY_JOINED_ROOM);
+        }
+
+        // 모집 기간이 지났는지 확인
+        if (LocalDate.now().isAfter(room.getRecruitEndDate())) {
+            throw new GlobalException(ROOM_NOT_RECRUITING);
+        }
+
+        // 인원 초과 여부 확인
+        if (room.getUserRooms().size() >= room.getRecruitCount()) {
+            throw new GlobalException(ROOM_FULL);
+        }
+
+        // 비공개 방의 경우 비밀번호 확인
+        if (!room.isPublic()) {
+            if (room.getPassword() == null || !room.getPassword().equals(password)) {
+                throw new GlobalException(INVALID_ROOM_PASSWORD);
+            }
+        }
+
+        UserRoom userRoom = UserRoom.builder()
+                .user(user)
+                .room(room)
+                .userRole(UserRole.MEMBER)
+                .isMember(true)
+                .userPercentage(0.0)
+                .currentPage(0)
+                .build();
+        userRoomRepository.save(userRoom);
+
+        return PostJoinRoomResponse.of(room);
+    }
 }
