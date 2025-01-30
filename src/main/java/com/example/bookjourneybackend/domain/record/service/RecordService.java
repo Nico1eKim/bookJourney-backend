@@ -161,7 +161,7 @@ public class RecordService {
     private List<RecordInfo> parseEntireRecordsToResponse(List<Record> records, User user) {
         return records.stream()
                 .map(record -> {
-                    boolean isLiked = recordLikeRepository.existsByRecordAndUser(record, user);
+                    boolean isLiked = recordLikeRepository.existsByRecordAndUserAndRecordStatus(record, user, ACTIVE);
                     return RecordInfo.fromEntireRecord(
                             record.getUser().getUserId(),
                             record.getRecordId(),
@@ -180,7 +180,7 @@ public class RecordService {
     private List<RecordInfo> parsePageRecordsToResponse(List<Record> records, User user) {
         return records.stream()
                 .map(record -> {
-                    boolean isLiked = recordLikeRepository.existsByRecordAndUser(record, user);
+                    boolean isLiked = recordLikeRepository.existsByRecordAndUserAndRecordStatus(record, user, ACTIVE);
                     return RecordInfo.fromPageRecord(
                             record.getUser().getUserId(),
                             record.getRecordId(),
