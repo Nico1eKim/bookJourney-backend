@@ -58,12 +58,16 @@ public class RoomService {
     /**
      * 방 상세정보 조회
      */
-    public GetRoomDetailResponse showRoomDetails(Long roomId) {
+    public GetRoomDetailResponse showRoomDetails(Long roomId, Long userId) {
         log.info("------------------------[RoomService.showRoomDetails]------------------------");
 
         Room room = roomRepository.findById(roomId)
                 .orElseThrow(() -> new GlobalException(CANNOT_FOUND_ROOM));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER));
+
         List<RoomMemberInfo> members = getRoomMemberInfoList(room);
+        boolean isMember = userRoomRepository.existsByRoomAndUser(room, user);
 
         return GetRoomDetailResponse.of(
                 room.getRoomName(),
@@ -75,6 +79,7 @@ public class RoomService {
                 dateUtil.calculateDday(room.getRecruitEndDate()),   // D-day 계산
                 dateUtil.formatDate(room.getRecruitEndDate()),
                 room.getRecruitCount(),
+                isMember,
                 members // DELETED가 아닌 유저들만 포함
         );
 
@@ -83,12 +88,15 @@ public class RoomService {
     /**
      * 방 정보 조회
      */
-    public GetRoomInfoResponse showRoomInfo(Long roomId) {
+    public GetRoomInfoResponse showRoomInfo(Long roomId, Long userId) {
         log.info("------------------------[RoomService.showRoomInfo]------------------------");
-
         Room room = roomRepository.findById(roomId)
                 .orElseThrow(() -> new GlobalException(CANNOT_FOUND_ROOM));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER));
+
         List<RoomMemberInfo> members = getRoomMemberInfoList(room);
+        boolean isMember = userRoomRepository.existsByRoomAndUser(room, user);
 
         return GetRoomInfoResponse.of(
                 room.getBook().getBookTitle(),
@@ -96,6 +104,7 @@ public class RoomService {
                 room.isPublic(),
                 room.getRoomPercentage().intValue(),
                 dateUtil.calculateDday(room.getProgressEndDate()),
+                isMember,
                 members // DELETED가 아닌 유저들만 포함
         );
     }
@@ -422,7 +431,6 @@ public class RoomService {
                 .user(user)
                 .room(room)
                 .userRole(UserRole.MEMBER)
-                .isMember(true)
                 .userPercentage(0.0)
                 .currentPage(0)
                 .build();
