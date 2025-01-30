@@ -20,6 +20,7 @@ public enum BaseExceptionResponseStatus implements ResponseStatus{
      * 5000 : user 관련
      */
     CANNOT_FOUND_USER(5000,BAD_REQUEST, "유저를 찾을 수 없습니다."),
+    ALREADY_EXIST_USER(5001,BAD_REQUEST, "이미 회원가입 된 유저입니다."),
 
     /**
      * 6000 : book 관련

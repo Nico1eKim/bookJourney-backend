@@ -35,7 +35,7 @@ public class SecurityConfig {
             "/users/signup","/users/emails/verification-requests","/users/emails/verifications",
             "/users/nickname","/h2-console/**"
 
-            , "/books/**", "/rooms/**", "/**"    //개발을 위해 일시적으로 허용..,
+            , "/books/**", "/rooms/**", "/users/**","/**"    //개발을 위해 일시적으로 허용..,
     };
 
 
