@@ -58,6 +58,7 @@ public class Book extends BaseEntity {
     @Column(nullable = false, length = 500)
     private String imageUrl;
 
+    @Setter
     @Column(nullable = false)
     private boolean bestSeller; //베스트셀러 여부
 
