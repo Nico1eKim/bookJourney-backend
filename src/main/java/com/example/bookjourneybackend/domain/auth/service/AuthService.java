@@ -51,7 +51,7 @@ public class AuthService {
                 .orElseThrow(()-> new GlobalException(CANNOT_FOUND_EMAIL));
 
         // 암호화된 password를 디코딩한 값과 입력한 패스워드 값이 다르면 null 반환
-        // 회원가입시 암호화된 비밀번호 저장하는것으로 리펙토링
+        // TODO 회원가입시 암호화된 비밀번호 저장하는것으로 리펙토링
         //if(!passwordEncoder.matches(password,user.getPassword()))
         if(!user.getPassword().equals(password)) {
 //            log.info(password);
