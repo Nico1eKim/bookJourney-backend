@@ -278,7 +278,7 @@ public class RoomService {
     public GetRoomActiveResponse searchActiveRooms(String sort, Long userId) {
         log.info("------------------------[RoomService.searchActiveRooms]------------------------");
         log.info("sort: {}", sort);
-        SortType sortType = (sort == null)? LASTEST : SortType.from(sort);
+        SortType sortType = (sort == null) ? LASTEST : SortType.from(sort);
         List<UserRoom> userRooms = findUserRoomsBySortType(sortType, userId);
 
         return GetRoomActiveResponse.of(parsingUserRoomsToRecordInfo(userRooms));
@@ -415,7 +415,7 @@ public class RoomService {
 
         // 비공개 방의 경우 비밀번호 확인
         if (!room.isPublic()) {
-            if (room.getPassword() == null || !room.getPassword().equals(password)) {
+            if (!room.getPassword().equals(password)) {
                 throw new GlobalException(INVALID_ROOM_PASSWORD);
             }
         }

@@ -75,9 +75,9 @@ public class RoomController {
     @PostMapping("{roomId}")
     public BaseResponse<PostJoinRoomResponse> joinRoom(
             @PathVariable("roomId") final Long roomId,
-            @RequestBody @Valid final PostJoinRoomRequest postJoinRoomRequest,
+            @RequestParam(value = "password", required = false) Integer password,
             @LoginUserId final Long userId
     ) {
-        return BaseResponse.ok(roomService.joinRoom(roomId, userId, postJoinRoomRequest.getPassword()));
+        return BaseResponse.ok(roomService.joinRoom(roomId, userId, password));
     }
 }
