@@ -13,17 +13,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.authentication.AbstractAuthenticationToken;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-
-import java.util.Collections;
 
 import static com.example.bookjourneybackend.global.entity.EntityStatus.ACTIVE;
 import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.*;
@@ -40,6 +33,13 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
+    /**
+     * 1. 이메일로 등록된 회원인지 검사
+     * 2. 비밀번호 검사로 로그인
+     * 3. 토큰 발급 및 인증된 사용자 권한 설정
+     * @param authLoginRequest,request,response
+     * @return PostAuthLoginResponse
+     */
     @Transactional
     public PostAuthLoginResponse login(PostAuthLoginRequest authLoginRequest, HttpServletRequest request, HttpServletResponse response) {
         log.info("[AuthService.login]");
@@ -50,12 +50,7 @@ public class AuthService {
         User user = userRepository.findByEmailAndStatus(email,ACTIVE)
                 .orElseThrow(()-> new GlobalException(CANNOT_FOUND_EMAIL));
 
-        // 암호화된 password를 디코딩한 값과 입력한 패스워드 값이 다르면 null 반환
-        // TODO 회원가입시 암호화된 비밀번호 저장하는것으로 리펙토링
-        //if(!passwordEncoder.matches(password,user.getPassword()))
-        if(!user.getPassword().equals(password)) {
-//            log.info(password);
-//            log.info(user.getPassword());
+        if(!passwordEncoder.matches(password,user.getPassword())){
             throw new GlobalException(INVALID_PASSWORD);
         }
 
@@ -72,6 +67,13 @@ public class AuthService {
     }
 
 
+    /**
+     * 1. 리프레쉬 토큰 검증
+     * 2. 검증 후 리프레쉬 토큰 저장소에서 찾아옴
+     * 3. 검증된 리프레쉬 토큰으로 엑세스 토큰 재발급 및 인증된 사용자 권한 설정
+     * @param authAccessTokenReissueRequest,request,response
+     * @return PostAuthAccessTokenReissueResponse
+     */
     @Transactional(readOnly = true)
     public PostAuthAccessTokenReissueResponse tokenReissue(PostAuthAccessTokenReissueRequest authAccessTokenReissueRequest,
                                                            HttpServletResponse response, HttpServletRequest request) {
@@ -104,6 +106,12 @@ public class AuthService {
 
     }
 
+    /**
+     * 1. 로그인 된 유저인지 확인
+     * 2. 로그아웃
+     * 3. 토큰 무효화
+     * @param userId
+     */
     @Transactional
     public void logout(Long userId) {
         log.info("[AuthService.logout]");
@@ -114,6 +122,9 @@ public class AuthService {
 
         //리프레쉬 토큰 저장소에서 삭제
         tokenService.invalidateToken(userId);
+
+        // Spring Security에서 인증 정보 초기화
+        SecurityContextHolder.clearContext();  // 인증 정보 초기화
 
     }
 }
