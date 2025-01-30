@@ -22,6 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import static com.example.bookjourneybackend.domain.record.domain.RecordSortType.PAGE_ORDER;
 import static com.example.bookjourneybackend.global.entity.EntityStatus.*;
 
 import java.util.List;
@@ -106,7 +107,7 @@ public class RecordService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER));
 
-        RecordSortType recordSortType = (sortType == null) ? LATEST : RecordSortType.from(sortType);
+        RecordSortType recordSortType = (sortType == null) ? PAGE_ORDER : RecordSortType.from(sortType);
 
         List<Record> records = findRecordsByRoomId(roomId, recordSortType).stream()
                 .filter(record -> record.getRecordType() == RecordType.PAGE)
