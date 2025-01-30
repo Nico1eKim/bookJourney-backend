@@ -49,9 +49,8 @@ jobs:
           envs: GITHUB_SHA
           script: |
             echo "✋🏻Stopping existing container"
-            sudo docker stop bookjourney-backend
-            sudo docker rm bookjourney-backend
-            sudo docker-compose down
+            sudo docker stop ${{ secrets.DOCKER_IMAGE }}
+            sudo docker rm ${{ secrets.DOCKER_IMAGE }}
         
             sudo docker ps -a
             
@@ -59,7 +58,7 @@ jobs:
             sudo docker pull ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE }}
             
             echo "🌱 Running new container"
-            sudo docker run -d -p 8000:8080 --name bookjourney-backend \
+            sudo docker run -d -p 8000:8080 --name ${{ secrets.DOCKER_IMAGE }} \
             -e JWT_SECRET="${{ secrets.JWT_SECRET }}" \
             -e ALADIN_API_KEY="${{ secrets.ALADIN_API_KEY }}" \
             ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE }}
