@@ -7,7 +7,7 @@ import com.example.bookjourneybackend.domain.record.domain.repository.RecordLike
 import com.example.bookjourneybackend.domain.record.domain.repository.RecordRepository;
 import com.example.bookjourneybackend.domain.record.dto.request.PostRecordRequest;
 import com.example.bookjourneybackend.domain.record.dto.response.RecordInfo;
-import com.example.bookjourneybackend.domain.record.dto.response.GetEntireRecordResponse;
+import com.example.bookjourneybackend.domain.record.dto.response.GetRecordResponse;
 import com.example.bookjourneybackend.domain.record.dto.response.PostRecordResponse;
 import com.example.bookjourneybackend.domain.room.domain.Room;
 import com.example.bookjourneybackend.domain.room.domain.repository.RoomRepository;
@@ -22,8 +22,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import static com.example.bookjourneybackend.domain.record.domain.RecordSortType.PAGE_ORDER;
 import static com.example.bookjourneybackend.global.entity.EntityStatus.*;
+
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.example.bookjourneybackend.domain.record.domain.RecordSortType.LATEST;
@@ -82,9 +85,7 @@ public class RecordService {
      * 특정 방(roomId)의 전체 기록 조회
      */
     @Transactional(readOnly = true)
-    public GetEntireRecordResponse showEntireRecords(Long roomId, Long userId, String sortType) {
-        Room room = roomRepository.findById(roomId)
-                .orElseThrow(() -> new GlobalException(CANNOT_FOUND_ROOM));
+    public GetRecordResponse showEntireRecords(Long roomId, Long userId, String sortType) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER));
 
@@ -92,34 +93,100 @@ public class RecordService {
 
         List<Record> records = findRecordsByRoomId(roomId, recordSortType)
                 .stream()
-                .filter(record -> record.getRecordType() == RecordType.ENTIRE)
+                .filter(this::isEntireRecord)
                 .collect(Collectors.toList());
 
         List<RecordInfo> recordInfoList = parseEntireRecordsToResponse(records, user);
-        return GetEntireRecordResponse.of(recordInfoList);
+        return GetRecordResponse.of(recordInfoList);
     }
 
     /**
-     * roomId와 전체 기록의 정렬 순서로 기록 찾기
+     * 특정 방(roomId)의 페이지 별 기록 조회
+     */
+    @Transactional(readOnly = true)
+    public GetRecordResponse showPageRecords(Long roomId, Long userId, String sortType, Integer pageStart, Integer pageEnd) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER));
+
+        RecordSortType recordSortType = (sortType == null) ? PAGE_ORDER : RecordSortType.from(sortType);
+
+        List<Record> records = findRecordsByRoomId(roomId, recordSortType).stream()
+                .filter(this::isPageRecord)
+                .filter(record -> isWithinPageRange(record, pageStart, pageEnd))
+                .collect(Collectors.toList());
+
+        List<RecordInfo> recordInfoList = parsePageRecordsToResponse(records, user);
+        return GetRecordResponse.of(recordInfoList);
+    }
+
+    /**
+     * 전체 기록인지 확인
+     */
+    private boolean isEntireRecord(Record record) {
+        return record.getRecordType() == RecordType.ENTIRE;
+    }
+
+    /**
+     * 페이지 기록인지 확인
+     */
+    private boolean isPageRecord(Record record) {
+        return record.getRecordType() == RecordType.PAGE;
+    }
+
+
+    /**
+     * 기록의 페이지가 주어진 범위(pageStart, pageEnd) 내에 있는지 확인
+     */
+    private boolean isWithinPageRange(Record record, Integer pageStart, Integer pageEnd) {
+        Integer recordPage = record.getRecordPage();
+        return recordPage != null &&
+                (pageStart == null || recordPage >= pageStart) &&
+                (pageEnd == null || recordPage <= pageEnd);
+    }
+
+    /**
+     * roomId와 기록의 정렬 순서로 기록 찾기
      */
     private List<Record> findRecordsByRoomId(Long roomId, RecordSortType sortType) {
-        return switch (sortType) {
+        Optional<List<Record>> records = switch (sortType) {
             case LATEST -> recordRepository.findRecordsOrderByLatest(roomId, sortType);
             case MOST_COMMENTS -> recordRepository.findRecordsOrderByMostComments(roomId, sortType);
+            case PAGE_ORDER -> recordRepository.findRecordsOrderByPage(roomId, sortType);
             default -> throw new GlobalException(INVALID_RECORD_SORT_TYPE);
         };
+
+        return records.orElseThrow(() -> new GlobalException(RECORD_NOT_FOUND));
     }
 
     private List<RecordInfo> parseEntireRecordsToResponse(List<Record> records, User user) {
         return records.stream()
                 .map(record -> {
-                    boolean isLiked = recordLikeRepository.existsByRecordAndUser(record, user);
+                    boolean isLiked = recordLikeRepository.existsByRecordAndUserAndRecordStatus(record, user, ACTIVE);
                     return RecordInfo.fromEntireRecord(
                             record.getUser().getUserId(),
                             record.getRecordId(),
                             (record.getUser().getUserImage() != null) ? record.getUser().getUserImage().getImageUrl() : null,
                             record.getUser().getNickname(),
                             record.getRecordTitle(),
+                            dateUtil.formDateTime(record.getCreatedAt()),
+                            record.getContent(),
+                            record.getComments().size(),
+                            record.getRecordLikes().size(),
+                            isLiked
+                    );
+                }).collect(Collectors.toList());
+    }
+
+    private List<RecordInfo> parsePageRecordsToResponse(List<Record> records, User user) {
+        return records.stream()
+                .map(record -> {
+                    boolean isLiked = recordLikeRepository.existsByRecordAndUserAndRecordStatus(record, user, ACTIVE);
+                    return RecordInfo.fromPageRecord(
+                            record.getUser().getUserId(),
+                            record.getRecordId(),
+                            (record.getUser().getUserImage() != null) ? record.getUser().getUserImage().getImageUrl() : null,
+                            record.getUser().getNickname(),
+                            record.getRecordPage(),
                             dateUtil.formDateTime(record.getCreatedAt()),
                             record.getContent(),
                             record.getComments().size(),

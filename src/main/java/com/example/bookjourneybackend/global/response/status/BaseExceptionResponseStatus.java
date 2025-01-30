@@ -20,6 +20,7 @@ public enum BaseExceptionResponseStatus implements ResponseStatus {
      * 5000 : user 관련
      */
     CANNOT_FOUND_USER(5000, BAD_REQUEST, "유저를 찾을 수 없습니다."),
+    ALREADY_EXIST_USER(5001, BAD_REQUEST, "이미 회원가입 된 유저입니다."),
 
     /**
      * 6000 : book 관련
@@ -67,7 +68,7 @@ public enum BaseExceptionResponseStatus implements ResponseStatus {
     /**
      * 9000 : record 관련
      */
-    RECORD_NOT_FOUND(9001, BAD_REQUEST, "알맞은 기록 타입을 찾을 수 없습니다."),
+    RECORD_NOT_FOUND(9001, BAD_REQUEST, "기록을 찾을 수 없습니다."),
 
     INVALID_RECORD_TYPE(9002, BAD_REQUEST, "알맞은 기록 타입을 찾을 수 없습니다."),
     INVALID_RECORD_PAGE(9002, BAD_REQUEST, "페이지 번호를 입력해주세요."),

@@ -7,15 +7,15 @@ import java.util.List;
 
 @Getter
 @NoArgsConstructor
-public class GetEntireRecordResponse {
+public class GetRecordResponse {
 
     private List<RecordInfo> recordList;
 
-    public GetEntireRecordResponse(List<RecordInfo> entireRecords) {
+    public GetRecordResponse(List<RecordInfo> entireRecords) {
         this.recordList = entireRecords;
     }
 
-    public static GetEntireRecordResponse of(List<RecordInfo> entireRecords) {
-        return new GetEntireRecordResponse(entireRecords);
+    public static GetRecordResponse of(List<RecordInfo> entireRecords) {
+        return new GetRecordResponse(entireRecords);
     }
 }

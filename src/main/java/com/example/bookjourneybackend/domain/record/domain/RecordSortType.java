@@ -8,7 +8,7 @@ import static com.example.bookjourneybackend.global.response.status.BaseExceptio
 @Getter
 public enum RecordSortType {
 
-    LATEST("최신 등록 순"), MOST_COMMENTS("답글 많은 순");
+    LATEST("최신 등록순"), MOST_COMMENTS("답글 많은 순"), PAGE_ORDER("페이지순");
 
     private final String recordSortType;
 
