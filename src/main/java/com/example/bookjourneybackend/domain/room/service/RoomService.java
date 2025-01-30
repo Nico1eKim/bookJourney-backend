@@ -33,6 +33,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -229,7 +230,7 @@ public class RoomService {
         String requestUrl = aladinApiUtil.buildLookUpApiUrl(isbn);
         String currentResponse = aladinApiUtil.requestBookInfoFromAladinApi(requestUrl);
 
-        return aladinApiUtil.parseAladinApiResponseToBook(currentResponse,false);
+        return aladinApiUtil.parseAladinApiResponseToBook(currentResponse, false);
     }
 
     //유저 정보를 통해 UserRoom 객체 생성
@@ -270,7 +271,7 @@ public class RoomService {
     public GetRoomActiveResponse searchActiveRooms(String sort, Long userId) {
         log.info("------------------------[RoomService.searchActiveRooms]------------------------");
         log.info("sort: {}", sort);
-        SortType sortType = (sort == null)? LASTEST : SortType.from(sort);
+        SortType sortType = (sort == null) ? LASTEST : SortType.from(sort);
         List<UserRoom> userRooms = findUserRoomsBySortType(sortType, userId);
 
         return GetRoomActiveResponse.of(parsingUserRoomsToRecordInfo(userRooms));
@@ -357,7 +358,7 @@ public class RoomService {
 
         // 비공개 방의 경우 비밀번호 확인
         if (!room.isPublic()) {
-            if (room.getPassword() == null || !room.getPassword().equals(password)) {
+            if (!room.getPassword().equals(password)) {
                 throw new GlobalException(INVALID_ROOM_PASSWORD);
             }
         }
