@@ -30,4 +30,5 @@ public interface UserRoomRepository extends JpaRepository<UserRoom, Long> {
 
     Optional<UserRoom> findUserRoomByRoomAndUserAndStatus(Room room, User user, EntityStatus status);
 
+    boolean existsByRoomAndUser(Room room, User user);
 }

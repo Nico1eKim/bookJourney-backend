@@ -399,7 +399,7 @@ public class RoomService {
                 .orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER));
 
         // 이미 방에 참여한 유저인지 확인
-        if (userRoomRepository.findUserRoomByRoomAndUser(room, user).isPresent()) {
+        if (userRoomRepository.existsByRoomAndUser(room, user)) {
             throw new GlobalException(ALREADY_JOINED_ROOM);
         }
 
