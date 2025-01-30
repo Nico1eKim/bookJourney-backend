@@ -357,10 +357,8 @@ public class RoomService {
         }
 
         // 비공개 방의 경우 비밀번호 확인
-        if (!room.isPublic()) {
-            if (!room.getPassword().equals(password)) {
-                throw new GlobalException(INVALID_ROOM_PASSWORD);
-            }
+        if (!room.isPublic() && !Objects.equals(room.getPassword(), password)) {
+            throw new GlobalException(INVALID_ROOM_PASSWORD);
         }
 
         UserRoom userRoom = UserRoom.builder()
