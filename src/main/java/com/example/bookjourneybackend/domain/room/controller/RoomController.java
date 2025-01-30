@@ -1,6 +1,5 @@
 package com.example.bookjourneybackend.domain.room.controller;
 
-import com.example.bookjourneybackend.domain.room.dto.request.PostJoinRoomRequest;
 import com.example.bookjourneybackend.domain.room.dto.request.PostRoomCreateRequest;
 import com.example.bookjourneybackend.domain.room.dto.response.*;
 import com.example.bookjourneybackend.domain.room.service.RoomService;
