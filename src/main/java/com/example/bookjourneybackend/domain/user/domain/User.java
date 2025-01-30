@@ -33,7 +33,7 @@ public class User extends BaseEntity{
     @Column(name = "password", nullable = false, length = 255)
     private String password;
 
-    @Column(name = "nickname", nullable = false, length = 90)
+    @Column(name = "nickname", nullable = false, length = 20)
     private String nickname;
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
