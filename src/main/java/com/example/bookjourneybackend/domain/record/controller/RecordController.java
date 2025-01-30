@@ -28,19 +28,19 @@ public class RecordController {
         return BaseResponse.ok(recordService.createRecord(postRecordRequest, roomId, userId));
     }
 
-    @GetMapping("/{roomId}/entire/{userId}")
+    @GetMapping("/{roomId}/entire")
     public BaseResponse<GetRecordResponse> getEntireRecords(
             @PathVariable("roomId") Long roomId,
-            @PathVariable("userId") Long userId,
+            @LoginUserId final Long userId,
             @RequestParam(value = "sortingType", required = false, defaultValue = "최신 등록순") String sortingType) {
 
         return BaseResponse.ok(recordService.showEntireRecords(roomId, userId, sortingType));
     }
 
-    @GetMapping("/{roomId}/page/{userId}")
+    @GetMapping("/{roomId}/page")
     public BaseResponse<GetRecordResponse> getPageRecords(
             @PathVariable("roomId") Long roomId,
-            @PathVariable("userId") Long userId,
+            @LoginUserId final Long userId,
             @RequestParam(value = "sortingType", required = false, defaultValue = "페이지순") String sortingType,
             @RequestParam(value = "pageStart", required = false) Integer pageStart,
             @RequestParam(value = "pageEnd", required = false) Integer pageEnd
