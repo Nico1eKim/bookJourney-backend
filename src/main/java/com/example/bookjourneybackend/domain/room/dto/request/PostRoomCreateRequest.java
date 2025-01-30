@@ -1,5 +1,6 @@
 package com.example.bookjourneybackend.domain.room.dto.request;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.*;
 import lombok.AccessLevel;
@@ -10,6 +11,7 @@ import java.time.LocalDateTime;
 
 @Getter
 @NoArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class PostRoomCreateRequest {
 
     private boolean isPublic;
