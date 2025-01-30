@@ -66,4 +66,10 @@ public class DateUtil {
     public LocalDate parseToLocalDate(String date) {
         return LocalDate.parse(date, DateTimeFormatter.ofPattern("yyyy.MM.dd"));
     }
+
+    // LocalDateTime을 문자열(2024.11.14 23:04:28 형태)로 변환
+    public String formDateTime(LocalDateTime dateTime) {
+        return dateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+    }
+
 }
