@@ -228,7 +228,7 @@ public class RoomService {
         String requestUrl = aladinApiUtil.buildLookUpApiUrl(isbn);
         String currentResponse = aladinApiUtil.requestBookInfoFromAladinApi(requestUrl);
 
-        return aladinApiUtil.parseAladinApiResponseToBook(currentResponse,false);
+        return aladinApiUtil.parseAladinApiResponseToBook(currentResponse,false,false);
     }
 
     //유저 정보를 통해 UserRoom 객체 생성

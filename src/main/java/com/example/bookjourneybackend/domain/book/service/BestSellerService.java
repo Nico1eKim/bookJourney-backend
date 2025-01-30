@@ -3,7 +3,6 @@ package com.example.bookjourneybackend.domain.book.service;
 import com.example.bookjourneybackend.domain.book.domain.Book;
 import com.example.bookjourneybackend.domain.book.domain.GenreType;
 import com.example.bookjourneybackend.domain.book.domain.repository.BookRepository;
-import com.example.bookjourneybackend.domain.book.dto.response.GetBookInfoResponse;
 import com.example.bookjourneybackend.domain.user.domain.FavoriteGenre;
 import com.example.bookjourneybackend.domain.user.domain.repository.FavoriteGenreRepository;
 import com.example.bookjourneybackend.global.exception.GlobalException;
@@ -57,22 +56,27 @@ public class BestSellerService {
                 // 기존 DB에서 책 찾기
                 Optional<Book> existingBookOptional = bookRepository.findByIsbn(isbn);
 
-                // 기존 DB에 존재하고 여전히 베스트셀러라면 다른 장르로 건너뛰기
-                if (existingBookOptional.isPresent() && existingBookOptional.get().isBestSeller()) {
+                // 기존 DB에 존재하고 여전히 베스트셀러이면서 같은 장르이면 다른 장르로 건너뛰기
+                if (existingBookOptional.isPresent() && existingBookOptional.get().isBestSeller()
+                        && existingBookOptional.get().getGenre() == genre) {
                     continue;
                 }
 
                 // 기존 책이 있으면 베스트셀러 여부만 변경, 없으면 새로 저장
                 Book newBestSeller = existingBookOptional
                         .map(existingBook -> {
+                            //현재 이 장르의 베스트셀러가 다른 장르의 베스트셀러일 경우 두번째 베스트셀러를 저장
+                            if (existingBook.getGenre() != genre) {
+                                return aladinApiUtil.parseAladinApiResponseToBook(currentResponse, true,true);
+                            }
                             existingBook.setBestSeller(true);
                             return existingBook;
                         })
-                        .orElseGet(() -> aladinApiUtil.parseAladinApiResponseToBook(currentResponse,true));
+                        .orElseGet(() -> aladinApiUtil.parseAladinApiResponseToBook(currentResponse,true,false));
 
                 bookRepository.save(newBestSeller); // 업데이트 후 저장
 
-//                // 기존 베스트셀러와 관심 장르 정보 업데이트
+               // 기존 베스트셀러와 관심 장르 정보 업데이트
                 updateFavoriteGenres(oldBestSeller, newBestSeller);
                 deleteOldBestsellers(oldBestSeller);
 
@@ -113,6 +117,7 @@ public class BestSellerService {
 
         //기존 베스트 셀러 여부 바꾸기
         oldBestSeller.setBestSeller(false);
+        bookRepository.save(oldBestSeller);
         //이 책에해당하는 방이 없거나, 이책을 즐겨찾기 한사람이 없으면 db에서 삭제
         if(oldBestSeller.getRooms().isEmpty() && oldBestSeller.getFavorites().isEmpty()) {
             bookRepository.delete(oldBestSeller);

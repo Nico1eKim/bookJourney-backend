@@ -39,7 +39,7 @@ public class AladinApiUtil {
     private final String ALADIN_ITEM_LIST_PATH = "/ItemList.aspx";   //상품 리스트 API (베스트셀러 조회용)
 
     private final int SEARCH_MAX_RESULTS = 10; //최대 책 검색 결과 개수
-    private final int BESTSELLER_MAX_RESULTS = 1;
+    private final int BESTSELLER_MAX_RESULTS = 2;
     private final String OUTPUT = "js"; // 응답 포맷 (xml 또는 json)
     private final int VERSION = 20131101;
     private final String BESTSELLER = "Bestseller";
@@ -66,7 +66,7 @@ public class AladinApiUtil {
                 request.getPage(),
                 SEARCH_MAX_RESULTS,
                 OUTPUT,
-                request.getGenreType()==null? null: request.getGenreType().getCategoryId(),
+                request.getGenreType() == null ? null : request.getGenreType().getCategoryId(),
                 COVER_SIZE
         );
     }
@@ -123,51 +123,54 @@ public class AladinApiUtil {
         }
     }
 
-    public Book parseAladinApiResponseToBook(String currentResponse,boolean isBestseller) {
+    public Book parseAladinApiResponseToBook(String currentResponse, boolean isBestseller, boolean getSecondItem) {
         try {
-            //JSON 형식 오류 허용 -> "Unrecognized character escape ''' (code 39)" 에러 해결용
             objectMapper.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
             objectMapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
-//            currentResponse = currentResponse.replace("'", "\"");
 
             JsonNode root = objectMapper.readTree(currentResponse);
             String searchCategoryName = root.get("searchCategoryName").asText();
             JsonNode items = root.get("item");
 
             if (items != null && items.isArray()) {
-                for (JsonNode item : items) {
-                    String title = item.get("title").asText();
-                    String author = item.get("author").asText();
+                JsonNode selectedItem;
 
-//                    isbn 13자리가 비어있는 경우 10자리 사용
-                    String isbn = item.has("isbn13") && !item.get("isbn13").asText().isEmpty()
-                            ? item.get("isbn13").asText()
-                            : item.get("isbn").asText();
-                    String imageUrl = item.get("cover").asText();
+                selectedItem = items.get(0); // 첫 번째 아이템
 
-//                    String link = item.get("link").asText();
-                    String description = item.get("description").asText();
-//                    String categoryName = item.get("categoryName").asText();
-                    String publisher = item.get("publisher").asText();
-                    String publishedDate = item.get("pubDate").asText();
-
-                    //전체 페이지 수 파싱
-                    Integer pageCount = item.has("bookinfo") && item.get("bookinfo").has("itemPage")
-                            ? item.get("bookinfo").get("itemPage").asInt() : null;
-
-                    return Book.builder()
-                            .isbn(isbn)
-                            .bookTitle(title)
-                            .authorName(author)
-                            .genre(GenreType.parsingGenreType(searchCategoryName))
-                            .publisher(publisher)
-                            .publishedDate(LocalDate.parse(publishedDate, DateTimeFormatter.ofPattern("yyyy-MM-dd")))
-                            .description(description)
-                            .imageUrl(imageUrl)
-                            .bestSeller(isBestseller)
-                            .pageCount(pageCount)
-                            .build();
+                // getSecondItem이 true면 두 번째 아이템을 가져오고, 아니면 첫 번째 아이템을 가져옴
+                if (getSecondItem) {
+                    selectedItem = items.get(1); // 두 번째 아이템
                 }
+
+                String title = selectedItem.get("title").asText();
+                String author = selectedItem.get("author").asText();
+
+//              isbn 13자리가 비어있는 경우 10자리 사용
+                String isbn = selectedItem.has("isbn13") && !selectedItem.get("isbn13").asText().isEmpty()
+                        ? selectedItem.get("isbn13").asText()
+                        : selectedItem.get("isbn").asText();
+                String imageUrl = selectedItem.get("cover").asText();
+
+                String description = selectedItem.get("description").asText();
+                String publisher = selectedItem.get("publisher").asText();
+                String publishedDate = selectedItem.get("pubDate").asText();
+
+                //전체 페이지 수 파싱
+                Integer pageCount = selectedItem.has("bookinfo") && selectedItem.get("bookinfo").has("itemPage")
+                        ? selectedItem.get("bookinfo").get("itemPage").asInt() : null;
+
+                return Book.builder()
+                        .isbn(isbn)
+                        .bookTitle(title)
+                        .authorName(author)
+                        .genre(GenreType.parsingGenreType(searchCategoryName))
+                        .publisher(publisher)
+                        .publishedDate(LocalDate.parse(publishedDate, DateTimeFormatter.ofPattern("yyyy-MM-dd")))
+                        .description(description)
+                        .imageUrl(imageUrl)
+                        .bestSeller(isBestseller)
+                        .pageCount(pageCount)
+                        .build();
             }
         } catch (JsonProcessingException e) {
             log.info("Json 파싱 에러 메시지: {}", e.getMessage());
@@ -185,7 +188,7 @@ public class AladinApiUtil {
             JsonNode root = objectMapper.readTree(currentResponse);
             JsonNode items = root.get("item");
 
-            if (items != null && items.isArray() ) {
+            if (items != null && items.isArray()) {
                 JsonNode firstItem = items.get(0); // 첫 번째 아이템 가져오기
                 String isbn = firstItem.has("isbn13") && !firstItem.get("isbn13").asText().isEmpty()
                         ? firstItem.get("isbn13").asText()
