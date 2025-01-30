@@ -11,10 +11,6 @@ import java.util.List;
 @NoArgsConstructor
 public class PostUsersSignUpRequest {
 
-    /**
-     * 로그인 request dto
-     */
-
     @NotBlank(message = "이메일은 필수 입력 항목입니다.")
     private String email;
 
@@ -27,7 +23,6 @@ public class PostUsersSignUpRequest {
     @NotBlank(message = "프로필 사진은 필수입니다.")
     private String imageUrl;
 
-    @NotBlank(message = "장르 선택은 필수입니다.")
     private List<favoriteGenres> favoriteGenres;
 
     @Builder
