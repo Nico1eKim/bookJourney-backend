@@ -15,7 +15,7 @@ public class RecordInfo {
     private String imageUrl;
     private String nickName;
     private String recordTitle;  // 전체 기록에서 사용
-    private Integer bookPage;     // 페이지 기록에서 사용
+    private Integer recordPage;     // 페이지 기록에서 사용
     private String createdAt;
     private String content;
     private Integer commentCount;
@@ -23,14 +23,14 @@ public class RecordInfo {
     private boolean isLike;
 
     public static RecordInfo fromPageRecord(Long userId, Long recordId, String imageUrl, String nickName,
-                                            Integer bookPage, String createdAt, String content,
+                                            Integer recordPage, String createdAt, String content,
                                             Integer commentCount, Integer recordLikeCount, boolean isLike) {
         return RecordInfo.builder()
                 .userId(userId)
                 .recordId(recordId)
                 .imageUrl(imageUrl)
                 .nickName(nickName)
-                .bookPage(bookPage)
+                .recordPage(recordPage)
                 .createdAt(createdAt)
                 .content(content)
                 .commentCount(commentCount)
