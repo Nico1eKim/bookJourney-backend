@@ -2,12 +2,15 @@ services:
   my-server:
     build: .
     ports:
-      - 8080:8080
+      - 8000:8080
     depends_on:
       my-db:
         condition: service_healthy
       my-cache-server:
         condition: service_healthy
+    env_file:
+      - .env
+
   my-db:
     image: mysql:latest
     environment:
@@ -15,6 +18,8 @@ services:
       MYSQL_DATABASE: mydb
     ports:
       - 3307:3306
+    volumes:
+      - mysql_data:/var/lib/mysql
     healthcheck:
       test: [ "CMD", "mysqladmin", "ping" ]
       interval: 5s
@@ -24,7 +29,13 @@ services:
     image: redis
     ports:
       - 6379:6379
+    volumes:
+      - redis_data:/data
     healthcheck:
       test: [ "CMD", "redis-cli", "ping" ]
       interval: 5s
       retries: 10
+
+volumes:
+  mysql_data:
+  redis_data:
