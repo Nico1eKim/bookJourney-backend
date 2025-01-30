@@ -73,19 +73,17 @@ public class UserService {
                 .build();
 
         // 관심 장르 매핑
-        List<FavoriteGenre> favoriteGenres = userSignUpRequest.getFavoriteGenres().stream()
-                .map(genre -> FavoriteGenre.builder()
-                        .genre(GenreType.fromGenreType(genre.getGenreName()))  //장르 정보 매핑
-                        .user(newUser)  // 유저 정보 매핑
-                        .book(bookRepository.findByBestSellerTrueAndGenre(GenreType.fromGenreType(genre.getGenreName()))
-                                .orElseThrow(() -> new GlobalException(CANNOT_FOUND_BESTSELLER) //책 정보 매핑
-                        ))
-                        .build())
-                .toList();
+        userSignUpRequest.getFavoriteGenres().forEach(genre -> {
+            FavoriteGenre favoriteGenre = FavoriteGenre.builder()
+                    .genre(GenreType.fromGenreType(genre.getGenreName())) //장르 정보 매핑
+                    .book(bookRepository.findByBestSellerTrueAndGenre(GenreType.fromGenreType(genre.getGenreName()))
+                            .orElseThrow(() -> new GlobalException(CANNOT_FOUND_BESTSELLER))) //책 정보 매핑
+                    .build();
+            newUser.addFavoriteGenres(favoriteGenre); // 유저 정보 매핑
+        });
 
         userRepository.save(newUser);
         userImageRepository.save(userImage);
-        favoriteGenreRepository.saveAll(favoriteGenres);
 
         //토큰 발급
         String accessToken = jwtUtil.createAccessToken(newUser.getUserId());
