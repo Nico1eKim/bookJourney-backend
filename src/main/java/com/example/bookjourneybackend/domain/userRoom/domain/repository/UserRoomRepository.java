@@ -16,13 +16,13 @@ import java.util.Optional;
 public interface UserRoomRepository extends JpaRepository<UserRoom, Long> {
     @Query("SELECT ur FROM UserRoom ur " +
             "JOIN FETCH ur.room r " +
-            "WHERE ur.user.userId = :userId AND ur.status = 'ACTIVE' AND ur.isMember = true " +
+            "WHERE ur.user.userId = :userId AND ur.status = 'ACTIVE'" +
             "ORDER BY (SELECT MAX(rec.modifiedAt) FROM Record rec WHERE rec.room = r) DESC ")
     List<UserRoom> findUserRoomsOrderByModifiedAt(@Param("userId") Long userId);
 
     @Query("SELECT ur FROM UserRoom ur " +
             "JOIN FETCH ur.room r " +
-            "WHERE ur.user.userId = :userId AND ur.status = 'ACTIVE' AND ur.isMember = true " +
+            "WHERE ur.user.userId = :userId AND ur.status = 'ACTIVE'" +
             "ORDER BY ur.userPercentage DESC")
     List<UserRoom> findUserRoomsOrderByUserPercentage(@Param("userId") Long userId);
 
@@ -30,4 +30,5 @@ public interface UserRoomRepository extends JpaRepository<UserRoom, Long> {
 
     Optional<UserRoom> findUserRoomByRoomAndUserAndStatus(Room room, User user, EntityStatus status);
 
+    boolean existsByRoomAndUser(Room room, User user);
 }

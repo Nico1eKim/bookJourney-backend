@@ -13,9 +13,10 @@ public class GetRoomInfoResponse {
     private boolean isPublic;
     private int roomPercentage;
     private String progressEndDate;
+    private boolean isMember;
     private List<RoomMemberInfo> memberList;
 
-    public static GetRoomInfoResponse of(String bookTitle, String roomName, boolean isPublic, int roomPercentage, String progressEndDate, List<RoomMemberInfo> memberList) {
-        return new GetRoomInfoResponse(bookTitle, roomName, isPublic, roomPercentage, progressEndDate, memberList);
+    public static GetRoomInfoResponse of(String bookTitle, String roomName, boolean isPublic, int roomPercentage, String progressEndDate, boolean isMember, List<RoomMemberInfo> memberList) {
+        return new GetRoomInfoResponse(bookTitle, roomName, isPublic, roomPercentage, progressEndDate, isMember, memberList);
     }
 }

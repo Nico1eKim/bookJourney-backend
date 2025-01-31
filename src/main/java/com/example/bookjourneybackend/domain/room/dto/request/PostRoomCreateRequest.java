@@ -1,5 +1,6 @@
 package com.example.bookjourneybackend.domain.room.dto.request;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.*;
 import lombok.AccessLevel;
@@ -12,6 +13,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class PostRoomCreateRequest {
 
+    @JsonProperty("isPublic")
     private boolean isPublic;
 
     @Size(max = 20, message = "방 제목은 20자 이내입니다.")

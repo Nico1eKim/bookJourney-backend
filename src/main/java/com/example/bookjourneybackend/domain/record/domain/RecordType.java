@@ -24,5 +24,11 @@ public enum RecordType {
         throw new GlobalException(INVALID_RECORD_TYPE);
     }
 
+    public boolean isEntireRecord() {
+        return this == ENTIRE;
+    }
 
+    public boolean isPageRecord() {
+        return this == PAGE;
+    }
 }
