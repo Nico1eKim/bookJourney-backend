@@ -32,6 +32,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -61,7 +62,7 @@ public class RoomService {
      */
     public GetRoomDetailResponse showRoomDetails(Long roomId, Long userId) {
         log.info("------------------------[RoomService.showRoomDetails]------------------------");
-
+      
         Room room = roomRepository.findById(roomId)
                 .orElseThrow(() -> new GlobalException(CANNOT_FOUND_ROOM));
         User user = userRepository.findById(userId)
@@ -398,7 +399,6 @@ public class RoomService {
         recordRepository.deleteAllByRoomAndUser(room, userRoom.getUser());
         userRoomRepository.delete(userRoom);    // 같이읽기 방에서 멤버가 나가도 방 삭제 X (해당 사용자와 관련된 방 정보 삭제)
     }
-
 
 
     /**
