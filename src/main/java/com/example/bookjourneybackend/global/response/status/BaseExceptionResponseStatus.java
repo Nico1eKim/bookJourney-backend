@@ -7,14 +7,14 @@ import static org.springframework.http.HttpStatus.*;
 
 
 @RequiredArgsConstructor
-public enum BaseExceptionResponseStatus implements ResponseStatus{
+public enum BaseExceptionResponseStatus implements ResponseStatus {
 
     /**
      * 1000: 요청 성공 (OK)
      */
-    SUCCESS(2000,OK, "요청에 성공하였습니다."),
+    SUCCESS(2000, OK, "요청에 성공하였습니다."),
     FAILURE(4000, BAD_REQUEST, "요청에 실패하였습니다."),
-    NOT_FOUND_API(4040,NOT_FOUND,"존재하지 않는 API입니다."),
+    NOT_FOUND_API(4040, NOT_FOUND, "존재하지 않는 API입니다."),
 
     /**
      * 5000 : user 관련
@@ -44,13 +44,12 @@ public enum BaseExceptionResponseStatus implements ResponseStatus{
     CANNOT_FOUND_BESTSELLER(6005, BAD_REQUEST, "베스트셀러 책을 찾을 수 없습니다."),
 
 
-
     /**
      * 7000 : auth 관련
      */
     ALREADY_EXIST_EMAIL(7001, BAD_REQUEST, "이미 존재하는 이메일입니다."),
-    CANNOT_FOUND_EMAIL(7002,BAD_REQUEST, "이메일이 존재하지 않습니다."),
-    INVALID_PASSWORD(7003,BAD_REQUEST, "비밀번호가 일치하지 않습니다."),
+    CANNOT_FOUND_EMAIL(7002, BAD_REQUEST, "이메일이 존재하지 않습니다."),
+    INVALID_PASSWORD(7003, BAD_REQUEST, "비밀번호가 일치하지 않습니다."),
     NOT_EXIST_TOKEN(7004, BAD_REQUEST, "토큰이 존재하지 않습니다."),
     INVALID_TOKEN(7005, BAD_REQUEST, "유효하지 않은 토큰입니다."),
     EXPIRED_TOKEN(7006, BAD_REQUEST, "만료된 토큰입니다."),
@@ -58,13 +57,20 @@ public enum BaseExceptionResponseStatus implements ResponseStatus{
     /**
      * 8000 : room 관련
      */
-    CANNOT_FOUND_ROOM(8001 ,BAD_REQUEST, "방을 찾을 수 없습니다."),
+    CANNOT_FOUND_ROOM(8001, BAD_REQUEST, "방을 찾을 수 없습니다."),
     INVALID_ROOM_TYPE(8002, BAD_REQUEST, "알맞은 방 타입을 찾을 수 없습니다."),
     INVALID_SEARCH_TYPE(8003, BAD_REQUEST, "알맞은 검색 조건을 찾을 수 없습니다."),
     INVALID_SORT_TYPE(8004, BAD_REQUEST, "알맞은 정렬 조건을 찾을 수 없습니다."),
 
     CANNOT_FOUND_USER_ROOM(8005, BAD_REQUEST, "사용자와 방의 관계가 없습니다."),
     NOT_PARTICIPATING_IN_ROOM(8005, BAD_REQUEST, "방에 참여해있지 않습니다."),
+
+    ROOM_NOT_RECRUITING(8006, BAD_REQUEST, "모집 기간이 지난 방입니다."),
+    ROOM_FULL(8006, BAD_REQUEST, "모집 인원이 초과된 방입니다."),
+    ALREADY_JOINED_ROOM(8006, BAD_REQUEST, "이미 참여한 방입니다."),
+    INVALID_ROOM_PASSWORD(8006, BAD_REQUEST, "비밀번호 인증에 실패했습니다."),
+
+    HOST_CANNOT_LEAVE_ROOM(8007, BAD_REQUEST, "방장은 방에서 나갈 수 없습니다."),
 
     /**
      * 9000 : record 관련
