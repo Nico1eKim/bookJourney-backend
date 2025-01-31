@@ -16,7 +16,6 @@ import static java.util.concurrent.TimeUnit.MINUTES;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class RedisService {
 
     @Value("${jwt.refresh-token-expiration}")

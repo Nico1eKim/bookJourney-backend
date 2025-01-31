@@ -180,7 +180,6 @@ public class UserService {
      * @param UsersVerificationEmailRequest
      * @return PostUsersValidationResponse
      */
-    @Transactional
     public PostUsersValidationResponse verifiedCode(PostUsersVerificationEmailRequest UsersVerificationEmailRequest) {
 
         // 이메일로 저장된 인증 코드 조회
