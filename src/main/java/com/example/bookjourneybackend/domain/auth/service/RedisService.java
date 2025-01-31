@@ -68,6 +68,7 @@ public class RedisService {
     public void deleteAuthCode(String email) {
         log.info("[RedisService.deleteAuthCode]");
         redisTemplate.delete(AUTH_CODE_PREFIX + email);
+        redisTemplate.delete(AUTH_REQUEST_PREFIX + email);
     }
 
     // 인증 요청 여부 확인
