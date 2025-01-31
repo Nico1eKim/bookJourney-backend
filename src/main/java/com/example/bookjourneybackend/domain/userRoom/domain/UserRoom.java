@@ -27,9 +27,6 @@ public class UserRoom extends BaseEntity {
     private UserRole userRole;
 
     @Column(nullable = false)
-    private boolean isMember; // 유저가 현재 방에 속해있는지 여부
-
-    @Column(nullable = false)
     private Double userPercentage;
 
     @Setter
@@ -47,9 +44,8 @@ public class UserRoom extends BaseEntity {
     private Room room;
 
     @Builder
-    public UserRoom(UserRole userRole, boolean isMember, Double userPercentage, User user, Integer currentPage, Room room) {
+    public UserRoom(UserRole userRole, Double userPercentage, User user, Integer currentPage, Room room) {
         this.userRole = userRole;
-        this.isMember = isMember;
         this.userPercentage = userPercentage;
         this.user = user;
         this.currentPage = currentPage;
@@ -57,7 +53,7 @@ public class UserRoom extends BaseEntity {
     }
 
     public boolean isUserInRoom() {
-        return this.isMember && this.getStatus() != DELETED;
+        return this.getStatus() != DELETED;
     }
 
 }
