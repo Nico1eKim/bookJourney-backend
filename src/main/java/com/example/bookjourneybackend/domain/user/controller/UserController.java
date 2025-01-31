@@ -1,8 +1,10 @@
 package com.example.bookjourneybackend.domain.user.controller;
 
+import com.example.bookjourneybackend.domain.user.domain.dto.request.PostUsersEmailRequest;
 import com.example.bookjourneybackend.domain.user.domain.dto.request.PostUsersNicknameValidationRequest;
 import com.example.bookjourneybackend.domain.user.domain.dto.request.PostUsersSignUpRequest;
-import com.example.bookjourneybackend.domain.user.domain.dto.response.PostUsersNicknameValidationResponse;
+import com.example.bookjourneybackend.domain.user.domain.dto.request.PostUsersVerificationEmailRequest;
+import com.example.bookjourneybackend.domain.user.domain.dto.response.PostUsersValidationResponse;
 import com.example.bookjourneybackend.domain.user.domain.dto.response.PostUsersSignUpResponse;
 import com.example.bookjourneybackend.domain.user.service.UserService;
 import com.example.bookjourneybackend.global.response.BaseResponse;
@@ -31,8 +33,23 @@ public class UserController {
 
     //닉네임 중복검증
     @PostMapping("/nickname")
-    public BaseResponse<PostUsersNicknameValidationResponse> validateNickname(@Valid @RequestBody final PostUsersNicknameValidationRequest NicknameValidationRequest) {
+    public BaseResponse<PostUsersValidationResponse> validateNickname(@Valid @RequestBody final PostUsersNicknameValidationRequest NicknameValidationRequest) {
         log.info("[UserController.validateNickname]");
         return BaseResponse.ok(userService.validateNickname(NicknameValidationRequest));
     }
+
+    //이메일 인증코드 요청
+    @PostMapping("/emails/vertifications-requests")
+    public BaseResponse<Void> sendMessage(@Valid @RequestBody final PostUsersEmailRequest postUsersEmailRequest)
+    {   log.info("[UserController.requestEmail]");
+        return BaseResponse.ok(userService.sendCodeToEmail(postUsersEmailRequest));
+    }
+
+    //이메일 인증확인 요청
+    @PostMapping("/emails/vertifications")
+    public  BaseResponse<PostUsersValidationResponse> verificationEmail(@Valid @RequestBody final PostUsersVerificationEmailRequest UsersVerificationEmailRequest) {
+        log.info("[UserController.verificationEmail]");
+        return BaseResponse.ok(userService.verifiedCode(UsersVerificationEmailRequest));
+    }
+
 }

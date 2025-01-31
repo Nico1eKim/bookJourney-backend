@@ -29,7 +29,7 @@ public class AuthService {
 
     private final JwtUtil jwtUtil;
     private final UserRepository userRepository;
-    private final TokenService tokenService;
+    private final RedisService redisService;
     private final PasswordEncoder passwordEncoder;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
@@ -58,7 +58,7 @@ public class AuthService {
         String refreshToken = jwtUtil.createRefreshToken(user.getUserId());
 
         jwtUtil.setHeaderAccessToken(response,accessToken);
-        tokenService.storeRefreshToken(refreshToken, user.getUserId());
+        redisService.storeRefreshToken(refreshToken, user.getUserId());
 
         //인증된 사용자 권한 설정
         jwtAuthenticationFilter.setAuthentication(request,user.getUserId());
@@ -90,7 +90,7 @@ public class AuthService {
         Long userId = jwtUtil.extractUserIdFromJwtToken(refreshToken);
 
         /// 리프레시 토큰 저장소 존재유무 확인
-        boolean isRefreshToken = tokenService.checkTokenExists(userId.toString());
+        boolean isRefreshToken = redisService.checkTokenExists(userId.toString());
         if (isRefreshToken) {
 
             /// 토큰 재발급
@@ -121,7 +121,7 @@ public class AuthService {
                 .orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER));
 
         //리프레쉬 토큰 저장소에서 삭제
-        tokenService.invalidateToken(userId);
+        redisService.invalidateToken(userId);
 
         // Spring Security에서 인증 정보 초기화
         SecurityContextHolder.clearContext();  // 인증 정보 초기화

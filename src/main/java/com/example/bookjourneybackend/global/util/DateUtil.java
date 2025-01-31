@@ -9,7 +9,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.Optional;
 
 @Component
 public class DateUtil {
@@ -68,8 +67,13 @@ public class DateUtil {
     }
 
     // LocalDateTime을 문자열(2024.11.14 23:04:28 형태)로 변환
-    public String formDateTime(LocalDateTime dateTime) {
+    public String formatDateTimeStandard(LocalDateTime dateTime) {
         return dateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+    }
+
+    // LocalDateTime을 문자열(2024년 11월 14일 23시 04분 28초 형태)로 변환
+    public String formatDateTimeKorean(LocalDateTime dateTime) {
+        return dateTime.format(DateTimeFormatter.ofPattern("yyyy년 MM월 dd일 HH시 mm분 ss초"));
     }
 
 }

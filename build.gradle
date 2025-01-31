@@ -39,7 +39,7 @@ dependencies {
     implementation 'io.jsonwebtoken:jjwt-jackson:0.11.5'  // JSON 처리용 추가 라이브러리
 
     //SMTP
-    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-mail', version: '3.0.5'
+    implementation 'org.springframework.boot:spring-boot-starter-mail'
 
     //Redis
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
