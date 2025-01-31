@@ -37,6 +37,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static com.example.bookjourneybackend.domain.room.domain.RoomType.ALONE;
 import static com.example.bookjourneybackend.domain.room.domain.RoomType.TOGETHER;
 import static com.example.bookjourneybackend.domain.room.domain.SortType.LASTEST;
 import static com.example.bookjourneybackend.global.entity.EntityStatus.*;
@@ -367,8 +368,8 @@ public class RoomService {
 
         if (room.getRoomType() == TOGETHER) {
             handleTogetherRoomExit(userRoom, room);
-
-        } else {
+        }
+        if(room.getRoomType() == ALONE) {
             roomRepository.delete(room);    // 혼자읽기 방은 나가면 방 삭제
         }
 
@@ -378,7 +379,8 @@ public class RoomService {
     private void handleTogetherRoomExit(UserRoom userRoom, Room room) {
         if (userRoom.getUserRole() == UserRole.HOST) {
             removeHostFromRoom(room);
-        } else {
+        }
+        if (userRoom.getUserRole() == UserRole.MEMBER) {
             removeMemberFromRoom(userRoom, room);
         }
     }
@@ -386,7 +388,8 @@ public class RoomService {
     private void removeHostFromRoom(Room room) {
         if (room.getUserRooms().size() == 1) {
             roomRepository.delete(room);    // 같이읽기 방에서 방장이 혼자 남아 있는 있을때 방을 나가면 방 삭제
-        } else {
+        }
+        if (room.getUserRooms().size() != 1) {
             throw new GlobalException(HOST_CANNOT_LEAVE_ROOM);  // 같이읽기 방에서 방장이 혼자 남아 있지 않으면 방장은 나갈 수 없음
         }
     }
