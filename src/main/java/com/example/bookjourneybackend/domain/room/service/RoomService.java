@@ -31,7 +31,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -55,10 +57,14 @@ public class RoomService {
     /**
      * 방 상세정보 조회
      */
-    public GetRoomDetailResponse showRoomDetails(Long roomId) {
+    public GetRoomDetailResponse showRoomDetails(Long roomId, Long userId) {
         Room room = roomRepository.findById(roomId)
                 .orElseThrow(() -> new GlobalException(CANNOT_FOUND_ROOM));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER));
+
         List<RoomMemberInfo> members = getRoomMemberInfoList(room);
+        boolean isMember = userRoomRepository.existsByRoomAndUser(room, user);
 
         return GetRoomDetailResponse.of(
                 room.getRoomName(),
@@ -70,6 +76,7 @@ public class RoomService {
                 dateUtil.calculateDday(room.getRecruitEndDate()),   // D-day 계산
                 dateUtil.formatDate(room.getRecruitEndDate()),
                 room.getRecruitCount(),
+                isMember,
                 members // DELETED가 아닌 유저들만 포함
         );
 
@@ -78,10 +85,14 @@ public class RoomService {
     /**
      * 방 정보 조회
      */
-    public GetRoomInfoResponse showRoomInfo(Long roomId) {
+    public GetRoomInfoResponse showRoomInfo(Long roomId, Long userId) {
         Room room = roomRepository.findById(roomId)
                 .orElseThrow(() -> new GlobalException(CANNOT_FOUND_ROOM));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER));
+
         List<RoomMemberInfo> members = getRoomMemberInfoList(room);
+        boolean isMember = userRoomRepository.existsByRoomAndUser(room, user);
 
         return GetRoomInfoResponse.of(
                 room.getBook().getBookTitle(),
@@ -89,6 +100,7 @@ public class RoomService {
                 room.isPublic(),
                 room.getRoomPercentage().intValue(),
                 dateUtil.calculateDday(room.getProgressEndDate()),
+                isMember,
                 members // DELETED가 아닌 유저들만 포함
         );
     }
@@ -269,7 +281,7 @@ public class RoomService {
     public GetRoomActiveResponse searchActiveRooms(String sort, Long userId) {
         log.info("------------------------[RoomService.searchActiveRooms]------------------------");
         log.info("sort: {}", sort);
-        SortType sortType = (sort == null)? LASTEST : SortType.from(sort);
+        SortType sortType = (sort == null) ? LASTEST : SortType.from(sort);
         List<UserRoom> userRooms = findUserRoomsBySortType(sortType, userId);
 
         return GetRoomActiveResponse.of(parsingUserRoomsToRecordInfo(userRooms));
@@ -327,5 +339,47 @@ public class RoomService {
         userRoomRepository.save(userRoom);
 
         return null;
+    }
+
+    /**
+     * 방 참여
+     */
+    @Transactional
+    public PostJoinRoomResponse joinRoom(Long roomId, Long userId, Integer password) {
+        Room room = roomRepository.findById(roomId)
+                .orElseThrow(() -> new GlobalException(CANNOT_FOUND_ROOM));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER));
+
+        // 이미 방에 참여한 유저인지 확인
+        if (userRoomRepository.existsByRoomAndUser(room, user)) {
+            throw new GlobalException(ALREADY_JOINED_ROOM);
+        }
+
+        // 모집 기간이 지났는지 확인
+        if (LocalDate.now().isAfter(room.getRecruitEndDate())) {
+            throw new GlobalException(ROOM_NOT_RECRUITING);
+        }
+
+        // 인원 초과 여부 확인
+        if (room.getUserRooms().size() >= room.getRecruitCount()) {
+            throw new GlobalException(ROOM_FULL);
+        }
+
+        // 비공개 방의 경우 비밀번호 확인
+        if (!room.isPublic() && !Objects.equals(room.getPassword(), password)) {
+            throw new GlobalException(INVALID_ROOM_PASSWORD);
+        }
+
+        UserRoom userRoom = UserRoom.builder()
+                .user(user)
+                .room(room)
+                .userRole(UserRole.MEMBER)
+                .userPercentage(0.0)
+                .currentPage(0)
+                .build();
+        userRoomRepository.save(userRoom);
+
+        return PostJoinRoomResponse.of(room);
     }
 }

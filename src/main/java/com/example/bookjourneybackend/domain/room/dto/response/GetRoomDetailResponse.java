@@ -18,12 +18,13 @@ public class GetRoomDetailResponse {
     private String recruitDday;
     private String recruitEndDate;
     private int recruitCount;
+    private boolean isMember;
     private List<RoomMemberInfo> memberList;
 
     public static GetRoomDetailResponse of(String roomName, boolean isPublic, String lastActivityTime, int roomPercentage,
                                            String progressStartDate, String progressEndDate, String recruitDday,
-                                           String recruitEndDate, int recruitCount, List<RoomMemberInfo> memberList) {
+                                           String recruitEndDate, int recruitCount, boolean isMember, List<RoomMemberInfo> memberList) {
         return new GetRoomDetailResponse(roomName, isPublic, lastActivityTime, roomPercentage, progressStartDate,
-                progressEndDate, recruitDday, recruitEndDate, recruitCount, memberList);
+                progressEndDate, recruitDday, recruitEndDate, recruitCount, isMember, memberList);
     }
 }
