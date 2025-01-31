@@ -24,10 +24,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 
 import static com.example.bookjourneybackend.global.entity.EntityStatus.ACTIVE;
-import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.ALREADY_EXIST_USER;
 import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.CANNOT_FOUND_BESTSELLER;
 
 @Slf4j

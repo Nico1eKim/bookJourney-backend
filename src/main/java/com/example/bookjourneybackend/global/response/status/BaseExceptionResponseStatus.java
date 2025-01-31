@@ -20,6 +20,7 @@ public enum BaseExceptionResponseStatus implements ResponseStatus {
      * 5000 : user 관련
      */
     CANNOT_FOUND_USER(5000, BAD_REQUEST, "유저를 찾을 수 없습니다."),
+
     ALREADY_EXIST_USER(5001, BAD_REQUEST, "이미 회원가입 된 유저입니다."),
 
     /**
@@ -64,6 +65,8 @@ public enum BaseExceptionResponseStatus implements ResponseStatus {
     ROOM_FULL(8006, BAD_REQUEST, "모집 인원이 초과된 방입니다."),
     ALREADY_JOINED_ROOM(8006, BAD_REQUEST, "이미 참여한 방입니다."),
     INVALID_ROOM_PASSWORD(8006, BAD_REQUEST, "비밀번호 인증에 실패했습니다."),
+
+    HOST_CANNOT_LEAVE_ROOM(8007, BAD_REQUEST, "방장은 방에서 나갈 수 없습니다."),
 
     /**
      * 9000 : record 관련
