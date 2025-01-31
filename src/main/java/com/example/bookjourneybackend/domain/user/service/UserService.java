@@ -6,7 +6,9 @@ import com.example.bookjourneybackend.domain.book.domain.repository.BookReposito
 import com.example.bookjourneybackend.domain.user.domain.FavoriteGenre;
 import com.example.bookjourneybackend.domain.user.domain.User;
 import com.example.bookjourneybackend.domain.user.domain.UserImage;
+import com.example.bookjourneybackend.domain.user.domain.dto.request.PostUsersNicknameValidationRequest;
 import com.example.bookjourneybackend.domain.user.domain.dto.request.PostUsersSignUpRequest;
+import com.example.bookjourneybackend.domain.user.domain.dto.response.PostUsersNicknameValidationResponse;
 import com.example.bookjourneybackend.domain.user.domain.dto.response.PostUsersSignUpResponse;
 import com.example.bookjourneybackend.domain.user.domain.repository.FavoriteGenreRepository;
 import com.example.bookjourneybackend.domain.user.domain.repository.UserImageRepository;
@@ -96,5 +98,16 @@ public class UserService {
 
         return PostUsersSignUpResponse.of(newUser.getUserId(),accessToken,refreshToken);
 
+    }
+
+    /**
+     * db에서 존재하는 유저중에 해당닉네임이있다면 false반환 없다면 true반환
+     * @param NicknameValidationRequest
+     * @return PostUsersSignUpResponse
+     */
+    public PostUsersNicknameValidationResponse validateNickname(PostUsersNicknameValidationRequest NicknameValidationRequest) {
+        log.info("[UserService.validateNickname]");
+        return PostUsersNicknameValidationResponse.of(
+                !userRepository.existsByNicknameAndStatus(NicknameValidationRequest.getNickName(), ACTIVE));
     }
 }

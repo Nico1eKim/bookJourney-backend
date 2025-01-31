@@ -1,8 +1,8 @@
 package com.example.bookjourneybackend.domain.user.controller;
 
-import com.example.bookjourneybackend.domain.auth.domain.dto.request.PostAuthLoginRequest;
-import com.example.bookjourneybackend.domain.auth.domain.dto.response.PostAuthLoginResponse;
+import com.example.bookjourneybackend.domain.user.domain.dto.request.PostUsersNicknameValidationRequest;
 import com.example.bookjourneybackend.domain.user.domain.dto.request.PostUsersSignUpRequest;
+import com.example.bookjourneybackend.domain.user.domain.dto.response.PostUsersNicknameValidationResponse;
 import com.example.bookjourneybackend.domain.user.domain.dto.response.PostUsersSignUpResponse;
 import com.example.bookjourneybackend.domain.user.service.UserService;
 import com.example.bookjourneybackend.global.response.BaseResponse;
@@ -27,5 +27,12 @@ public class UserController {
             , HttpServletRequest request, HttpServletResponse response) {
         log.info("[UserController.signUp]");
         return BaseResponse.ok(userService.signup(userSignUpRequest, request,response));
+    }
+
+    //닉네임 중복검증
+    @PostMapping("/nickname")
+    public BaseResponse<PostUsersNicknameValidationResponse> validateNickname(@Valid @RequestBody final PostUsersNicknameValidationRequest NicknameValidationRequest) {
+        log.info("[UserController.validateNickname]");
+        return BaseResponse.ok(userService.validateNickname(NicknameValidationRequest));
     }
 }
