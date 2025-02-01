@@ -137,7 +137,7 @@ public class UserService {
 
         // 현재 시간에서 메일 인증유효기간 계산
         LocalDateTime expirationTime = LocalDateTime.now().plusMinutes(redisService.getAuthCodeExpirationMinutes());
-        String formattedExpirationTime = dateUtil.formatDateTimeKorean(expirationTime);
+        String formattedExpirationTime = dateUtil.formatLocalDateTimeKorean(expirationTime);
 
         // 이메일 제목과 본문 생성
         EmailContentTemplate template = AUTH_CODE_EMAIL;
