@@ -42,7 +42,7 @@ public enum BaseExceptionResponseStatus implements ResponseStatus {
     CANNOT_FOUND_POPULAR_BOOK(6004, BAD_REQUEST, "읽기횟수가 가장 많은 책을 찾을 수 없습니다."),
 
     CANNOT_FOUND_BESTSELLER(6005, BAD_REQUEST, "베스트셀러 책을 찾을 수 없습니다."),
-
+    NO_AVAILABLE_BESTSELLER(6006,BAD_REQUEST,"해당 장르의 베스트셀러 후보 중 기존에 존재하지 않는 책을 찾을 수 없습니다."),
 
     /**
      * 7000 : auth 관련
