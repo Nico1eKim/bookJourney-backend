@@ -2,7 +2,7 @@ package com.example.bookjourneybackend.domain.room.domain.repository;
 
 import com.example.bookjourneybackend.domain.book.domain.GenreType;
 import com.example.bookjourneybackend.domain.room.domain.Room;
-import com.example.bookjourneybackend.domain.room.domain.SearchType;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -11,6 +11,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Repository
 public interface RoomRepository extends JpaRepository<Room, Long> {
@@ -30,4 +31,22 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
             @Param("roomEndDate") LocalDate roomEndDate,
             @Param("recordCount") Integer recordCount,
             Pageable pageable);
+
+
+    /**
+     * 정렬 기준 순서
+     * 공개방
+     * 댓글+답글 수가 많은 순
+     * 모집마감일까지 많이 남은 순
+     * 최근에 방 생성된 순
+     */
+    @Query("SELECT r FROM Room r " +
+            "LEFT JOIN r.records rec " +
+            "LEFT JOIN rec.comments com " +
+            "WHERE r.recruitEndDate >= :lastDayOfWeek " +
+            "AND r.roomType = 'TOGETHER' " +
+            "AND r.isPublic = true " +
+            "GROUP BY r " +
+            "ORDER BY (COUNT(rec) + COUNT(com)) DESC, r.recruitEndDate DESC, r.startDate ASC")
+    List<Room> findRecruitmentRooms(LocalDate firstDayOfWeek, LocalDate lastDayOfWeek, PageRequest of);
 }
