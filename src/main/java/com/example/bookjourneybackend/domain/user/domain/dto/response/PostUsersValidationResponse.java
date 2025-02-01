@@ -9,11 +9,11 @@ import static lombok.AccessLevel.PRIVATE;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor(access = PRIVATE)
-public class PostUsersNicknameValidationResponse {
+public class PostUsersValidationResponse {
 
     private boolean verified;
 
-    public static PostUsersNicknameValidationResponse of(boolean verified) {
-        return new PostUsersNicknameValidationResponse(verified);
+    public static PostUsersValidationResponse of(boolean verified) {
+        return new PostUsersValidationResponse(verified);
     }
 }

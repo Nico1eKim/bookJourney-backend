@@ -19,9 +19,13 @@ public enum BaseExceptionResponseStatus implements ResponseStatus {
     /**
      * 5000 : user 관련
      */
-    CANNOT_FOUND_USER(5000, BAD_REQUEST, "유저를 찾을 수 없습니다."),
-
-    ALREADY_EXIST_USER(5001, BAD_REQUEST, "이미 회원가입 된 유저입니다."),
+    CANNOT_FOUND_USER(5000,BAD_REQUEST, "유저를 찾을 수 없습니다."),
+    ALREADY_EXIST_USER(5001,BAD_REQUEST, "이미 회원가입 된 유저입니다."),
+    UNABLE_TO_SEND_EMAIL(5002,BAD_REQUEST, "이메일을 전송할 수 없습니다."),
+    CANNOT_CREAT_EMAIL(5003,BAD_REQUEST, "이메일을 생성할 수 없습니다."),
+    CANNOT_CREATE_EMAIL_AUTH_CODE(5004,BAD_REQUEST, "인증번호를 발급 받지 않은 이메일입니다. 먼저 인증번호를 발급받아주세요."),
+    EMAIL_AUTH_CODE_EXPIRED(5005,BAD_REQUEST,"만료된 인증번호 입니다."),
+    NO_SUCH_ALGORITHM(5006,BAD_REQUEST,"지정된 난수 생성 알고리즘을 찾을 수 없습니다."),
 
     /**
      * 6000 : book 관련
