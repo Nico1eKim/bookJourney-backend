@@ -20,6 +20,6 @@ public interface BookRepository extends JpaRepository<Book, Long> {
 
     Optional<List<Book>> findByBestSellerTrue();
 
-    Optional<Book> findByBestSellerTrueAndGenre(@Param("genre") GenreType genre);
+    Optional<Book> findByBestSellerTrueAndGenre(GenreType genre);
 
 }
