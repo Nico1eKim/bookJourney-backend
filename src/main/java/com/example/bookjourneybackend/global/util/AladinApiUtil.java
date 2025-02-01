@@ -3,13 +3,12 @@ package com.example.bookjourneybackend.global.util;
 import com.example.bookjourneybackend.domain.book.domain.Book;
 import com.example.bookjourneybackend.domain.book.domain.GenreType;
 import com.example.bookjourneybackend.domain.book.dto.request.GetBookListRequest;
-import com.example.bookjourneybackend.domain.book.dto.response.BestSellerImageUrl;
-import com.example.bookjourneybackend.domain.book.dto.response.GetBookInfoResponse;
 import com.example.bookjourneybackend.global.exception.GlobalException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,8 +18,6 @@ import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
 
 import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.ALADIN_API_ERROR;
 import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.ALADIN_API_PARSING_ERROR;
@@ -38,8 +35,9 @@ public class AladinApiUtil {
     private final String ALADIN_ITEM_LOOKUP_PATH = "/ItemLookUp.aspx";
     private final String ALADIN_ITEM_LIST_PATH = "/ItemList.aspx";   //상품 리스트 API (베스트셀러 조회용)
 
+    @Getter
+    private final int BESTSELLER_MAX_RESULTS = 10; //베스트셀러 최대 책 검색 결과 개수
     private final int SEARCH_MAX_RESULTS = 10; //최대 책 검색 결과 개수
-    private final int BESTSELLER_MAX_RESULTS = 2;
     private final String OUTPUT = "js"; // 응답 포맷 (xml 또는 json)
     private final int VERSION = 20131101;
     private final String BESTSELLER = "Bestseller";
@@ -54,6 +52,7 @@ public class AladinApiUtil {
 
     private final ObjectMapper objectMapper;
     private final RestTemplate restTemplate;
+    private final DateUtil dateUtil;
 
 
     public String buildSearchApiUrl(GetBookListRequest request) {
@@ -123,24 +122,18 @@ public class AladinApiUtil {
         }
     }
 
-    public Book parseAladinApiResponseToBook(String currentResponse, boolean isBestseller, boolean getSecondItem) {
+    public Book parseAladinApiResponseToBook(String currentResponse, boolean isBestseller,int nthItem) {
         try {
             objectMapper.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
             objectMapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
 
             JsonNode root = objectMapper.readTree(currentResponse);
-            String searchCategoryName = root.get("searchCategoryName").asText();
             JsonNode items = root.get("item");
 
             if (items != null && items.isArray()) {
                 JsonNode selectedItem;
 
-                selectedItem = items.get(0); // 첫 번째 아이템
-
-                // getSecondItem이 true면 두 번째 아이템을 가져오고, 아니면 첫 번째 아이템을 가져옴
-                if (getSecondItem) {
-                    selectedItem = items.get(1); // 두 번째 아이템
-                }
+                selectedItem = items.get(nthItem);
 
                 String title = selectedItem.get("title").asText();
                 String author = selectedItem.get("author").asText();
@@ -159,13 +152,15 @@ public class AladinApiUtil {
                 Integer pageCount = selectedItem.has("bookinfo") && selectedItem.get("bookinfo").has("itemPage")
                         ? selectedItem.get("bookinfo").get("itemPage").asInt() : null;
 
+                String categoryName = isBestseller ? root.get("searchCategoryName").asText() : selectedItem.get("categoryName").asText();
+
                 return Book.builder()
                         .isbn(isbn)
                         .bookTitle(title)
                         .authorName(author)
-                        .genre(GenreType.parsingGenreType(searchCategoryName))
+                        .genre(GenreType.parsingGenreType(categoryName))
                         .publisher(publisher)
-                        .publishedDate(LocalDate.parse(publishedDate, DateTimeFormatter.ofPattern("yyyy-MM-dd")))
+                        .publishedDate(dateUtil.parseDateToLocalDateFromPublishedDateString(publishedDate))
                         .description(description)
                         .imageUrl(imageUrl)
                         .bestSeller(isBestseller)
@@ -179,7 +174,7 @@ public class AladinApiUtil {
         throw new GlobalException(ALADIN_API_ERROR);
     }
 
-    public String getIsbnFromBestSellerResponse(String currentResponse) {
+    public String getIsbnFromBestSellerResponse(String currentResponse,int nthItem) {
 
         try {
             objectMapper.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
@@ -189,7 +184,7 @@ public class AladinApiUtil {
             JsonNode items = root.get("item");
 
             if (items != null && items.isArray()) {
-                JsonNode firstItem = items.get(0); // 첫 번째 아이템 가져오기
+                JsonNode firstItem = items.get(nthItem); // 해당 아이템 가져오기
                 String isbn = firstItem.has("isbn13") && !firstItem.get("isbn13").asText().isEmpty()
                         ? firstItem.get("isbn13").asText()
                         : firstItem.get("isbn").asText();

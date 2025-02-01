@@ -19,8 +19,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.ALADIN_API_ERROR;
-import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.CANNOT_FOUND_BESTSELLER;
+import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.*;
 
 @Slf4j
 @Service
@@ -48,41 +47,42 @@ public class BestSellerService {
                         .orElseThrow(() -> new GlobalException(CANNOT_FOUND_BESTSELLER));
 
                 int categoryId = genre.getCategoryId();
-
                 //베스트셀러 정보 알아오기
                 String currentResponse = getBestsellers(categoryId);
-                String isbn = aladinApiUtil.getIsbnFromBestSellerResponse(currentResponse);
 
-                // 기존 DB에서 책 찾기
-                Optional<Book> existingBookOptional = bookRepository.findByIsbn(isbn);
+                int nthItem = 0; // 첫 번째 책부터 시작
 
-                // 기존 DB에 존재하고 여전히 베스트셀러이면서 같은 장르이면 다른 장르로 건너뛰기
-                if (existingBookOptional.isPresent() && existingBookOptional.get().isBestSeller()
-                        && existingBookOptional.get().getGenre() == genre) {
-                    continue;
+                while (true) {
+
+                    String isbn = aladinApiUtil.getIsbnFromBestSellerResponse(currentResponse, nthItem);
+
+                    // 기존 DB에서 책 찾기
+                    Optional<Book> existingBookOptional = bookRepository.findByIsbn(isbn);
+
+                    // 기존 DB에 없으면 저장
+                    if (existingBookOptional.isEmpty()) {
+                        break;
+                    }
+
+                    // 이미 존재하는 책이면 N번째로 이동
+                    nthItem++;
+
+                    // N번째 아이템이 없을 경우 종료
+                    if (nthItem >= aladinApiUtil.getBESTSELLER_MAX_RESULTS()) {
+                        throw new GlobalException(NO_AVAILABLE_BESTSELLER);
+                    }
                 }
 
-                // 기존 책이 있으면 베스트셀러 여부만 변경, 없으면 새로 저장
-                Book newBestSeller = existingBookOptional
-                        .map(existingBook -> {
-                            //현재 이 장르의 베스트셀러가 다른 장르의 베스트셀러일 경우 두번째 베스트셀러를 저장
-                            //TODO 만약 두번째 베스트셀러도 이미 다른책의 베스트셀러일경우 ,,, --> N번째 책을 받아오는 형식으로 수정
-                            if (existingBook.getGenre() != genre) {
-                                return aladinApiUtil.parseAladinApiResponseToBook(currentResponse, true,true);
-                            }
-                            existingBook.setBestSeller(true);
-                            return existingBook;
-                        })
-                        .orElseGet(() -> aladinApiUtil.parseAladinApiResponseToBook(currentResponse,true,false));
+                // 새로운 베스트셀러 책 파싱
+                Book newBestSeller = aladinApiUtil.parseAladinApiResponseToBook(currentResponse, true, nthItem);
+                bookRepository.save(newBestSeller);
 
-                bookRepository.save(newBestSeller); // 업데이트 후 저장
-
-               // 기존 베스트셀러와 관심 장르 정보 업데이트
+                // 베스트셀러 정보 업데이트
                 updateFavoriteGenres(oldBestSeller, newBestSeller);
                 deleteOldBestsellers(oldBestSeller);
 
+                }
             }
-        }
 
     }
 
