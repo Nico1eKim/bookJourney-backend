@@ -32,7 +32,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -441,5 +440,43 @@ public class RoomService {
         userRoomRepository.save(userRoom);
 
         return PostJoinRoomResponse.of(room);
+    }
+
+    /**
+     * 현재가 몇월 몇째주인지 계산
+     * 현재 주차의 첫째날과 마지막날을 구해서 모집마감일이 해당 날 사이에 있는 모든 Room을 찾음
+     * <정렬 우선순위>
+     * 1. 공개방
+     * 2. 댓글+답글 수가 많은 순
+     * 3. 모집마감일까지 많이 남은 순
+     * 4. 최근에 방 생성된 순
+     */
+    public GetRoomRecruitmentResponse searchRecruitmentRooms() {
+        log.info("------------------------[RoomService.searchRecruitmentRooms]------------------------");
+
+        LocalDate now = LocalDate.now();
+        String weekOfMonth = dateUtil.getCurrentWeekOfMonth(now);   //현재 주차를 기준으로 "~월 ~주차 반환"
+        LocalDate[] firstAndLastDayOfWeek = dateUtil.getFirstAndLastDayOfWeek(now);
+
+        List<Room> rooms = roomRepository.findRecruitmentRooms(firstAndLastDayOfWeek[0], firstAndLastDayOfWeek[1], PageRequest.of(0, 5));
+
+        if (rooms.isEmpty()) {
+            throw new GlobalException(CANNOT_FOUND_RECRUITMENT_ROOM);
+        }
+
+        return GetRoomRecruitmentResponse.of(
+                weekOfMonth,
+                rooms.stream()
+                        .map(room -> RoomInfo.builder()
+                                .roomId(room.getRoomId())
+                                .bookTitle(room.getBook().getBookTitle())
+                                .authorName(room.getBook().getAuthorName())
+                                .roomName(room.getRoomName())
+                                .recruitCount(room.getRecruitCount())
+                                .progressStartDate(dateUtil.formatDate(room.getStartDate()))
+                                .progressEndDate(dateUtil.formatDate(room.getProgressEndDate()))
+                                .build())
+                        .toList()
+        );
     }
 }
