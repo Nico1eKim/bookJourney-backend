@@ -1,11 +1,13 @@
 package com.example.bookjourneybackend.domain.record.service;
 
+import com.example.bookjourneybackend.domain.record.domain.RecordLike;
 import com.example.bookjourneybackend.domain.record.domain.RecordSortType;
 import com.example.bookjourneybackend.domain.record.domain.Record;
 import com.example.bookjourneybackend.domain.record.domain.RecordType;
 import com.example.bookjourneybackend.domain.record.domain.repository.RecordLikeRepository;
 import com.example.bookjourneybackend.domain.record.domain.repository.RecordRepository;
 import com.example.bookjourneybackend.domain.record.dto.request.PostRecordRequest;
+import com.example.bookjourneybackend.domain.record.dto.response.PostRecordLikeResponse;
 import com.example.bookjourneybackend.domain.record.dto.response.RecordInfo;
 import com.example.bookjourneybackend.domain.record.dto.response.GetRecordResponse;
 import com.example.bookjourneybackend.domain.record.dto.response.PostRecordResponse;
@@ -140,13 +142,13 @@ public class RecordService {
             default -> throw new GlobalException(INVALID_RECORD_SORT_TYPE);
         };
 
-        return records.orElseThrow(() -> new GlobalException(RECORD_NOT_FOUND));
+        return records.orElseThrow(() -> new GlobalException(CANNOT_FOUND_RECORD));
     }
 
     private List<RecordInfo> parseEntireRecordsToResponse(List<Record> records, User user) {
         return records.stream()
                 .map(record -> {
-                    boolean isLiked = recordLikeRepository.existsByRecordAndUserAndRecordStatus(record, user, ACTIVE);
+                    boolean isLiked = recordLikeRepository.existsByRecordAndUser(record, user);
                     return RecordInfo.fromEntireRecord(
                             record.getUser().getUserId(),
                             record.getRecordId(),
@@ -165,7 +167,7 @@ public class RecordService {
     private List<RecordInfo> parsePageRecordsToResponse(List<Record> records, User user) {
         return records.stream()
                 .map(record -> {
-                    boolean isLiked = recordLikeRepository.existsByRecordAndUserAndRecordStatus(record, user, ACTIVE);
+                    boolean isLiked = recordLikeRepository.existsByRecordAndUser(record, user);
                     return RecordInfo.fromPageRecord(
                             record.getUser().getUserId(),
                             record.getRecordId(),
@@ -189,5 +191,35 @@ public class RecordService {
         if (recordType == RecordType.ENTIRE && postRecordRequest.getRecordTitle() == null) {
             throw new GlobalException(INVALID_RECORD_TITLE);
         }
+    }
+
+    /**
+     * recordId로 기록에 좋아요 toggle하기
+     *
+     * @param recordId
+     * @return PostRecordLikeResponse
+     */
+    @Transactional
+    public PostRecordLikeResponse toggleRecordLike(Long recordId, Long userId) {
+        Record record = recordRepository.findById(recordId)
+                .orElseThrow(() -> new GlobalException(CANNOT_FOUND_RECORD));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER));
+
+        // 방에 속해있지 않으면 좋아요를 누를 수 없음
+        if (!userRoomRepository.existsByRoomAndUser(record.getRoom(), user)) {
+            throw new GlobalException(NOT_PARTICIPATING_IN_ROOM);
+        }
+
+        boolean isLiked = recordLikeRepository.existsByRecordAndUser(record, user);
+
+        if (isLiked) {
+            recordLikeRepository.deleteByRecordAndUser(record, user);
+        } else {
+            recordLikeRepository.save(RecordLike.builder().record(record).user(user).build());
+        }
+
+        // 사용자의 좋아요 상태가 변경된 후의 결과를 반환
+        return PostRecordLikeResponse.of(!isLiked);
     }
 }
