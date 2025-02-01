@@ -54,7 +54,7 @@ public class DateUtil {
 
     //방의 모집종료 기간 계산
     //방의 모집종료 기간 = {(방의 종료기간 - 방의 시작기간)/2} + 방의 시작기간
-    public LocalDate calculateRecruitEndDateString(LocalDate startDate, LocalDate progressEndDate) {
+    public LocalDate calculateRecruitEndDate(LocalDate startDate, LocalDate progressEndDate) {
         long totalDays = ChronoUnit.DAYS.between(startDate, progressEndDate);
         long halfDays = Math.round(totalDays / 2.0);
 
@@ -62,12 +62,12 @@ public class DateUtil {
     }
 
     //문자열을 LocalDate(2024.11.14 형태)로 변환
-    public LocalDate parseDateToLocalDate(String date) {
+    public LocalDate parseDateToLocalDateString(String date) {
         return LocalDate.parse(date, DateTimeFormatter.ofPattern("yyyy.MM.dd"));
     }
 
     // LocalDateTime을 문자열(2024.11.14 23:04:28 형태)로 변환
-    public String parseDateToLocalDateFromString(LocalDateTime dateTime) {
+    public String formatLocalDateTime(LocalDateTime dateTime) {
         return dateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
     }
 

@@ -269,11 +269,11 @@ public class RoomService {
         if (request.getRecruitCount() == 1) {
             room = Room.makeReadAloneRoom(book);
         } else {
-            LocalDate startDate = dateUtil.parseDateToLocalDate(request.getProgressStartDate());
-            LocalDate progressEndDate = dateUtil.parseDateToLocalDate(request.getProgressEndDate());
+            LocalDate startDate = dateUtil.parseDateToLocalDateString(request.getProgressStartDate());
+            LocalDate progressEndDate = dateUtil.parseDateToLocalDateString(request.getProgressEndDate());
             room = Room.makeReadTogetherRoom(
                     request.getRoomName(), book, request.isPublic(), request.getPassword(),
-                    startDate, progressEndDate, dateUtil.calculateRecruitEndDateString(startDate, progressEndDate), request.getRecruitCount()
+                    startDate, progressEndDate, dateUtil.calculateRecruitEndDate(startDate, progressEndDate), request.getRecruitCount()
             );
         }
         room.addUserRoom(userRoom);
