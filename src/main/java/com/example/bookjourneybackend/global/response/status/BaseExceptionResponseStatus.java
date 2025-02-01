@@ -72,6 +72,8 @@ public enum BaseExceptionResponseStatus implements ResponseStatus {
 
     HOST_CANNOT_LEAVE_ROOM(8007, BAD_REQUEST, "방장은 방에서 나갈 수 없습니다."),
 
+    CANNOT_FOUND_RECRUITMENT_ROOM(8008, BAD_REQUEST, "모집 중인 방을 찾을 수 없습니다."),
+
     /**
      * 9000 : record 관련
      */
