@@ -184,7 +184,7 @@ public class AladinApiUtil {
             JsonNode items = root.get("item");
 
             if (items != null && items.isArray()) {
-                JsonNode firstItem = items.get(nthItem); // 첫 번째 아이템 가져오기
+                JsonNode firstItem = items.get(nthItem); // 해당 아이템 가져오기
                 String isbn = firstItem.has("isbn13") && !firstItem.get("isbn13").asText().isEmpty()
                         ? firstItem.get("isbn13").asText()
                         : firstItem.get("isbn").asText();
