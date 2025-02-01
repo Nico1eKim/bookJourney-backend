@@ -59,33 +59,33 @@ public class UserService {
      * 1. 회원가입 하려는 유저의 비밀번호는 암호화하여 db에 저장
      * 2. 회원가입 할때 선택한 관심장르의 베스트셀러 bookId를 관심장르 테이블에 저장
      * 3. 회원가입 한 유저가 바로 서비스 이용을 할 수 있도록 로그인과 동일하게 토큰 발급 및 인증된 사용자 권한 설정
-     * @param userSignUpRequest,request,response
+     * @param postUsersSignUpRequest,request,response
      * @return PostUsersSignUpResponse
      */
     @Transactional
-    public PostUsersSignUpResponse signup(PostUsersSignUpRequest userSignUpRequest,
+    public PostUsersSignUpResponse signup(PostUsersSignUpRequest postUsersSignUpRequest,
                                           HttpServletRequest request, HttpServletResponse response) {
         log.info("[UserService.signUp]");
 
         //비밀번호 암호화
-        String encodedPassword = passwordEncoder.encode(userSignUpRequest.getPassword());
+        String encodedPassword = passwordEncoder.encode(postUsersSignUpRequest.getPassword());
 
         User newUser = User.builder()
-                .email(userSignUpRequest.getEmail())
+                .email(postUsersSignUpRequest.getEmail())
                 .password(encodedPassword)
-                .nickname(userSignUpRequest.getNickName())
+                .nickname(postUsersSignUpRequest.getNickName())
                 .build();
 
         //TODO s3 연동하고 수정
         UserImage userImage = UserImage.builder()
-                .imageUrl(userSignUpRequest.getImageUrl())
+                .imageUrl(postUsersSignUpRequest.getImageUrl())
                 .user(newUser)
                 .path("///")
                 .size(11)
                 .build();
 
         // 관심 장르 매핑
-        userSignUpRequest.getFavoriteGenres().forEach(genre -> {
+        postUsersSignUpRequest.getFavoriteGenres().forEach(genre -> {
             FavoriteGenre favoriteGenre = FavoriteGenre.builder()
                     .genre(GenreType.fromGenreType(genre.getGenreName())) //장르 정보 매핑
                     .book(bookRepository.findByBestSellerTrueAndGenre(GenreType.fromGenreType(genre.getGenreName()))
@@ -112,13 +112,13 @@ public class UserService {
 
     /**
      * db에서 존재하는 유저중에 해당닉네임이있다면 false반환 없다면 true반환
-     * @param NicknameValidationRequest
+     * @param postUsersNicknameValidationRequest
      * @return PostUsersSignUpResponse
      */
-    public PostUsersValidationResponse validateNickname(PostUsersNicknameValidationRequest NicknameValidationRequest) {
+    public PostUsersValidationResponse validateNickname(PostUsersNicknameValidationRequest postUsersNicknameValidationRequest) {
         log.info("[UserService.validateNickname]");
         return PostUsersValidationResponse.of(
-                !userRepository.existsByNicknameAndStatus(NicknameValidationRequest.getNickName(), ACTIVE));
+                !userRepository.existsByNicknameAndStatus(postUsersNicknameValidationRequest.getNickName(), ACTIVE));
     }
 
     /**
@@ -158,11 +158,10 @@ public class UserService {
     }
 
     private String createCode() {
-        int lenth = AUTH_CODE_LENGTH;
         try {
             Random random = SecureRandom.getInstanceStrong();
             StringBuilder builder = new StringBuilder();
-            for (int i = 0; i < lenth; i++) {
+            for (int i = 0; i < AUTH_CODE_LENGTH; i++) {
                 builder.append(random.nextInt(RANDOM_BOUND));
             }
             return builder.toString();
@@ -177,24 +176,24 @@ public class UserService {
      * 3. 인증 요청 true : 인증번호 검증 로직
      * 4. 인증번호가 만료되었을 경우 예외처리
      * 5. 인증번호 일치하면 true, 일치하지않으면 false 반환
-     * @param UsersVerificationEmailRequest
+     * @param postUsersVerificationEmailRequest
      * @return PostUsersValidationResponse
      */
-    public PostUsersValidationResponse verifiedCode(PostUsersVerificationEmailRequest UsersVerificationEmailRequest) {
+    public PostUsersValidationResponse verifiedCode(PostUsersVerificationEmailRequest postUsersVerificationEmailRequest) {
 
         // 이메일로 저장된 인증 코드 조회
-        if (!redisService.hasRequestedAuthCode(UsersVerificationEmailRequest.getEmail())) {
+        if (!redisService.hasRequestedAuthCode(postUsersVerificationEmailRequest.getEmail())) {
             throw new GlobalException(CANNOT_CREATE_EMAIL_AUTH_CODE);  // 인증 요청 자체를 안한 유저
         }
 
         // 인증 코드 조회 (없으면 만료된 것)
-        String storedAuthCode = redisService.getAuthCode(UsersVerificationEmailRequest.getEmail())
+        String storedAuthCode = redisService.getAuthCode(postUsersVerificationEmailRequest.getEmail())
                 .orElseThrow(() -> new GlobalException(EMAIL_AUTH_CODE_EXPIRED));
 
         //인증코드 일치 여부 반환
-        if (storedAuthCode.equals(UsersVerificationEmailRequest.getCode())) {
+        if (storedAuthCode.equals(postUsersVerificationEmailRequest.getCode())) {
             // 인증 성공 후 인증 코드 삭제
-            redisService.deleteAuthCode(UsersVerificationEmailRequest.getEmail());
+            redisService.deleteAuthCode(postUsersVerificationEmailRequest.getEmail());
             return PostUsersValidationResponse.of(true);
         }
         return PostUsersValidationResponse.of(false);

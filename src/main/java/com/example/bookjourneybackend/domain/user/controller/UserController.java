@@ -25,17 +25,17 @@ public class UserController {
 
     //회원가입
     @PostMapping("/signup")
-    public BaseResponse<PostUsersSignUpResponse> signup(@Valid @RequestBody final PostUsersSignUpRequest userSignUpRequest
+    public BaseResponse<PostUsersSignUpResponse> signup(@Valid @RequestBody final PostUsersSignUpRequest postUsersSignUpRequest
             , HttpServletRequest request, HttpServletResponse response) {
         log.info("[UserController.signUp]");
-        return BaseResponse.ok(userService.signup(userSignUpRequest, request,response));
+        return BaseResponse.ok(userService.signup(postUsersSignUpRequest, request,response));
     }
 
     //닉네임 중복검증
     @PostMapping("/nickname")
-    public BaseResponse<PostUsersValidationResponse> validateNickname(@Valid @RequestBody final PostUsersNicknameValidationRequest NicknameValidationRequest) {
+    public BaseResponse<PostUsersValidationResponse> validateNickname(@Valid @RequestBody final PostUsersNicknameValidationRequest postUsersNicknameValidationRequest) {
         log.info("[UserController.validateNickname]");
-        return BaseResponse.ok(userService.validateNickname(NicknameValidationRequest));
+        return BaseResponse.ok(userService.validateNickname(postUsersNicknameValidationRequest));
     }
 
     //이메일 인증코드 요청
@@ -47,9 +47,9 @@ public class UserController {
 
     //이메일 인증확인 요청
     @PostMapping("/emails/vertifications")
-    public  BaseResponse<PostUsersValidationResponse> verificationEmail(@Valid @RequestBody final PostUsersVerificationEmailRequest UsersVerificationEmailRequest) {
+    public  BaseResponse<PostUsersValidationResponse> verificationEmail(@Valid @RequestBody final PostUsersVerificationEmailRequest postUsersVerificationEmailRequest) {
         log.info("[UserController.verificationEmail]");
-        return BaseResponse.ok(userService.verifiedCode(UsersVerificationEmailRequest));
+        return BaseResponse.ok(userService.verifiedCode(postUsersVerificationEmailRequest));
     }
 
 }
