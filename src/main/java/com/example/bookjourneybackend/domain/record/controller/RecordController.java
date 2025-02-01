@@ -49,4 +49,12 @@ public class RecordController {
         return BaseResponse.ok(recordService.showPageRecords(roomId, userId, sortingType, pageStart, pageEnd));
     }
 
+    @PostMapping("/{recordId}/likes")
+    public BaseResponse<PostRecordLikeResponse> likesRecord(
+            @PathVariable("recordId") final Long recordId,
+            @LoginUserId final Long userId
+    ) {
+        return BaseResponse.ok(recordService.toggleRecordLike(recordId, userId));
+    }
+
 }
