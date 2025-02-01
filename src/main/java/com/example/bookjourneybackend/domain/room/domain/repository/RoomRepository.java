@@ -46,6 +46,7 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
             "WHERE r.recruitEndDate >= :lastDayOfWeek " +
             "AND r.roomType = 'TOGETHER' " +
             "AND r.isPublic = true " +
+            "AND r.status != 'EXPIRED' " +
             "GROUP BY r " +
             "ORDER BY (COUNT(rec) + COUNT(com)) DESC, r.recruitEndDate DESC, r.startDate ASC")
     List<Room> findRecruitmentRooms(LocalDate firstDayOfWeek, LocalDate lastDayOfWeek, PageRequest of);
