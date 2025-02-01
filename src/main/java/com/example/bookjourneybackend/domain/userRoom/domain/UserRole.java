@@ -1,6 +1,9 @@
 package com.example.bookjourneybackend.domain.userRoom.domain;
 
+import com.example.bookjourneybackend.global.exception.GlobalException;
 import lombok.Getter;
+
+import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.NO_SUCH_TYPE_USER;
 
 @Getter
 public enum UserRole {
@@ -19,9 +22,7 @@ public enum UserRole {
                 return userRole;
             }
         }
-        //TODO 예외 엔티티 작성
-        //throw new CustomException(ErrorCode.NO_SUCH_TYPE);
-        return null;
+        throw new GlobalException(NO_SUCH_TYPE_USER);
     }
 
 

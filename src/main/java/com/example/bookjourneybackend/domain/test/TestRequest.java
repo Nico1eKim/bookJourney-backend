@@ -20,7 +20,6 @@ public class TestRequest {
     @Pattern(regexp = "^(?=.*[a-zA-Z])(?=.*[0-9]).{8,16}$", message = "비밀번호는 영어와 숫자를 포함해서 8자 이상 16자 이내로 입력해주세요.")
     private String password;
 
-    //todo 닉네임 4~12 한글 제한
     @NotNull(message = "닉네임 입력은 필수입니다.")
     @Size(min=4, message = "닉네임은 최소 4자 이상입니다.")
     private String name;
