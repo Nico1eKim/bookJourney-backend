@@ -35,15 +35,15 @@ public class RoomController {
 
     @GetMapping("/search")
     public BaseResponse<GetRoomSearchResponse> searchRooms(
-            @RequestParam(required = false) final String searchTerm,
-            @RequestParam(required = false) final String searchType,
+            @RequestParam(required = true) final String searchTerm,
+            @RequestParam(required = true, defaultValue = "책 제목") final String searchType,
             @RequestParam(required = false) final String genre,
             @RequestParam(required = false) final String recruitStartDate,
             @RequestParam(required = false) final String recruitEndDate,
             @RequestParam(required = false) final String roomStartDate,
             @RequestParam(required = false) final String roomEndDate,
             @RequestParam(required = false) final Integer recordCount,
-            @RequestParam(required = false) final Integer page
+            @RequestParam(required = true, defaultValue = "0") final Integer page
     ) {
         return BaseResponse.ok(
                 roomService.searchRooms(searchTerm, searchType, genre, recruitStartDate, recruitEndDate, roomStartDate, roomEndDate, recordCount, page)
