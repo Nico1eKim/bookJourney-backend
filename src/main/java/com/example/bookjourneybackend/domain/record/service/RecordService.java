@@ -6,6 +6,7 @@ import com.example.bookjourneybackend.domain.record.domain.RecordType;
 import com.example.bookjourneybackend.domain.record.domain.repository.RecordLikeRepository;
 import com.example.bookjourneybackend.domain.record.domain.repository.RecordRepository;
 import com.example.bookjourneybackend.domain.record.dto.request.PostRecordRequest;
+import com.example.bookjourneybackend.domain.record.dto.response.PostRecordLikeResponse;
 import com.example.bookjourneybackend.domain.record.dto.response.RecordInfo;
 import com.example.bookjourneybackend.domain.record.dto.response.GetRecordResponse;
 import com.example.bookjourneybackend.domain.record.dto.response.PostRecordResponse;
@@ -140,7 +141,7 @@ public class RecordService {
             default -> throw new GlobalException(INVALID_RECORD_SORT_TYPE);
         };
 
-        return records.orElseThrow(() -> new GlobalException(RECORD_NOT_FOUND));
+        return records.orElseThrow(() -> new GlobalException(CANNOT_FOUND_RECORD));
     }
 
     private List<RecordInfo> parseEntireRecordsToResponse(List<Record> records, User user) {

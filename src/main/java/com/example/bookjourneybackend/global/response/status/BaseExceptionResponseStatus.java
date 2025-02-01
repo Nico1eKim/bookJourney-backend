@@ -71,7 +71,7 @@ public enum BaseExceptionResponseStatus implements ResponseStatus {
     /**
      * 9000 : record 관련
      */
-    RECORD_NOT_FOUND(9001, BAD_REQUEST, "기록을 찾을 수 없습니다."),
+    CANNOT_FOUND_RECORD(9001, BAD_REQUEST, "기록을 찾을 수 없습니다."),
 
     INVALID_RECORD_TYPE(9002, BAD_REQUEST, "알맞은 기록 타입을 찾을 수 없습니다."),
     INVALID_RECORD_PAGE(9002, BAD_REQUEST, "페이지 번호를 입력해주세요."),
