@@ -25,6 +25,9 @@ public class RedisService {
     @Value("${spring.mail.auth-code-expiration-minutes}")
     private long authCodeExpirationMinutes;
 
+    @Value("${spring.mail.auth-code-request-expiration-minutes}")
+    private long authCodeRequestExpirationMinutes;
+
     private final RedisTemplate<String, Object> redisTemplate;
     private static final String AUTH_CODE_PREFIX = "AuthCode:";
     private static final String AUTH_REQUEST_PREFIX = "AuthRequest:";
@@ -55,7 +58,7 @@ public class RedisService {
         // 인증 코드 저장
         redisTemplate.opsForValue().set(AUTH_CODE_PREFIX + email, authCode, authCodeExpirationMinutes,MINUTES);
         // 인증 요청 여부 저장
-        redisTemplate.opsForValue().set(AUTH_REQUEST_PREFIX + email, "true", authCodeExpirationMinutes * 2,MINUTES);
+        redisTemplate.opsForValue().set(AUTH_REQUEST_PREFIX + email, "true",authCodeRequestExpirationMinutes,MINUTES);
     }
 
     // 주어진 이메일로 인증 번호 조회

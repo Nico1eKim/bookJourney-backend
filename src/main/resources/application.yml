@@ -152,7 +152,8 @@ spring:
           connectiontimeout: 5000 #5초
           timeout: 5000
           writetimeout: 5000
-    auth-code-expiration-minutes: 30  #30분
+    auth-code-expiration-minutes: 720  #12시간
+    auth-code-request-expiration-minutes: 1440  #24시간
 
 aladin:
   key: ${ALADIN_API_KEY}
