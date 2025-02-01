@@ -473,6 +473,8 @@ public class RoomService {
                                 .authorName(room.getBook().getAuthorName())
                                 .roomName(room.getRoomName())
                                 .recruitCount(room.getRecruitCount())
+                                .memberCount(room.getUserRooms().size())
+                                .isPublic(room.isPublic())
                                 .progressStartDate(dateUtil.formatDate(room.getStartDate()))
                                 .progressEndDate(dateUtil.formatDate(room.getProgressEndDate()))
                                 .build())
