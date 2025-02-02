@@ -82,4 +82,10 @@ public class RoomController {
     ) {
         return BaseResponse.ok(roomService.joinRoom(roomId, userId, password));
     }
+
+    @GetMapping("/recruitments")
+    public BaseResponse<GetRoomRecruitmentResponse> viewRecruitmentRooms(
+    ) {
+        return BaseResponse.ok(roomService.searchRecruitmentRooms());
+    }
 }
