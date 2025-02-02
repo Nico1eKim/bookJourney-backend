@@ -60,7 +60,10 @@ public class RecentSearchService {
         return GetRecentSearchResponse.of(recentSearchInfoList);
     }
 
-
+    /**
+     * 로그인 한 유저의 특정 최근 검색어 삭제
+     * @param recentSearchId,userId
+     */
     public Void deleteRecentSearch(Long recentSearchId, Long userId) {
         log.info("[RecentSearchService.deleteRecentSearch]");
         // 사용자 조회
