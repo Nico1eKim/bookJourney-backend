@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.CANNOT_FOUND_RECENT_SEARCH;
 import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.CANNOT_FOUND_USER;
 
 @Slf4j
@@ -60,4 +61,17 @@ public class RecentSearchService {
     }
 
 
+    public Void deleteRecentSearch(Long recentSearchId, Long userId) {
+        log.info("[RecentSearchService.deleteRecentSearch]");
+        // 사용자 조회
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER));
+
+        //사용자가 삭제하고자 하는 최근 검색어 조회
+        RecentSearch recentSearch = recentSearchRepository.findByUserAndRecentSearchId(user, recentSearchId)
+                .orElseThrow(() -> new GlobalException(CANNOT_FOUND_RECENT_SEARCH));
+
+        recentSearchRepository.delete(recentSearch);
+        return null;
+    }
 }
