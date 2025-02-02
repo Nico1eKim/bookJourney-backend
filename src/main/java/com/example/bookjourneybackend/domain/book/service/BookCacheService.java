@@ -63,7 +63,7 @@ public class BookCacheService {
         String currentResponse = aladinApiUtil.requestBookInfoFromAladinApi(requestUrl);
         log.info("알라딘 API 응답 Body: {}", currentResponse);
 
-        Book book = aladinApiUtil.parseAladinApiResponseToBook(currentResponse,false,false);
+        Book book = aladinApiUtil.parseAladinApiResponseToBook(currentResponse,false,0);
 
         return GetBookInfoResponse.of(
                 book.getGenre().getGenreType(),

@@ -248,7 +248,7 @@ public class RoomService {
         String requestUrl = aladinApiUtil.buildLookUpApiUrl(isbn);
         String currentResponse = aladinApiUtil.requestBookInfoFromAladinApi(requestUrl);
 
-        return aladinApiUtil.parseAladinApiResponseToBook(currentResponse,false,false);
+        return aladinApiUtil.parseAladinApiResponseToBook(currentResponse,false,0);
     }
 
     //유저 정보를 통해 UserRoom 객체 생성
@@ -269,8 +269,8 @@ public class RoomService {
         if (request.getRecruitCount() == 1) {
             room = Room.makeReadAloneRoom(book);
         } else {
-            LocalDate startDate = dateUtil.parseToLocalDate(request.getProgressStartDate());
-            LocalDate progressEndDate = dateUtil.parseToLocalDate(request.getProgressEndDate());
+            LocalDate startDate = dateUtil.parseDateToLocalDateString(request.getProgressStartDate());
+            LocalDate progressEndDate = dateUtil.parseDateToLocalDateString(request.getProgressEndDate());
             room = Room.makeReadTogetherRoom(
                     request.getRoomName(), book, request.isPublic(), request.getPassword(),
                     startDate, progressEndDate, dateUtil.calculateRecruitEndDate(startDate, progressEndDate), request.getRecruitCount()
