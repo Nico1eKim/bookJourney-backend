@@ -157,3 +157,8 @@ spring:
 
 aladin:
   key: ${ALADIN_API_KEY}
+
+springdoc:
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui/index.html
