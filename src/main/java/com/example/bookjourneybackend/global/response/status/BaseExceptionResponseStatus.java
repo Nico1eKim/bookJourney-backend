@@ -87,7 +87,8 @@ public enum BaseExceptionResponseStatus implements ResponseStatus {
     /**
      * 10000 : recentSearch 관련
      */
-    CANNOT_FOUND_RECENT_SEARCH(10000,BAD_REQUEST, "최근검색어를 찾을 수 없습니다.");
+    CANNOT_FOUND_RECENT_SEARCH(10000,BAD_REQUEST, "최근검색어를 찾을 수 없습니다."),
+    CANNOT_DELETE_RECENT_SEARCH(10000,BAD_REQUEST, "최근검색어를 삭제 할 수 없습니다.");
 
     private final int code;
     private final HttpStatus status;
