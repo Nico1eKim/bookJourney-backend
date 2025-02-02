@@ -32,6 +32,7 @@ public class RecentSearchService {
      * @param userId
      * @return GetRecentSearchResponse
      */
+    @Transactional(readOnly = true)
     public GetRecentSearchResponse showRecentSearch(Long userId) {
         log.info("[RecentSearchService.showRecentSearch]");
 
