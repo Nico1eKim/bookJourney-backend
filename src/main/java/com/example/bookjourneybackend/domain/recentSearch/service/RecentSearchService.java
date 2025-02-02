@@ -16,8 +16,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.CANNOT_FOUND_RECENT_SEARCH;
-import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.CANNOT_FOUND_USER;
+import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.*;
 
 @Slf4j
 @Service
@@ -36,15 +35,11 @@ public class RecentSearchService {
     public GetRecentSearchResponse showRecentSearch(Long userId) {
         log.info("[RecentSearchService.showRecentSearch]");
 
-        // 사용자 조회
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER));
-
-        //사용자의 최근 검색어 조회
-        Optional<List<RecentSearch>> recentSearchList = recentSearchRepository.findByUser(user);
+        Optional<List<RecentSearch>> recentSearchList = getRecentSearchList(userId);
 
         return getGetRecentSearchResponse(recentSearchList);
     }
+
 
     private GetRecentSearchResponse getGetRecentSearchResponse(Optional<List<RecentSearch>> recentSearchList) {
 
@@ -76,5 +71,35 @@ public class RecentSearchService {
 
         recentSearchRepository.delete(recentSearch);
         return null;
+    }
+
+    /**
+     * 로그인 한 유저의 최근검색어 전체 삭제
+     * @param userId
+     */
+    public Void deleteRecentSearchAll(Long userId) {
+        log.info("[RecentSearchService.deleteRecentSearchAll]");
+
+        Optional<List<RecentSearch>> recentSearchList = getRecentSearchList(userId);
+
+        // 최근 검색어가 존재하면 전체 삭제
+        if (recentSearchList.isPresent() && !recentSearchList.get().isEmpty()) {
+            // 삭제
+            recentSearchRepository.deleteAll(recentSearchList.get());
+            return null;
+        }
+        // 존재하지 않으면 예외 처리
+        throw new GlobalException(CANNOT_DELETE_RECENT_SEARCH);
+    }
+
+    private Optional<List<RecentSearch>> getRecentSearchList(Long userId) {
+
+        // 사용자 조회
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER));
+
+        //사용자의 최근 검색어 조회
+        Optional<List<RecentSearch>> recentSearchList = recentSearchRepository.findByUser(user);
+        return recentSearchList;
     }
 }
