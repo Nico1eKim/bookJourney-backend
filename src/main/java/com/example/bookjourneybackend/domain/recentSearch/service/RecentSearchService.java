@@ -94,7 +94,6 @@ public class RecentSearchService {
 
         // 최근 검색어가 존재하면 전체 삭제
         if (recentSearchList.isPresent() && !recentSearchList.get().isEmpty()) {
-            // 삭제
             recentSearchRepository.deleteAll(recentSearchList.get());
             return null;
         }
