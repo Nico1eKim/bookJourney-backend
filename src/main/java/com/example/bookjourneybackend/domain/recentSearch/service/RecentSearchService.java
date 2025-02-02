@@ -16,7 +16,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.*;
+import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.CANNOT_FOUND_RECENT_SEARCH;
+import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.CANNOT_FOUND_USER;
 
 @Slf4j
 @Service
@@ -32,14 +33,19 @@ public class RecentSearchService {
      * @param userId
      * @return GetRecentSearchResponse
      */
+    @Transactional(readOnly = true)
     public GetRecentSearchResponse showRecentSearch(Long userId) {
         log.info("[RecentSearchService.showRecentSearch]");
 
-        Optional<List<RecentSearch>> recentSearchList = getRecentSearchList(userId);
+        // 사용자 조회
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER));
+
+        //사용자의 최근 검색어 조회
+        Optional<List<RecentSearch>> recentSearchList = recentSearchRepository.findTop12ByUserOrderByCreatedAtDesc(user);
 
         return getGetRecentSearchResponse(recentSearchList);
     }
-
 
     private GetRecentSearchResponse getGetRecentSearchResponse(Optional<List<RecentSearch>> recentSearchList) {
 
