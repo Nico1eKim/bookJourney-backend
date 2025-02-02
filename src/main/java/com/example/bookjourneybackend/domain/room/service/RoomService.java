@@ -460,10 +460,6 @@ public class RoomService {
 
         List<Room> rooms = roomRepository.findRecruitmentRooms(firstAndLastDayOfWeek[0], firstAndLastDayOfWeek[1], PageRequest.of(0, 5));
 
-        if (rooms.isEmpty()) {
-            throw new GlobalException(CANNOT_FOUND_RECRUITMENT_ROOM);
-        }
-
         return GetRoomRecruitmentResponse.of(
                 weekOfMonth,
                 rooms.stream()
