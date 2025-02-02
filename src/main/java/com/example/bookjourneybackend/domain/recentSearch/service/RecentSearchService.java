@@ -33,6 +33,7 @@ public class RecentSearchService {
      * @param userId
      * @return GetRecentSearchResponse
      */
+    @Transactional(readOnly = true)
     public GetRecentSearchResponse showRecentSearch(Long userId) {
         log.info("[RecentSearchService.showRecentSearch]");
 
@@ -41,7 +42,7 @@ public class RecentSearchService {
                 .orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER));
 
         //사용자의 최근 검색어 조회
-        Optional<List<RecentSearch>> recentSearchList = recentSearchRepository.findByUser(user);
+        Optional<List<RecentSearch>> recentSearchList = recentSearchRepository.findTop12ByUserOrderByCreatedAtDesc(user);
 
         return getGetRecentSearchResponse(recentSearchList);
     }
