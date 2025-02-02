@@ -15,7 +15,7 @@ public class RoomInfo {
     private String roomName;
     private int memberCount;
     private int recruitCount;
-    private int roomPercentage;
+    private Integer roomPercentage;
     private String progressStartDate;
     private String progressEndDate;
 }
