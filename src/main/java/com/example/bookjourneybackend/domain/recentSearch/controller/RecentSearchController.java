@@ -28,4 +28,10 @@ public class RecentSearchController {
         return BaseResponse.ok(recentSearchService.deleteRecentSearch(recentSearchId,userId));
     }
 
+    @DeleteMapping("/all")
+    public BaseResponse<Void> deleteRecentSearchAll(@LoginUserId final Long userId) {
+        log.info("[RecentSearchController.deleteRecentSearchAll]");
+        return BaseResponse.ok(recentSearchService.deleteRecentSearchAll(userId));
+    }
+
 }
