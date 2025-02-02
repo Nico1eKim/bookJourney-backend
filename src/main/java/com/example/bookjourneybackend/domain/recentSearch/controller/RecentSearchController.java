@@ -6,9 +6,7 @@ import com.example.bookjourneybackend.global.annotation.LoginUserId;
 import com.example.bookjourneybackend.global.response.BaseResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @RestController
@@ -22,6 +20,12 @@ public class RecentSearchController {
     public BaseResponse<GetRecentSearchResponse> viewRecentSearch(@LoginUserId final Long userId) {
         log.info("[RecentSearchController.viewRecentSearch]");
         return BaseResponse.ok(recentSearchService.showRecentSearch(userId));
+    }
+
+    @DeleteMapping("/{recentSearchId}")
+    public BaseResponse<Void> deleteRecentSearch(@PathVariable("recentSearchId") final Long recentSearchId,@LoginUserId final Long userId) {
+        log.info("[RecentSearchController.deleteRecentSearch]");
+        return BaseResponse.ok(recentSearchService.deleteRecentSearch(recentSearchId,userId));
     }
 
 }
