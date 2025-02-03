@@ -88,4 +88,12 @@ public class RoomController {
     ) {
         return BaseResponse.ok(roomService.searchRecruitmentRooms());
     }
+
+    @GetMapping("/{roomId}/pages")
+    public BaseResponse<GetRoomPagesResponse> viewPages(
+            @PathVariable("roomId") final Long roomId,
+            @LoginUserId final Long userId
+    ) {
+        return BaseResponse.ok(roomService.showRoomPages(roomId, userId));
+    }
 }

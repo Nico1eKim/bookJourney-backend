@@ -478,4 +478,20 @@ public class RoomService {
                         .toList()
         );
     }
+
+    /**
+     * 읽은 페이지 입력 시 책 전체 & 저번까지 읽었던 페이지 조회
+     */
+    @Transactional(readOnly = true)
+    public GetRoomPagesResponse showRoomPages(Long roomId, Long userId) {
+        Room room = roomRepository.findById(roomId).orElseThrow(() -> new GlobalException(CANNOT_FOUND_ROOM));
+        User user = userRepository.findById(userId).orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER));
+        UserRoom userRoom = userRoomRepository.findUserRoomByRoomAndUser(room, user).orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER_ROOM));
+
+        int bookPage = room.getBook().getPageCount();
+        int currentPage = userRoom.getCurrentPage();
+
+        return GetRoomPagesResponse.of(bookPage, currentPage);
+
+    }
 }
