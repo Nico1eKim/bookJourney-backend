@@ -244,15 +244,16 @@ public class RecordService {
             throw new GlobalException(INVALID_PAGE_NUMBER);
         }
 
+        // 유저의 진행률 & current page 업데이트
         double userPercentage = ((double) currentPage / totalPages) * 100;
-        userRoom.updateUserPercentage(userPercentage);
+        userRoom.updateUserProgress(userPercentage, currentPage);
 
+        // 방의 진행률 업데이트
         List<UserRoom> roomMembers = userRoomRepository.findAllByRoom(room);
         double roomPercentage = roomMembers.stream()
                 .mapToDouble(UserRoom::getUserPercentage)
                 .average()
                 .orElse(0.0);
-
         room.updateRoomPercentage(roomPercentage);
 
         return PostRecordPageResponse.of(currentPage);
