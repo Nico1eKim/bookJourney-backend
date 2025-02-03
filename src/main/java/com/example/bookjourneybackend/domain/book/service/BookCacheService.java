@@ -50,6 +50,7 @@ public class BookCacheService {
         return currentResponse;
     }
 
+    //TODO BOOK으로 반환하도록 수정(캐싱되어있는 북을 즐겨찾기에서도 써야하기떄문에 book형태로반환해야함)
     @Cacheable(cacheNames = "getBookInfo", key = "'book:isbn:' + #p2", cacheManager = "bookInfoCacheManager")
     public GetBookInfoResponse cachingBookInfo(String title, String author, String isbn, String cover, String description, String categoryName, String publisher, String publishedDate) {
         return GetBookInfoResponse.of(categoryName, cover, title, author, false, publisher, publishedDate, isbn, description);
