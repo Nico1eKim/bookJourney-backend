@@ -35,18 +35,18 @@ public interface UserRoomRepository extends JpaRepository<UserRoom, Long> {
 
     List<UserRoom> findAllByRoom(Room room);
 
-    @Query("SELECT ur FROM UserRoom ur " +
+   @Query("SELECT ur FROM UserRoom ur " +
             "JOIN FETCH ur.room r " +
             "WHERE ur.user.userId = :userId AND ur.status = 'INACTIVE' " +
-            "AND (MONTH(r.startDate) <= MONTH(:localDate) AND YEAR(r.startDate) <= YEAR(:localDate) " +
-            "OR MONTH(r.progressEndDate) >= MONTH(:localDate) AND YEAR(r.progressEndDate) >= YEAR(:localDate)) " +
+            "AND ((:month IS NULL OR MONTH(r.startDate) <= :month) AND YEAR(r.startDate) <= :year " +
+            "OR (:month IS NULL OR MONTH(r.progressEndDate) >= :month) AND YEAR(r.progressEndDate) >= :year) " +
             "AND r.roomType = 'TOGETHER'")
-    List<UserRoom> findInActiveTogetherRoomsByUserIdAndDate(@Param("userId") Long userId, @Param("localDate") LocalDate localDate);
+   List<UserRoom> findInActiveTogetherRoomsByUserIdAndDate(@Param("userId") Long userId, @Param("year") Integer year, @Param("month") Integer month);
 
     @Query("SELECT ur FROM UserRoom ur " +
             "JOIN FETCH ur.room r " +
             "WHERE ur.user.userId = :userId AND ur.status = 'INACTIVE' " +
-            "AND MONTH(r.startDate) <= MONTH(:localDate) " +
+            "AND ((:month IS NULL OR MONTH(r.startDate) <= :month) AND YEAR(r.startDate) <= :year) " +
             "AND r.roomType = 'ALONE'")
-    List<UserRoom> findInActiveAloneRoomsByUserIdAndDate(Long userId, LocalDate localDate);
+    List<UserRoom> findInActiveAloneRoomsByUserIdAndDate(@Param("userId") Long userId, @Param("year") Integer year, @Param("month") Integer month);
 }

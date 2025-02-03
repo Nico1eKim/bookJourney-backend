@@ -32,13 +32,21 @@ public class RoomArchiveService {
      * 해당 사용자의 status가 'INACTIVE'인 UserRoom 중에서 queryParam으로 넘어온 날짜에 겹치는 날을 필터링하여 조회
      * 정렬은 inActivatedAt 내림차순으로 정렬
      */
-    public GetRoomArchiveResponse viewInCompletedRooms(Long userId, String date) {
+    public GetRoomArchiveResponse viewInCompletedRooms(Long userId, Integer month, Integer year) {
         log.info("------------------------[RoomArchiveService.viewCompletedRooms]------------------------");
 
-        LocalDate localDate = dateUtil.parseDate(date);
+        List<UserRoom> togetherArchiveList;
+        List<UserRoom> aloneArchiveList;
 
-        List<UserRoom> togetherArchiveList = userRoomRepository.findInActiveTogetherRoomsByUserIdAndDate(userId, localDate);
-        List<UserRoom> aloneArchiveList = userRoomRepository.findInActiveAloneRoomsByUserIdAndDate(userId, localDate);
+        if (year == null) {
+            // year가 null이면 이번달과 겹치는 모든 방을 조회
+            year = LocalDate.now().getYear();
+            month = LocalDate.now().getMonthValue();
+        }
+
+        //month가 null일 경우에는 해당 년도의 모든 방을 조회
+        togetherArchiveList = userRoomRepository.findInActiveTogetherRoomsByUserIdAndDate(userId, year, month);
+        aloneArchiveList = userRoomRepository.findInActiveAloneRoomsByUserIdAndDate(userId, year, month);
 
         return new GetRoomArchiveResponse(combineAndParseToRecordInfo(togetherArchiveList, aloneArchiveList));
     }
