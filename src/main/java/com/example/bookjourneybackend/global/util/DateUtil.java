@@ -22,6 +22,11 @@ public class DateUtil {
         return date != null ? LocalDate.parse(date) : null;
     }
 
+    //현재 시각을 LocalDateTime으로 반환
+    public LocalDateTime getCurrentTime() {
+        return LocalDateTime.now();
+    }
+
     //기록들 중 마지막 활동 시간 계산 -> 가장 최근에 수정된 기록의 시간을 반환 (ex. 1분 전, 1시간 전, 1일 전)
     public String calculateLastActivityTime(List<Record> records) {
         return records.stream()
