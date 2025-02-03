@@ -75,6 +75,11 @@ public enum BaseExceptionResponseStatus implements ResponseStatus {
 
     CANNOT_FOUND_RECRUITMENT_ROOM(8008, BAD_REQUEST, "모집 중인 방을 찾을 수 없습니다."),
 
+    CANNOT_WRITE_IN_EXPIRED_ROOM(8009, BAD_REQUEST, "기간이 지난 방에는 기록을 남길 수 없습니다."),
+    CANNOT_LIKE_IN_EXPIRED_ROOM(8009, BAD_REQUEST, "기간이 지난 방에는 좋아요를 남길 수 없습니다."),
+    CANNOT_ENTER_PAGE_IN_EXPIRED_ROOM(8009, BAD_REQUEST, "기간이 지난 방에는 페이지를 입력할 수 없습니다."),
+    CANNOT_COMMENT_IN_EXPIRED_ROOM(8009, BAD_REQUEST, "기간이 지난 방에는 댓글을 남길 수 없습니다."),
+
     /**
      * 9000 : record 관련
      */

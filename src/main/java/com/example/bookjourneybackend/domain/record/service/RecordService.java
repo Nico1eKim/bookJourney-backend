@@ -68,6 +68,11 @@ public class RecordService {
             throw new GlobalException(NOT_PARTICIPATING_IN_ROOM);
         }
 
+        // 방이 EXPIRED 상태이면 기록을 남길 수 없음
+        if (room.getStatus() == EXPIRED) {
+            throw new GlobalException(CANNOT_WRITE_IN_EXPIRED_ROOM);
+        }
+
         RecordType recordType = RecordType.from(postRecordRequest.getRecordType());
         validateRecordRequest(postRecordRequest, recordType);
 
@@ -210,9 +215,16 @@ public class RecordService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER));
 
+        Room room = record.getRoom();
+
         // 방에 속해있지 않으면 좋아요를 누를 수 없음
-        if (!userRoomRepository.existsByRoomAndUser(record.getRoom(), user)) {
+        if (!userRoomRepository.existsByRoomAndUser(room, user)) {
             throw new GlobalException(NOT_PARTICIPATING_IN_ROOM);
+        }
+
+        // 방이 EXPIRED 상태이면 좋아요를 누를 수 없음
+        if (room.getStatus() == EXPIRED) {
+            throw new GlobalException(CANNOT_LIKE_IN_EXPIRED_ROOM);
         }
 
         boolean isLiked = recordLikeRepository.existsByRecordAndUser(record, user);
@@ -241,6 +253,11 @@ public class RecordService {
 
         Book book = room.getBook();
         int totalPages = book.getPageCount();
+
+        // 방이 EXPIRED 상태이면 페이지 입력 불가
+        if (room.getStatus() == EXPIRED) {
+            throw new GlobalException(CANNOT_ENTER_PAGE_IN_EXPIRED_ROOM);
+        }
 
         if (currentPage > totalPages) {
             throw new GlobalException(INVALID_PAGE_NUMBER);
