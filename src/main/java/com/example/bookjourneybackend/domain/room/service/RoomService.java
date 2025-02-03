@@ -61,7 +61,7 @@ public class RoomService {
      */
     public GetRoomDetailResponse showRoomDetails(Long roomId, Long userId) {
         log.info("------------------------[RoomService.showRoomDetails]------------------------");
-      
+
         Room room = roomRepository.findById(roomId)
                 .orElseThrow(() -> new GlobalException(CANNOT_FOUND_ROOM));
         User user = userRepository.findById(userId)
@@ -182,6 +182,7 @@ public class RoomService {
                 .roomPercentage(room.getRoomPercentage().intValue())
                 .progressStartDate(dateUtil.formatDate(room.getStartDate()))
                 .progressEndDate(dateUtil.formatDate(room.getProgressEndDate()))
+                .imageUrl(room.getBook().getImageUrl())
                 .build();
     }
 
@@ -248,7 +249,7 @@ public class RoomService {
         String requestUrl = aladinApiUtil.buildLookUpApiUrl(isbn);
         String currentResponse = aladinApiUtil.requestBookInfoFromAladinApi(requestUrl);
 
-        return aladinApiUtil.parseAladinApiResponseToBook(currentResponse,false,0);
+        return aladinApiUtil.parseAladinApiResponseToBook(currentResponse, false, 0);
     }
 
     //유저 정보를 통해 UserRoom 객체 생성
@@ -369,7 +370,7 @@ public class RoomService {
         if (room.getRoomType() == TOGETHER) {
             handleTogetherRoomExit(userRoom, room);
         }
-        if(room.getRoomType() == ALONE) {
+        if (room.getRoomType() == ALONE) {
             roomRepository.delete(room);    // 혼자읽기 방은 나가면 방 삭제
         }
 

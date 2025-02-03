@@ -18,4 +18,5 @@ public class RoomInfo {
     private Integer roomPercentage;
     private String progressStartDate;
     private String progressEndDate;
+    private String imageUrl;
 }
