@@ -21,7 +21,7 @@ public class RoomArchiveController {
 
     @GetMapping
     public BaseResponse<GetRoomArchiveResponse> viewCompletedRooms(@LoginUserId final Long userId,
-                                                                   @RequestParam(required = false) final String date
+                                                                   @RequestParam final String date
     ) {
         return BaseResponse.ok(roomArchiveService.viewInCompletedRooms(userId, date));
     }
