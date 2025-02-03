@@ -75,7 +75,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(Arrays.asList(
-                "http://localhost:3000",  // 로컬 환경
+                "http://localhost:5173",  // 로컬 환경
                 "http://ec2-13-48-61-179.eu-north-1.compute.amazonaws.com"  // 배포 환경
         ));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PATCH", "DELETE","PUT","OPTIONS"));  // 허용할 HTTP 메서드 설정
