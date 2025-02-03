@@ -337,6 +337,7 @@ public class RoomService {
         UserRoom userRoom = getUserRoom(roomId, userId);
 
         userRoom.setStatus(EntityStatus.INACTIVE);
+        userRoom.setInActivatedAt(dateUtil.getCurrentTime());
         userRoomRepository.save(userRoom);
 
         return null;
