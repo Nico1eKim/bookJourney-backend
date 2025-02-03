@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,4 +34,19 @@ public interface UserRoomRepository extends JpaRepository<UserRoom, Long> {
     boolean existsByRoomAndUser(Room room, User user);
 
     List<UserRoom> findAllByRoom(Room room);
+
+    @Query("SELECT ur FROM UserRoom ur " +
+            "JOIN FETCH ur.room r " +
+            "WHERE ur.user.userId = :userId AND ur.status = 'INACTIVE' " +
+            "AND (MONTH(r.startDate) <= MONTH(:localDate) AND YEAR(r.startDate) <= YEAR(:localDate) " +
+            "OR MONTH(r.progressEndDate) >= MONTH(:localDate) AND YEAR(r.progressEndDate) >= YEAR(:localDate)) " +
+            "AND r.roomType = 'TOGETHER'")
+    List<UserRoom> findInActiveTogetherRoomsByUserIdAndDate(@Param("userId") Long userId, @Param("localDate") LocalDate localDate);
+
+    @Query("SELECT ur FROM UserRoom ur " +
+            "JOIN FETCH ur.room r " +
+            "WHERE ur.user.userId = :userId AND ur.status = 'INACTIVE' " +
+            "AND MONTH(r.startDate) <= MONTH(:localDate) " +
+            "AND r.roomType = 'ALONE'")
+    List<UserRoom> findInActiveAloneRoomsByUserIdAndDate(Long userId, LocalDate localDate);
 }
