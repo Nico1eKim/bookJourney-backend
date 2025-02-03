@@ -17,8 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.CANNOT_FOUND_BOOK;
-import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.CANNOT_FOUND_USER;
+import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.*;
 
 @Slf4j
 @Service
@@ -34,8 +33,10 @@ public class FavoriteService {
 
     /**
      * isbn에 해당하는 책을 즐겨찾기에 추가
+     * 1. 해당책이 이미 즐겨찾기 되어있는 지 검사
      * 1. DB에 존재하면 DB에 존재하는 책을 바로 즐겨찾기 테이블에 추가
      * 2. 존재하지 않는 다면 캐시저장소에서 정보 찾아와서 DB저장후 즐겨찾기 테이블에 추가
+     * 3.
      * @param isbn,userId
      * @return PostFavoriteAddResponse
      */
@@ -46,6 +47,10 @@ public class FavoriteService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER));
 
+        // 이미 즐겨찾기에 등록되어 있는지 확인
+        if (favoriteRepository.existsFavoriteByUserIdAndIsbn(userId, isbn)) {
+            throw new GlobalException(CANNOT_FAVORITE);
+        }
 
         //DB에 책 저장확인 없으면 캐시 저장소에서 확인
         Book findBook = bookRepository.findByIsbn(isbn)
@@ -75,7 +80,6 @@ public class FavoriteService {
                     return book;
                 });
 
-        //즐겨찾기 추가
         favoriteRepository.save(Favorite.builder()
                 .book(findBook)
                 .user(user)
