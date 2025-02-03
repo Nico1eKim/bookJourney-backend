@@ -29,7 +29,7 @@ public class AuthService {
 
     private final JwtUtil jwtUtil;
     private final UserRepository userRepository;
-    private final TokenService tokenService;
+    private final RedisService redisService;
     private final PasswordEncoder passwordEncoder;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
@@ -37,15 +37,15 @@ public class AuthService {
      * 1. 이메일로 등록된 회원인지 검사
      * 2. 비밀번호 검사로 로그인
      * 3. 토큰 발급 및 인증된 사용자 권한 설정
-     * @param authLoginRequest,request,response
+     * @param postAuthLoginRequest,request,response
      * @return PostAuthLoginResponse
      */
     @Transactional
-    public PostAuthLoginResponse login(PostAuthLoginRequest authLoginRequest, HttpServletRequest request, HttpServletResponse response) {
+    public PostAuthLoginResponse login(PostAuthLoginRequest postAuthLoginRequest, HttpServletRequest request, HttpServletResponse response) {
         log.info("[AuthService.login]");
 
-        String email = authLoginRequest.getEmail();
-        String password = authLoginRequest.getPassword();
+        String email = postAuthLoginRequest.getEmail();
+        String password = postAuthLoginRequest.getPassword();
 
         User user = userRepository.findByEmailAndStatus(email,ACTIVE)
                 .orElseThrow(()-> new GlobalException(CANNOT_FOUND_EMAIL));
@@ -58,7 +58,7 @@ public class AuthService {
         String refreshToken = jwtUtil.createRefreshToken(user.getUserId());
 
         jwtUtil.setHeaderAccessToken(response,accessToken);
-        tokenService.storeRefreshToken(refreshToken, user.getUserId());
+        redisService.storeRefreshToken(refreshToken, user.getUserId());
 
         //인증된 사용자 권한 설정
         jwtAuthenticationFilter.setAuthentication(request,user.getUserId());
@@ -71,15 +71,15 @@ public class AuthService {
      * 1. 리프레쉬 토큰 검증
      * 2. 검증 후 리프레쉬 토큰 저장소에서 찾아옴
      * 3. 검증된 리프레쉬 토큰으로 엑세스 토큰 재발급 및 인증된 사용자 권한 설정
-     * @param authAccessTokenReissueRequest,request,response
+     * @param postAuthAccessTokenReissueRequest,request,response
      * @return PostAuthAccessTokenReissueResponse
      */
     @Transactional(readOnly = true)
-    public PostAuthAccessTokenReissueResponse tokenReissue(PostAuthAccessTokenReissueRequest authAccessTokenReissueRequest,
+    public PostAuthAccessTokenReissueResponse tokenReissue(PostAuthAccessTokenReissueRequest postAuthAccessTokenReissueRequest,
                                                            HttpServletResponse response, HttpServletRequest request) {
         log.info("[AuthService.tokenReissue]");
 
-        String refreshToken = authAccessTokenReissueRequest.getRefreshToken();
+        String refreshToken = postAuthAccessTokenReissueRequest.getRefreshToken();
 
         // 리프레시 토큰 검증
         if (!jwtUtil.validateToken(refreshToken)) {
@@ -90,7 +90,7 @@ public class AuthService {
         Long userId = jwtUtil.extractUserIdFromJwtToken(refreshToken);
 
         /// 리프레시 토큰 저장소 존재유무 확인
-        boolean isRefreshToken = tokenService.checkTokenExists(userId.toString());
+        boolean isRefreshToken = redisService.checkTokenExists(userId.toString());
         if (isRefreshToken) {
 
             /// 토큰 재발급
@@ -113,7 +113,7 @@ public class AuthService {
      * @param userId
      */
     @Transactional
-    public void logout(Long userId) {
+    public Void logout(Long userId) {
         log.info("[AuthService.logout]");
 
         //해당하는 유저 찾기
@@ -121,10 +121,12 @@ public class AuthService {
                 .orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER));
 
         //리프레쉬 토큰 저장소에서 삭제
-        tokenService.invalidateToken(userId);
+        redisService.invalidateToken(userId);
 
         // Spring Security에서 인증 정보 초기화
         SecurityContextHolder.clearContext();  // 인증 정보 초기화
+
+        return null;
 
     }
 }

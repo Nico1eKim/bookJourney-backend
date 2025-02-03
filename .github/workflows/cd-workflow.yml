@@ -58,7 +58,10 @@ jobs:
             git pull origin develop
             sudo docker-compose down -v
 
-            sudo docker-compose up -d
+             ./gradlew clean
+             set -a && source .env && set +a && ./gradlew build
+
+            sudo docker-compose up -d --build
             
             echo "🥳 Pulling new image"
             # sudo docker pull ${{ secrets.DOCKER_IMAGE }}

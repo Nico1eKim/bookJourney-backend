@@ -3,11 +3,14 @@ package com.example.bookjourneybackend.global.util;
 import com.example.bookjourneybackend.domain.record.domain.Record;
 import org.springframework.stereotype.Component;
 
+import java.time.DayOfWeek;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalAdjusters;
+import java.time.temporal.WeekFields;
 import java.util.List;
 import java.util.Optional;
 
@@ -62,14 +65,63 @@ public class DateUtil {
         return startDate.plusDays(halfDays);
     }
 
-    //문자열을 LocalDate로 변환
-    public LocalDate parseToLocalDate(String date) {
+    //문자열을 LocalDate(2024.11.14 형태)로 변환
+    public LocalDate parseDateToLocalDateString(String date) {
         return LocalDate.parse(date, DateTimeFormatter.ofPattern("yyyy.MM.dd"));
     }
 
     // LocalDateTime을 문자열(2024.11.14 23:04:28 형태)로 변환
-    public String formDateTime(LocalDateTime dateTime) {
+    public String formatLocalDateTime(LocalDateTime dateTime) {
         return dateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+    }
+
+    //문자열을 LocalDate(2024-11-14 형태)로 변환
+    public LocalDate parseDateToLocalDateFromPublishedDateString(String publishedDate) {
+        return  LocalDate.parse(publishedDate, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+    }
+
+    // LocalDateTime을 문자열(2024년 11월 14일 23시 04분 28초 형태)로 변환
+    public String formatLocalDateTimeKorean(LocalDateTime dateTime) {
+        return dateTime.format(DateTimeFormatter.ofPattern("yyyy년 MM월 dd일 HH시 mm분 ss초"));
+    }
+
+    // 현재 날짜를 기준으로 주차 반환 (ex. ~월 ~주차)
+    // 한 주의 시작은 월요일이고, 첫 주에 4일이 포함되어있어야 첫 주 취급 (목/금/토/일) or (월/화/수/목)
+    // 마지막 주차의 경우 마지막 날이 월~수 사이이면 다음달 1주차로 계산
+    public String getCurrentWeekOfMonth(LocalDate localDate) {
+        WeekFields weekFields = WeekFields.of(DayOfWeek.MONDAY, 4);
+
+        int weekOfMonth = localDate.get(weekFields.weekOfMonth());
+
+        // 첫 주에 해당하지 않는 주의 경우 전 달 마지막 주차로 계산
+        if (weekOfMonth == 0) {
+            // 전 달의 마지막 날 기준
+            LocalDate lastDayOfLastMonth = localDate.with(TemporalAdjusters.firstDayOfMonth()).minusDays(1);
+            return getCurrentWeekOfMonth(lastDayOfLastMonth);
+        }
+
+        // 이번 달의 마지막 날 기준
+        LocalDate lastDayOfMonth = localDate.with(TemporalAdjusters.lastDayOfMonth());
+        // 마지막 주차의 경우 마지막 날이 월~수 사이이면 다음달 1주차로 계산
+        if (weekOfMonth == lastDayOfMonth.get(weekFields.weekOfMonth()) && lastDayOfMonth.getDayOfWeek().compareTo(DayOfWeek.THURSDAY) < 0) {
+            LocalDate firstDayOfNextMonth = lastDayOfMonth.plusDays(1); // 마지막 날 + 1일 => 다음달 1일
+            return getCurrentWeekOfMonth(firstDayOfNextMonth);
+        }
+
+        return localDate.getMonthValue() + "월 " + weekOfMonth + "주차";
+    }
+
+    // 현재 주차를 전달받아 첫째 날과 마지막 날을 반환
+    public LocalDate[] getFirstAndLastDayOfWeek(LocalDate now) {
+        WeekFields weekFields = WeekFields.of(DayOfWeek.MONDAY, 4);
+
+        int weekOfMonth = now.get(weekFields.weekOfMonth());
+
+        // 현재 주차를 전달받아 해당 주의 첫째 날과 마지막 날을 반환
+        LocalDate firstDayOfWeek = now.with(weekFields.weekOfMonth(), weekOfMonth).with(weekFields.dayOfWeek(), 1);
+        LocalDate lastDayOfWeek = now.with(weekFields.weekOfMonth(), weekOfMonth).with(weekFields.dayOfWeek(), 7);
+
+        return new LocalDate[]{firstDayOfWeek, lastDayOfWeek};
     }
 
 }

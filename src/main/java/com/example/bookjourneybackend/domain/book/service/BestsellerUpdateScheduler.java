@@ -16,9 +16,8 @@ public class BestsellerUpdateScheduler implements ApplicationRunner {
 
     private final BestSellerService bestSellerService;
 
-    //매주 일요일 00시에 베스트셀러 리스트 업데이트
-    //TODO 베스트셀러 한주기준 월요일인지 일요일인지 제대로 픽스
-    @Scheduled(cron = "0 0 0 ? * SUN")
+    //매주 월요일 오전 5시에 베스트셀러 리스트 업데이트
+    @Scheduled(cron = "0 0 5 ? * MON")
     public void updateBestsellers() {
         log.info("[BestsellerUpdateScheduler.updateBestsellers]");
         bestSellerService.updateBestsellers();

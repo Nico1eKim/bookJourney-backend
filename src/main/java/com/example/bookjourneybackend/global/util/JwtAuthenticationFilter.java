@@ -1,8 +1,6 @@
 package com.example.bookjourneybackend.global.util;
 
-import com.example.bookjourneybackend.domain.auth.service.TokenService;
 import com.example.bookjourneybackend.domain.user.domain.User;
-import com.example.bookjourneybackend.global.exception.GlobalException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -22,9 +20,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
-
-import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.EXPIRED_TOKEN;
-import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.INVALID_TOKEN;
 
 
 @Order(0)

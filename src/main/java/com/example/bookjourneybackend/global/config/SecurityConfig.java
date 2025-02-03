@@ -30,7 +30,7 @@ public class SecurityConfig {
 
     private static final String[] AUTH_WHITELIST = {
             "/swagger-ui/**", "/api-docs", "/swagger-ui-custom.html",
-            "/v3/api-docs/**", "/api-docs/**", "/swagger-ui.html",
+            "/v3/api-docs/**", "/api-docs/**", "/swagger-ui.html","/swagger-ui/index.html",
             "/auth/login","/auth/reissue",
             "/users/signup","/users/emails/verification-requests","/users/emails/verifications",
             "/users/nickname","/h2-console/**"
@@ -74,8 +74,11 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000"));  // 허용할 도메인 설정(프엔 서버주소,배포 서버)
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PATCH", "DELETE","PUT"));  // 허용할 HTTP 메서드 설정
+        configuration.setAllowedOrigins(Arrays.asList(
+                "http://localhost:3000",  // 로컬 환경
+                "http://ec2-13-48-61-179.eu-north-1.compute.amazonaws.com"  // 배포 환경
+        ));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PATCH", "DELETE","PUT","OPTIONS"));  // 허용할 HTTP 메서드 설정
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Cache-Control", "Content-Type","Refresh-Token"));  // 허용할 헤더 설정
         configuration.setAllowCredentials(true);  // 자격 증명 허용 설정
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

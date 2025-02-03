@@ -27,14 +27,14 @@ public class AuthController {
 
     /**
      *  로그인
-     * @param authLoginRequest
+     * @param postAuthLoginRequest
      * @return PostAuthLoginResponse
      */
     @PostMapping("/login")
-    public BaseResponse<PostAuthLoginResponse> login(@Valid @RequestBody final PostAuthLoginRequest authLoginRequest
+    public BaseResponse<PostAuthLoginResponse> login(@Valid @RequestBody final PostAuthLoginRequest postAuthLoginRequest
             ,HttpServletRequest request,HttpServletResponse response) {
         log.info("[AuthController.login]");
-        return BaseResponse.ok(authService.login(authLoginRequest, request,response));
+        return BaseResponse.ok(authService.login(postAuthLoginRequest, request,response));
     }
 
     //엑세스 토큰 재발급
@@ -50,8 +50,7 @@ public class AuthController {
     @PostMapping("/logout")
     public BaseResponse<Void> logout(@LoginUserId final Long userId){
         log.info("[AuthController.logout]");
-        authService.logout(userId);
-        return BaseResponse.ok(null);
+        return BaseResponse.ok(authService.logout(userId));
     }
 
 
