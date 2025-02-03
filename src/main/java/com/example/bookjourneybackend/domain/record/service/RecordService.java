@@ -27,8 +27,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import static com.example.bookjourneybackend.domain.record.domain.RecordSortType.PAGE_ORDER;
+import static com.example.bookjourneybackend.domain.room.domain.RoomType.ALONE;
 import static com.example.bookjourneybackend.global.entity.EntityStatus.*;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -255,6 +257,12 @@ public class RecordService {
                 .average()
                 .orElse(0.0);
         room.updateRoomPercentage(roomPercentage);
+
+        // 혼자 읽기인 경우 종료 날짜를 현재 날짜로 설정
+        if (room.getRoomType() == ALONE) {
+            room.setProgressEndDate(LocalDate.now());
+            room.setStatus(EXPIRED);
+        }
 
         return PostRecordPageResponse.of(currentPage);
     }
