@@ -1,5 +1,6 @@
 package com.example.bookjourneybackend.domain.record.service;
 
+import com.example.bookjourneybackend.domain.book.domain.Book;
 import com.example.bookjourneybackend.domain.record.domain.RecordLike;
 import com.example.bookjourneybackend.domain.record.domain.RecordSortType;
 import com.example.bookjourneybackend.domain.record.domain.Record;
@@ -224,13 +225,24 @@ public class RecordService {
         return PostRecordLikeResponse.of(!isLiked);
     }
 
+    /**
+     * currentPage로 어디까지 읽었는지 기록 남기기
+     *
+     * @param currentPage
+     * @return PostRecordPageResponse
+     */
     @Transactional
     public PostRecordPageResponse enterRecordPage(Long roomId, Long userId, Integer currentPage) {
         Room room = roomRepository.findById(roomId).orElseThrow(() -> new GlobalException(CANNOT_FOUND_ROOM));
         User user = userRepository.findById(userId).orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER));
         UserRoom userRoom = userRoomRepository.findUserRoomByRoomAndUser(room, user).orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER_ROOM));
 
-        int totalPages = room.getBook().getPageCount();
+        Book book = room.getBook();
+        int totalPages = book.getPageCount();
+
+        if (currentPage > totalPages) {
+            throw new GlobalException(INVALID_PAGE_NUMBER);
+        }
 
         double userPercentage = ((double) currentPage / totalPages) * 100;
         userRoom.updateUserPercentage(userPercentage);
