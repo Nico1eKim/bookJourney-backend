@@ -2,6 +2,7 @@ package com.example.bookjourneybackend.domain.record.controller;
 
 import com.example.bookjourneybackend.domain.record.dto.request.PostRecordRequest;
 import com.example.bookjourneybackend.domain.record.dto.response.GetRecordResponse;
+import com.example.bookjourneybackend.domain.record.dto.response.PostRecordPageResponse;
 import com.example.bookjourneybackend.domain.record.dto.response.PostRecordResponse;
 import com.example.bookjourneybackend.domain.record.service.RecordService;
 import com.example.bookjourneybackend.global.annotation.LoginUserId;
@@ -46,6 +47,15 @@ public class RecordController {
             @RequestParam(value = "pageEnd", required = false) Integer pageEnd
     ) {
         return BaseResponse.ok(recordService.showPageRecords(roomId, userId, sortingType, pageStart, pageEnd));
+    }
+
+    @PostMapping("/{roomId}/pages")
+    public BaseResponse<PostRecordPageResponse> createRecordPage(
+            @PathVariable("roomId") final Long roomId,
+            @LoginUserId final Long userId,
+            @RequestParam("currentPage") final Integer currentPage
+    ) {
+        return BaseResponse.ok(recordService.enterRecordPage(roomId, userId, currentPage));
     }
 
 }
