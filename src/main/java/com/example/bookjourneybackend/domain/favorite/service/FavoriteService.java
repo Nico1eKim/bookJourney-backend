@@ -34,9 +34,8 @@ public class FavoriteService {
     /**
      * isbn에 해당하는 책을 즐겨찾기에 추가
      * 1. 해당책이 이미 즐겨찾기 되어있는 지 검사
-     * 1. DB에 존재하면 DB에 존재하는 책을 바로 즐겨찾기 테이블에 추가
-     * 2. 존재하지 않는 다면 캐시저장소에서 정보 찾아와서 DB저장후 즐겨찾기 테이블에 추가
-     * 3.
+     * 2. DB에 존재하면 DB에 존재하는 책을 바로 즐겨찾기 테이블에 추가
+     * 3. 존재하지 않는 다면 캐시저장소에서 정보 찾아와서 DB저장후 즐겨찾기 테이블에 추가
      * @param isbn,userId
      * @return PostFavoriteAddResponse
      */
