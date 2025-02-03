@@ -100,6 +100,7 @@ public class FavoriteService {
      * @param userId
      * @return GetFavoriteListResponse
      */
+    @Transactional(readOnly = true)
     public GetFavoriteListResponse showFavoriteList(Long userId) {
         log.info("[FavoriteService.showFavoriteList]");
 
