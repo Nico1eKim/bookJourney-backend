@@ -1,5 +1,6 @@
 package com.example.bookjourneybackend.domain.record.service;
 
+import com.example.bookjourneybackend.domain.book.domain.Book;
 import com.example.bookjourneybackend.domain.record.domain.RecordLike;
 import com.example.bookjourneybackend.domain.record.domain.RecordSortType;
 import com.example.bookjourneybackend.domain.record.domain.Record;
@@ -7,6 +8,7 @@ import com.example.bookjourneybackend.domain.record.domain.RecordType;
 import com.example.bookjourneybackend.domain.record.domain.repository.RecordLikeRepository;
 import com.example.bookjourneybackend.domain.record.domain.repository.RecordRepository;
 import com.example.bookjourneybackend.domain.record.dto.request.PostRecordRequest;
+import com.example.bookjourneybackend.domain.record.dto.response.PostRecordPageResponse;
 import com.example.bookjourneybackend.domain.record.dto.response.PostRecordLikeResponse;
 import com.example.bookjourneybackend.domain.record.dto.response.RecordInfo;
 import com.example.bookjourneybackend.domain.record.dto.response.GetRecordResponse;
@@ -221,5 +223,39 @@ public class RecordService {
 
         // 사용자의 좋아요 상태가 변경된 후의 결과를 반환
         return PostRecordLikeResponse.of(!isLiked);
+    }
+
+    /**
+     * currentPage로 어디까지 읽었는지 기록 남기기
+     *
+     * @param currentPage
+     * @return PostRecordPageResponse
+     */
+    @Transactional
+    public PostRecordPageResponse enterRecordPage(Long roomId, Long userId, Integer currentPage) {
+        Room room = roomRepository.findById(roomId).orElseThrow(() -> new GlobalException(CANNOT_FOUND_ROOM));
+        User user = userRepository.findById(userId).orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER));
+        UserRoom userRoom = userRoomRepository.findUserRoomByRoomAndUser(room, user).orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER_ROOM));
+
+        Book book = room.getBook();
+        int totalPages = book.getPageCount();
+
+        if (currentPage > totalPages) {
+            throw new GlobalException(INVALID_PAGE_NUMBER);
+        }
+
+        // 유저의 진행률 & current page 업데이트
+        double userPercentage = ((double) currentPage / totalPages) * 100;
+        userRoom.updateUserProgress(userPercentage, currentPage);
+
+        // 방의 진행률 업데이트
+        List<UserRoom> roomMembers = userRoomRepository.findAllByRoom(room);
+        double roomPercentage = roomMembers.stream()
+                .mapToDouble(UserRoom::getUserPercentage)
+                .average()
+                .orElse(0.0);
+        room.updateRoomPercentage(roomPercentage);
+
+        return PostRecordPageResponse.of(currentPage);
     }
 }
