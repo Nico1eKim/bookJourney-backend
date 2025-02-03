@@ -94,4 +94,8 @@ public class Room extends BaseEntity {
         this.records.add(record);
         record.setRoom(this);
     }
+
+    public void updateRoomPercentage(double roomPercentage) {
+        this.roomPercentage = roomPercentage;
+    }
 }

@@ -83,6 +83,7 @@ public enum BaseExceptionResponseStatus implements ResponseStatus {
     INVALID_RECORD_TYPE(9002, BAD_REQUEST, "알맞은 기록 타입을 찾을 수 없습니다."),
     INVALID_RECORD_PAGE(9002, BAD_REQUEST, "페이지 번호를 입력해주세요."),
     INVALID_RECORD_TITLE(9002, BAD_REQUEST, "기록 제목을 입력해주세요."),
+    INVALID_PAGE_NUMBER(9002, BAD_REQUEST, "유효하지 않은 페이지 범위입니다."),
 
     INVALID_RECORD_SORT_TYPE(9003, BAD_REQUEST, "알맞은 기록 나열 타입을 찾을 수 없습니다."),
 

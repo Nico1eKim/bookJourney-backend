@@ -61,7 +61,7 @@ public class RoomService {
      */
     public GetRoomDetailResponse showRoomDetails(Long roomId, Long userId) {
         log.info("------------------------[RoomService.showRoomDetails]------------------------");
-      
+
         Room room = roomRepository.findById(roomId)
                 .orElseThrow(() -> new GlobalException(CANNOT_FOUND_ROOM));
         User user = userRepository.findById(userId)
@@ -182,6 +182,7 @@ public class RoomService {
                 .roomPercentage(room.getRoomPercentage().intValue())
                 .progressStartDate(dateUtil.formatDate(room.getStartDate()))
                 .progressEndDate(dateUtil.formatDate(room.getProgressEndDate()))
+                .imageUrl(room.getBook().getImageUrl())
                 .build();
     }
 
@@ -248,7 +249,7 @@ public class RoomService {
         String requestUrl = aladinApiUtil.buildLookUpApiUrl(isbn);
         String currentResponse = aladinApiUtil.requestBookInfoFromAladinApi(requestUrl);
 
-        return aladinApiUtil.parseAladinApiResponseToBook(currentResponse,false,0);
+        return aladinApiUtil.parseAladinApiResponseToBook(currentResponse, false, 0);
     }
 
     //유저 정보를 통해 UserRoom 객체 생성
@@ -369,7 +370,7 @@ public class RoomService {
         if (room.getRoomType() == TOGETHER) {
             handleTogetherRoomExit(userRoom, room);
         }
-        if(room.getRoomType() == ALONE) {
+        if (room.getRoomType() == ALONE) {
             roomRepository.delete(room);    // 혼자읽기 방은 나가면 방 삭제
         }
 
@@ -476,5 +477,21 @@ public class RoomService {
                                 .build())
                         .toList()
         );
+    }
+
+    /**
+     * 읽은 페이지 입력 시 책 전체 & 저번까지 읽었던 페이지 조회
+     */
+    @Transactional(readOnly = true)
+    public GetRoomPagesResponse showRoomPages(Long roomId, Long userId) {
+        Room room = roomRepository.findById(roomId).orElseThrow(() -> new GlobalException(CANNOT_FOUND_ROOM));
+        User user = userRepository.findById(userId).orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER));
+        UserRoom userRoom = userRoomRepository.findUserRoomByRoomAndUser(room, user).orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER_ROOM));
+
+        int bookPage = room.getBook().getPageCount();
+        int currentPage = userRoom.getCurrentPage();
+
+        return GetRoomPagesResponse.of(bookPage, currentPage);
+
     }
 }
