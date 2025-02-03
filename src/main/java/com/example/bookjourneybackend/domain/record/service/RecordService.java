@@ -6,6 +6,7 @@ import com.example.bookjourneybackend.domain.record.domain.RecordType;
 import com.example.bookjourneybackend.domain.record.domain.repository.RecordLikeRepository;
 import com.example.bookjourneybackend.domain.record.domain.repository.RecordRepository;
 import com.example.bookjourneybackend.domain.record.dto.request.PostRecordRequest;
+import com.example.bookjourneybackend.domain.record.dto.response.PostRecordPageResponse;
 import com.example.bookjourneybackend.domain.record.dto.response.RecordInfo;
 import com.example.bookjourneybackend.domain.record.dto.response.GetRecordResponse;
 import com.example.bookjourneybackend.domain.record.dto.response.PostRecordResponse;
@@ -189,5 +190,27 @@ public class RecordService {
         if (recordType == RecordType.ENTIRE && postRecordRequest.getRecordTitle() == null) {
             throw new GlobalException(INVALID_RECORD_TITLE);
         }
+    }
+
+    @Transactional
+    public PostRecordPageResponse enterRecordPage(Long roomId, Long userId, Integer currentPage) {
+        Room room = roomRepository.findById(roomId).orElseThrow(() -> new GlobalException(CANNOT_FOUND_ROOM));
+        User user = userRepository.findById(userId).orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER));
+        UserRoom userRoom = userRoomRepository.findUserRoomByRoomAndUser(room, user).orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER_ROOM));
+
+        int totalPages = room.getBook().getPageCount();
+
+        double userPercentage = ((double) currentPage / totalPages) * 100;
+        userRoom.updateUserPercentage(userPercentage);
+
+        List<UserRoom> roomMembers = userRoomRepository.findAllByRoom(room);
+        double roomPercentage = roomMembers.stream()
+                .mapToDouble(UserRoom::getUserPercentage)
+                .average()
+                .orElse(0.0);
+
+        room.updateRoomPercentage(roomPercentage);
+
+        return PostRecordPageResponse.of(currentPage);
     }
 }

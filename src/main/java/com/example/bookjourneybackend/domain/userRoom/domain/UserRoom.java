@@ -52,8 +52,8 @@ public class UserRoom extends BaseEntity {
         this.room = room;
     }
 
-    public boolean isUserInRoom() {
-        return this.getStatus() != DELETED;
+    public void updateUserPercentage(double percentage) {
+        this.userPercentage = percentage;
     }
 
 }
