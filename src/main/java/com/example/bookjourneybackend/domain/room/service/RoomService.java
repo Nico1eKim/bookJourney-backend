@@ -1,6 +1,7 @@
 package com.example.bookjourneybackend.domain.room.service;
 
 import com.example.bookjourneybackend.domain.book.domain.GenreType;
+import com.example.bookjourneybackend.domain.favorite.domain.repository.FavoriteRepository;
 import com.example.bookjourneybackend.domain.record.domain.repository.RecordRepository;
 import com.example.bookjourneybackend.domain.room.domain.Room;
 import com.example.bookjourneybackend.domain.room.domain.SearchType;
@@ -55,6 +56,7 @@ public class RoomService {
     private final AladinApiUtil aladinApiUtil;
     private final DateUtil dateUtil;
     private final RecordRepository recordRepository;
+    private final FavoriteRepository favoriteRepository;
 
     /**
      * 방 상세정보 조회
@@ -67,22 +69,12 @@ public class RoomService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER));
 
+        boolean isFavorite = favoriteRepository.existsActiveFavoriteByUserIdAndBook(userId, room.getBook());
+
         List<RoomMemberInfo> members = getRoomMemberInfoList(room);
         boolean isMember = userRoomRepository.existsByRoomAndUser(room, user);
 
-        return GetRoomDetailResponse.of(
-                room.getRoomName(),
-                room.isPublic(),
-                dateUtil.calculateLastActivityTime(room.getRecords()),
-                room.getRoomPercentage().intValue(),
-                dateUtil.formatDate(room.getStartDate()),
-                dateUtil.formatDate(room.getProgressEndDate()),
-                dateUtil.calculateDday(room.getRecruitEndDate()),   // D-day 계산
-                dateUtil.formatDate(room.getRecruitEndDate()),
-                room.getRecruitCount(),
-                isMember,
-                members // DELETED가 아닌 유저들만 포함
-        );
+        return GetRoomDetailResponse.of(room, isMember, isFavorite, members, dateUtil);
 
     }
 
