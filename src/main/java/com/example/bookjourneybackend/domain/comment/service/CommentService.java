@@ -42,24 +42,5 @@ public class CommentService {
                 .toList();
 
         return GetCommentListResponse.of(commentList);
-//        List<Comment> comments = commentRepository.findByRecord_RecordId(recordId);
-//
-//        List<CommentInfo> commentList = comments.stream()
-//                .map(comment -> {
-//                    boolean isLiked = commentLikeRepository.existsByCommentAndUser_UserId(comment, userId);
-//                    return new CommentInfo(
-//                            comment.getCommentId(),
-//                            comment.getRecord().getRecordId(),
-//                            comment.getUser().getUserId(),
-//                            (comment.getUser().getUserImage() != null) ? comment.getUser().getUserImage().toString() : null,
-//                            comment.getUser().getNickname(),
-//                            comment.getContent(),
-//                            comment.getCommentLikes().size(),
-//                            isLiked
-//                    );
-//                })
-//                .toList();
-//
-//        return GetCommentListResponse.of(commentList);
     }
 }
