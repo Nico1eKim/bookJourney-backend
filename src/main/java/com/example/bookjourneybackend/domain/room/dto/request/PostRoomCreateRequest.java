@@ -29,7 +29,7 @@ public class PostRoomCreateRequest {
 
     private Integer password;
 
-    @NotBlank(message = "ISBN cannot be blank.")
+    @NotBlank(message = "ISBN은 방 생성시 필수 입력값입니다..")
     @Pattern(regexp = "\\d{10,13}", message = "ISBN은 10이나 13자리로 이루어집니다.")
     private String isbn;
 }

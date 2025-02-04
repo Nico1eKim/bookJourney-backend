@@ -7,10 +7,13 @@ import com.example.bookjourneybackend.domain.user.domain.repository.UserReposito
 import com.example.bookjourneybackend.domain.userRoom.domain.UserRole;
 import com.example.bookjourneybackend.domain.userRoom.domain.UserRoom;
 import com.example.bookjourneybackend.domain.userRoom.domain.repository.UserRoomRepository;
+import com.example.bookjourneybackend.global.entity.EntityStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import jakarta.transaction.Transactional;
+
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Random;
 
@@ -45,6 +48,10 @@ public class UserRoomInitializer {
                     .userPercentage(randomPercentage)
                     .currentPage(1)
                     .build();
+
+            EntityStatus[] statuses = EntityStatus.values();
+            userRoom.setStatus(statuses[random.nextInt(statuses.length)]); // 랜덤한 상태
+            userRoom.setInActivatedAt(LocalDateTime.now());
 
             room.addUserRoom(userRoom);
             user.addUserRoom(userRoom);
