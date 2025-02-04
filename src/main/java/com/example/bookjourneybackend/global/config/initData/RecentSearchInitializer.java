@@ -25,19 +25,22 @@ public class RecentSearchInitializer {
     public void initializeRecentSearches() {
         List<User> users = userRepository.findAll(); // User 리스트 로드
 
-        for (int i = 0; i < users.size(); i++) {
-            User user = users.get(i); // 특정 User 가져오기
+        for (int j = 0; j < 5; j++) {
+            for (int i = 0; i < users.size(); i++) {
+                User user = users.get(i); // 특정 User 가져오기
 
-            RecentSearch recentSearch = RecentSearch.builder()
-                    .user(user)
-                    .recentSearch("Search query " + i)
-                    .build();
+                RecentSearch recentSearch = RecentSearch.builder()
+                        .user(user)
+                        .recentSearch("Search query " + i)
+                        .build();
 
-            // 연관관계 설정
-            user.addRecentSearch(recentSearch);
+                // 연관관계 설정
+                user.addRecentSearch(recentSearch);
 
-            // RecentSearch 저장
-            recentSearchRepository.save(recentSearch);
+                // RecentSearch 저장
+                recentSearchRepository.save(recentSearch);
+            }
         }
+
     }
 }

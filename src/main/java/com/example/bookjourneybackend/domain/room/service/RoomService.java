@@ -1,6 +1,7 @@
 package com.example.bookjourneybackend.domain.room.service;
 
 import com.example.bookjourneybackend.domain.book.domain.GenreType;
+import com.example.bookjourneybackend.domain.favorite.domain.repository.FavoriteRepository;
 import com.example.bookjourneybackend.domain.record.domain.repository.RecordRepository;
 import com.example.bookjourneybackend.domain.room.domain.Room;
 import com.example.bookjourneybackend.domain.room.domain.SearchType;
@@ -55,6 +56,7 @@ public class RoomService {
     private final AladinApiUtil aladinApiUtil;
     private final DateUtil dateUtil;
     private final RecordRepository recordRepository;
+    private final FavoriteRepository favoriteRepository;
 
     /**
      * 방 상세정보 조회
@@ -67,22 +69,12 @@ public class RoomService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER));
 
+        boolean isFavorite = favoriteRepository.existsActiveFavoriteByUserIdAndBook(userId, room.getBook());
+
         List<RoomMemberInfo> members = getRoomMemberInfoList(room);
         boolean isMember = userRoomRepository.existsByRoomAndUser(room, user);
 
-        return GetRoomDetailResponse.of(
-                room.getRoomName(),
-                room.isPublic(),
-                dateUtil.calculateLastActivityTime(room.getRecords()),
-                room.getRoomPercentage().intValue(),
-                dateUtil.formatDate(room.getStartDate()),
-                dateUtil.formatDate(room.getProgressEndDate()),
-                dateUtil.calculateDday(room.getRecruitEndDate()),   // D-day 계산
-                dateUtil.formatDate(room.getRecruitEndDate()),
-                room.getRecruitCount(),
-                isMember,
-                members // DELETED가 아닌 유저들만 포함
-        );
+        return GetRoomDetailResponse.of(room, isMember, isFavorite, members, dateUtil);
 
     }
 
@@ -140,6 +132,7 @@ public class RoomService {
         List<RoomInfo> roomInfos = rooms.stream()
                 .filter(room -> room.getStatus() == ACTIVE) // 상태가 ACTIVE인 방
                 .filter(room -> room.getRoomType() == TOGETHER) // 같이읽기 방만 포함
+                .filter(room -> !room.getRecruitEndDate().isBefore(LocalDate.now())) // 모집 기간이 지나지 않은 방만
                 .filter(room -> filterRooms(room, effectiveSearchType, searchTerm))
                 .map(this::mapRoomToRoomInfo)
                 .toList();
@@ -270,6 +263,8 @@ public class RoomService {
         if (request.getRecruitCount() == 1) {
             room = Room.makeReadAloneRoom(book);
         } else {
+            validatedRoomCreateRequest(request);
+
             LocalDate startDate = dateUtil.parseDateToLocalDateString(request.getProgressStartDate());
             LocalDate progressEndDate = dateUtil.parseDateToLocalDateString(request.getProgressEndDate());
             room = Room.makeReadTogetherRoom(
@@ -279,6 +274,18 @@ public class RoomService {
         }
         room.addUserRoom(userRoom);
         return room;
+    }
+
+    private void validatedRoomCreateRequest(PostRoomCreateRequest request) {
+        // 같이읽기 방에서 startDate, progressEndDate가 null일 경우 예외 처리
+        // isPublic이 false이면 password가 null일 경우 예외 처리
+        if (request.getProgressStartDate() == null || request.getProgressEndDate() == null) {
+            throw new GlobalException(CANNOT_NULL_DATE);
+        }
+
+        if (!request.isPublic() && request.getPassword() == null) {
+            throw new GlobalException(CANNOT_NULL_PASSWORD);
+        }
     }
 
     /**

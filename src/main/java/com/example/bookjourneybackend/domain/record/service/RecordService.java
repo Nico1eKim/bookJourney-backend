@@ -27,8 +27,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import static com.example.bookjourneybackend.domain.record.domain.RecordSortType.PAGE_ORDER;
+import static com.example.bookjourneybackend.domain.room.domain.RoomType.ALONE;
 import static com.example.bookjourneybackend.global.entity.EntityStatus.*;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -64,6 +66,11 @@ public class RecordService {
         // 유저가 방에 속해 있지 않거나, 방에서 삭제된 경우 예외 발생
         if (userRoom.getStatus() == DELETED) {
             throw new GlobalException(NOT_PARTICIPATING_IN_ROOM);
+        }
+
+        // 방이 EXPIRED 상태이면 기록을 남길 수 없음
+        if (room.getStatus() == EXPIRED) {
+            throw new GlobalException(CANNOT_WRITE_IN_EXPIRED_ROOM);
         }
 
         RecordType recordType = RecordType.from(postRecordRequest.getRecordType());
@@ -208,9 +215,16 @@ public class RecordService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER));
 
+        Room room = record.getRoom();
+
         // 방에 속해있지 않으면 좋아요를 누를 수 없음
-        if (!userRoomRepository.existsByRoomAndUser(record.getRoom(), user)) {
+        if (!userRoomRepository.existsByRoomAndUser(room, user)) {
             throw new GlobalException(NOT_PARTICIPATING_IN_ROOM);
+        }
+
+        // 방이 EXPIRED 상태이면 좋아요를 누를 수 없음
+        if (room.getStatus() == EXPIRED) {
+            throw new GlobalException(CANNOT_LIKE_IN_EXPIRED_ROOM);
         }
 
         boolean isLiked = recordLikeRepository.existsByRecordAndUser(record, user);
@@ -240,6 +254,11 @@ public class RecordService {
         Book book = room.getBook();
         int totalPages = book.getPageCount();
 
+        // 방이 EXPIRED 상태이면 페이지 입력 불가
+        if (room.getStatus() == EXPIRED) {
+            throw new GlobalException(CANNOT_ENTER_PAGE_IN_EXPIRED_ROOM);
+        }
+
         if (currentPage > totalPages) {
             throw new GlobalException(INVALID_PAGE_NUMBER);
         }
@@ -255,6 +274,14 @@ public class RecordService {
                 .average()
                 .orElse(0.0);
         room.updateRoomPercentage(roomPercentage);
+
+        // 혼자 읽기인 경우 진행률이 100%가 되면  종료 날짜를 현재 날짜로 설정
+        // room, userRoom 둘다 stauts EXPIRED로 설정
+        if (room.getRoomType() == ALONE && userPercentage >= 100) {
+            room.setProgressEndDate(LocalDate.now());
+            room.setStatus(EXPIRED);
+            userRoom.setStatus(EXPIRED);
+        }
 
         return PostRecordPageResponse.of(currentPage);
     }
