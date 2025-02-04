@@ -48,17 +48,20 @@ public class DateUtil {
 
     //날짜 포맷팅 -> ex. 2021.01.01 을 String으로 변환
     public String formatDate(LocalDate date) {
+        if (date == null) {
+            return null;
+        }
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd");
         return date.format(formatter);
     }
 
     //D-day 계산
     public String calculateDday(LocalDate endDate) {
-        long days = ChronoUnit.DAYS.between(LocalDate.now(), endDate);
-        if (days < 0) {
-            return "D+" + Math.abs(days);
+        if (endDate == null) {
+            return null;
         }
-        return "D-" + days;
+        long days = ChronoUnit.DAYS.between(LocalDate.now(), endDate);
+        return (days < 0) ? "D+" + Math.abs(days) : "D-" + days;
     }
 
     //방의 모집종료 기간 계산
@@ -82,7 +85,7 @@ public class DateUtil {
 
     //문자열을 LocalDate(2024-11-14 형태)로 변환
     public LocalDate parseDateToLocalDateFromPublishedDateString(String publishedDate) {
-        return  LocalDate.parse(publishedDate, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        return LocalDate.parse(publishedDate, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
     }
 
     // LocalDateTime을 문자열(2024년 11월 14일 23시 04분 28초 형태)로 변환

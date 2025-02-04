@@ -46,6 +46,7 @@ public class Room extends BaseEntity {
 
     private LocalDate startDate;    //방을 생성한 시점 = 방의 모집 시작 기간 = 방의 시작 기간
 
+    @Setter
     private LocalDate progressEndDate;
 
     private LocalDate recruitEndDate;

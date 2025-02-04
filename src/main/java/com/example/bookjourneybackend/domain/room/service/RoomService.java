@@ -140,6 +140,7 @@ public class RoomService {
         List<RoomInfo> roomInfos = rooms.stream()
                 .filter(room -> room.getStatus() == ACTIVE) // 상태가 ACTIVE인 방
                 .filter(room -> room.getRoomType() == TOGETHER) // 같이읽기 방만 포함
+                .filter(room -> !room.getRecruitEndDate().isBefore(LocalDate.now())) // 모집 기간이 지나지 않은 방만
                 .filter(room -> filterRooms(room, effectiveSearchType, searchTerm))
                 .map(this::mapRoomToRoomInfo)
                 .toList();
