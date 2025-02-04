@@ -275,9 +275,9 @@ public class RecordService {
                 .orElse(0.0);
         room.updateRoomPercentage(roomPercentage);
 
-        // 혼자 읽기인 경우 종료 날짜를 현재 날짜로 설정
+        // 혼자 읽기인 경우 진행률이 100%가 되면  종료 날짜를 현재 날짜로 설정
         // room, userRoom 둘다 stauts EXPIRED로 설정
-        if (room.getRoomType() == ALONE) {
+        if (room.getRoomType() == ALONE && userPercentage >= 100) {
             room.setProgressEndDate(LocalDate.now());
             room.setStatus(EXPIRED);
             userRoom.setStatus(EXPIRED);
