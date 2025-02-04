@@ -19,14 +19,14 @@ public enum BaseExceptionResponseStatus implements ResponseStatus {
     /**
      * 5000 : user 관련
      */
-    NO_SUCH_TYPE_USER(5000,BAD_REQUEST, "알맞은 유저 타입을 찾을 수 없습니다."),
-    CANNOT_FOUND_USER(5001,BAD_REQUEST, "유저를 찾을 수 없습니다."),
-    ALREADY_EXIST_USER(5002,BAD_REQUEST, "이미 회원가입 된 유저입니다."),
-    UNABLE_TO_SEND_EMAIL(5003,BAD_REQUEST, "이메일을 전송할 수 없습니다."),
-    CANNOT_CREAT_EMAIL(5004,BAD_REQUEST, "이메일을 생성할 수 없습니다."),
-    CANNOT_CREATE_EMAIL_AUTH_CODE(5005,BAD_REQUEST, "인증번호를 발급 받지 않은 이메일입니다. 먼저 인증번호를 발급받아주세요."),
-    EMAIL_AUTH_CODE_EXPIRED(5006,BAD_REQUEST,"만료된 인증번호 입니다."),
-    NO_SUCH_ALGORITHM(5007,BAD_REQUEST,"지정된 난수 생성 알고리즘을 찾을 수 없습니다."),
+    NO_SUCH_TYPE_USER(5000, BAD_REQUEST, "알맞은 유저 타입을 찾을 수 없습니다."),
+    CANNOT_FOUND_USER(5001, BAD_REQUEST, "유저를 찾을 수 없습니다."),
+    ALREADY_EXIST_USER(5002, BAD_REQUEST, "이미 회원가입 된 유저입니다."),
+    UNABLE_TO_SEND_EMAIL(5003, BAD_REQUEST, "이메일을 전송할 수 없습니다."),
+    CANNOT_CREAT_EMAIL(5004, BAD_REQUEST, "이메일을 생성할 수 없습니다."),
+    CANNOT_CREATE_EMAIL_AUTH_CODE(5005, BAD_REQUEST, "인증번호를 발급 받지 않은 이메일입니다. 먼저 인증번호를 발급받아주세요."),
+    EMAIL_AUTH_CODE_EXPIRED(5006, BAD_REQUEST, "만료된 인증번호 입니다."),
+    NO_SUCH_ALGORITHM(5007, BAD_REQUEST, "지정된 난수 생성 알고리즘을 찾을 수 없습니다."),
 
     /**
      * 6000 : book 관련
@@ -43,7 +43,7 @@ public enum BaseExceptionResponseStatus implements ResponseStatus {
     CANNOT_FOUND_POPULAR_BOOK(6004, BAD_REQUEST, "읽기횟수가 가장 많은 책을 찾을 수 없습니다."),
 
     CANNOT_FOUND_BESTSELLER(6005, BAD_REQUEST, "베스트셀러 책을 찾을 수 없습니다."),
-    NO_AVAILABLE_BESTSELLER(6006,BAD_REQUEST,"해당 장르의 베스트셀러 후보 중 기존에 존재하지 않는 책을 찾을 수 없습니다."),
+    NO_AVAILABLE_BESTSELLER(6006, BAD_REQUEST, "해당 장르의 베스트셀러 후보 중 기존에 존재하지 않는 책을 찾을 수 없습니다."),
 
     /**
      * 7000 : auth 관련
@@ -98,8 +98,13 @@ public enum BaseExceptionResponseStatus implements ResponseStatus {
     /**
      * 10000 : recentSearch 관련
      */
-    CANNOT_FOUND_RECENT_SEARCH(10000,BAD_REQUEST, "최근검색어를 찾을 수 없습니다."),
-    CANNOT_DELETE_RECENT_SEARCH(10001,BAD_REQUEST, "최근검색어를 삭제 할 수 없습니다.");
+    CANNOT_FOUND_RECENT_SEARCH(10000, BAD_REQUEST, "최근검색어를 찾을 수 없습니다."),
+    CANNOT_DELETE_RECENT_SEARCH(10001, BAD_REQUEST, "최근검색어를 삭제 할 수 없습니다."),
+
+    /**
+     * 11000 : recentSearch 관련
+     */
+    CANNOT_FAVORITE(11000, BAD_REQUEST, "이미 즐겨찾기 한 책입니다.");
 
     private final int code;
     private final HttpStatus status;
