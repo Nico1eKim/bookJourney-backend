@@ -1,6 +1,7 @@
 package com.example.bookjourneybackend.domain.room.service;
 
 import com.example.bookjourneybackend.domain.book.domain.GenreType;
+import com.example.bookjourneybackend.domain.favorite.domain.repository.FavoriteRepository;
 import com.example.bookjourneybackend.domain.record.domain.repository.RecordRepository;
 import com.example.bookjourneybackend.domain.room.domain.Room;
 import com.example.bookjourneybackend.domain.room.domain.SearchType;
@@ -55,6 +56,7 @@ public class RoomService {
     private final AladinApiUtil aladinApiUtil;
     private final DateUtil dateUtil;
     private final RecordRepository recordRepository;
+    private final FavoriteRepository favoriteRepository;
 
     /**
      * 방 상세정보 조회
@@ -66,6 +68,9 @@ public class RoomService {
                 .orElseThrow(() -> new GlobalException(CANNOT_FOUND_ROOM));
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER));
+
+        Book book = room.getBook();
+        boolean isFavorite = favoriteRepository.existsActiveFavoriteByUserIdAndBook(userId, book);
 
         List<RoomMemberInfo> members = getRoomMemberInfoList(room);
         boolean isMember = userRoomRepository.existsByRoomAndUser(room, user);
@@ -81,6 +86,15 @@ public class RoomService {
                 dateUtil.formatDate(room.getRecruitEndDate()),
                 room.getRecruitCount(),
                 isMember,
+                book.getGenre().getGenreType(),
+                book.getImageUrl(),
+                book.getBookTitle(),
+                book.getAuthorName(),
+                isFavorite,
+                book.getPublisher(),
+                dateUtil.formatDate(book.getPublishedDate()),
+                book.getIsbn(),
+                book.getDescription(),
                 members // DELETED가 아닌 유저들만 포함
         );
 
