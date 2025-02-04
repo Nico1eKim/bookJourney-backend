@@ -1,6 +1,7 @@
 package com.example.bookjourneybackend.domain.comment.domain;
 
 import com.example.bookjourneybackend.domain.record.domain.Record;
+import com.example.bookjourneybackend.domain.user.domain.User;
 import com.example.bookjourneybackend.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -25,6 +26,10 @@ public class Comment extends BaseEntity {
     @JoinColumn(name = "record_id", nullable = false)
     private Record record;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
     @Column(nullable = false, length = 3000)
     private String content;
 
@@ -33,9 +38,10 @@ public class Comment extends BaseEntity {
     private List<CommentLike> commentLikes = new ArrayList<>();
 
     @Builder
-    public Comment(Long commentId, Record record, String content) {
+    public Comment(Long commentId, Record record, User user, String content) {
         this.commentId = commentId;
         this.record = record;
+        this.user = user;
         this.content = content;
     }
 
