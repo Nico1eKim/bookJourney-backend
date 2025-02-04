@@ -61,6 +61,7 @@ public class RoomArchiveService {
 
         if (status == INACTIVE) {
             combinedList.sort(Comparator.comparing(UserRoom::getInActivatedAt).reversed());
+
         }
         if(status == EXPIRED) {
             //혼자읽기책과 같이읽기방을 구분하지 않고, 기간의 마지막일 날짜가 가장 오래 전인 책 및 방이 가장 상단에 위치하도록 정렬
@@ -71,6 +72,24 @@ public class RoomArchiveService {
             //같이읽기 방의 경우, 시작일 = 방기간의 시작일)
             combinedList.sort(Comparator.comparing(UserRoom::getRoom , Comparator.comparing(Room::getProgressEndDate, Comparator.nullsLast(Comparator.reverseOrder())))
                     .thenComparing(UserRoom::getRoom, Comparator.comparing(Room::getStartDate, Comparator.naturalOrder())));
+
+            return combinedList.stream()
+                    .map(userRoom -> {
+                        Room room = userRoom.getRoom();
+                        Book book = room.getBook();
+                        return RecordInfo
+                                .builder()
+                                .roomId(room.getRoomId())
+                                .imageUrl(book.getImageUrl())
+                                .roomType(room.getRoomType().getRoomType())
+                                .bookTitle(book.getBookTitle())
+//                                .modifiedAt(dateUtil.calculateLastActivityTime(room.getRecords()))
+                                .authorName(book.getAuthorName())
+//                                .userPercentage(userRoom.getUserPercentage())
+                                .roomDate(dateUtil.formatDateRange(room.getStartDate(), room.getProgressEndDate()))
+                                .build();
+                    })
+                    .collect(Collectors.toList());
         }
 
 
