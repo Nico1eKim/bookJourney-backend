@@ -1,10 +1,12 @@
 package com.example.bookjourneybackend.domain.favorite.controller;
 
+import com.example.bookjourneybackend.domain.favorite.domain.dto.request.DeleteFavoriteSelectedRequest;
 import com.example.bookjourneybackend.domain.favorite.domain.dto.response.GetFavoriteListResponse;
 import com.example.bookjourneybackend.domain.favorite.domain.dto.response.PostFavoriteAddResponse;
 import com.example.bookjourneybackend.domain.favorite.service.FavoriteService;
 import com.example.bookjourneybackend.global.annotation.LoginUserId;
 import com.example.bookjourneybackend.global.response.BaseResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -29,8 +31,10 @@ public class FavoriteController {
         return BaseResponse.ok(favoriteService.showFavoriteList(userId));
     }
 
-//    @DeleteMapping("/favorites")
-//    public BaseResponse<> deleteFavorite(@RequestParam final String sort, @LoginUserId final Long userId) {
-//        log.info("[FavoriteController.deleteFavorite]");
-//    }
+    @DeleteMapping
+    public BaseResponse<Void> deleteSelectedFavorite(@RequestBody final DeleteFavoriteSelectedRequest deleteFavoriteSelectedRequest,
+                                                     @LoginUserId final Long userId) {
+        log.info("[FavoriteController.deleteSelectedFavorite]");
+        return BaseResponse.ok(favoriteService.deleteSelectedFavorite(deleteFavoriteSelectedRequest,userId));
+    }
 }
