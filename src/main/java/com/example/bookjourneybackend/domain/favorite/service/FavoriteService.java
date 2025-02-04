@@ -3,9 +3,11 @@ package com.example.bookjourneybackend.domain.favorite.service;
 import com.example.bookjourneybackend.domain.book.domain.Book;
 import com.example.bookjourneybackend.domain.book.domain.GenreType;
 import com.example.bookjourneybackend.domain.book.domain.repository.BookRepository;
+import com.example.bookjourneybackend.domain.book.dto.response.BookInfo;
 import com.example.bookjourneybackend.domain.book.dto.response.GetBookInfoResponse;
 import com.example.bookjourneybackend.domain.book.service.BookCacheService;
 import com.example.bookjourneybackend.domain.favorite.domain.Favorite;
+import com.example.bookjourneybackend.domain.favorite.domain.dto.response.GetFavoriteListResponse;
 import com.example.bookjourneybackend.domain.favorite.domain.dto.response.PostFavoriteAddResponse;
 import com.example.bookjourneybackend.domain.favorite.domain.repository.FavoriteRepository;
 import com.example.bookjourneybackend.domain.user.domain.User;
@@ -18,6 +20,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.*;
+import java.util.Collections;
+import java.util.List;
+
+import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.CANNOT_FOUND_BOOK;
+import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.CANNOT_FOUND_USER;
 
 @Slf4j
 @Service
@@ -79,12 +86,36 @@ public class FavoriteService {
                     return book;
                 });
 
+        //즐겨찾기 추가
         favoriteRepository.save(Favorite.builder()
                 .book(findBook)
                 .user(user)
                 .build());
 
         return PostFavoriteAddResponse.of(findBook.getBookId(),true);
+    }
+
+    /**
+     * 해당 유저의 즐겨찾기 리스트 조회
+     * @param userId
+     * @return GetFavoriteListResponse
+     */
+    @Transactional(readOnly = true)
+    public GetFavoriteListResponse showFavoriteList(Long userId) {
+        log.info("[FavoriteService.showFavoriteList]");
+
+        // 사용자 조회
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER));
+
+        //즐겨찾기 리스트 조회
+        List<BookInfo> bookList = favoriteRepository.findByUserOrderByCreatedAtDesc(user)
+                .orElseGet(Collections::emptyList)
+                .stream()
+                .map(fav -> BookInfo.of(fav.getBook()))
+                .toList();
+
+        return GetFavoriteListResponse.of(bookList);
     }
 
 }
