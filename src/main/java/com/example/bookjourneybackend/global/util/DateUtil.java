@@ -129,4 +129,9 @@ public class DateUtil {
         return new LocalDate[]{firstDayOfWeek, lastDayOfWeek};
     }
 
+    //startDate와 endDate를 받으면 이를 yyyy.mm.dd ~ yyyy.mm.dd 인 문자열로 반환
+    public String formatDateRange(LocalDate startDate, LocalDate endDate) {
+        return startDate.format(DateTimeFormatter.ofPattern("yyyy.MM.dd")) + " ~ " + endDate.format(DateTimeFormatter.ofPattern("yyyy.MM.dd"));
+    }
+
 }
