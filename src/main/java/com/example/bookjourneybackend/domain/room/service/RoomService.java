@@ -69,34 +69,12 @@ public class RoomService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER));
 
-        Book book = room.getBook();
-        boolean isFavorite = favoriteRepository.existsActiveFavoriteByUserIdAndBook(userId, book);
+        boolean isFavorite = favoriteRepository.existsActiveFavoriteByUserIdAndBook(userId, room.getBook());
 
         List<RoomMemberInfo> members = getRoomMemberInfoList(room);
         boolean isMember = userRoomRepository.existsByRoomAndUser(room, user);
 
-        return GetRoomDetailResponse.of(
-                room.getRoomName(),
-                room.isPublic(),
-                dateUtil.calculateLastActivityTime(room.getRecords()),
-                room.getRoomPercentage().intValue(),
-                dateUtil.formatDate(room.getStartDate()),
-                dateUtil.formatDate(room.getProgressEndDate()),
-                dateUtil.calculateDday(room.getRecruitEndDate()),   // D-day 계산
-                dateUtil.formatDate(room.getRecruitEndDate()),
-                room.getRecruitCount(),
-                isMember,
-                book.getGenre().getGenreType(),
-                book.getImageUrl(),
-                book.getBookTitle(),
-                book.getAuthorName(),
-                isFavorite,
-                book.getPublisher(),
-                dateUtil.formatDate(book.getPublishedDate()),
-                book.getIsbn(),
-                book.getDescription(),
-                members // DELETED가 아닌 유저들만 포함
-        );
+        return GetRoomDetailResponse.of(room, isMember, isFavorite, members, dateUtil);
 
     }
 
