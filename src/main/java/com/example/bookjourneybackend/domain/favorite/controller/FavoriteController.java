@@ -28,4 +28,9 @@ public class FavoriteController {
         log.info("[FavoriteController.viewFavoriteList]");
         return BaseResponse.ok(favoriteService.showFavoriteList(userId));
     }
+
+//    @DeleteMapping("/favorites")
+//    public BaseResponse<> deleteFavorite(@RequestParam final String sort, @LoginUserId final Long userId) {
+//        log.info("[FavoriteController.deleteFavorite]");
+//    }
 }
