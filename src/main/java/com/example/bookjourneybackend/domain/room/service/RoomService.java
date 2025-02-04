@@ -271,6 +271,8 @@ public class RoomService {
         if (request.getRecruitCount() == 1) {
             room = Room.makeReadAloneRoom(book);
         } else {
+            validatedRoomCreateRequest(request);
+
             LocalDate startDate = dateUtil.parseDateToLocalDateString(request.getProgressStartDate());
             LocalDate progressEndDate = dateUtil.parseDateToLocalDateString(request.getProgressEndDate());
             room = Room.makeReadTogetherRoom(
@@ -280,6 +282,18 @@ public class RoomService {
         }
         room.addUserRoom(userRoom);
         return room;
+    }
+
+    private void validatedRoomCreateRequest(PostRoomCreateRequest request) {
+        // 같이읽기 방에서 startDate, progressEndDate가 null일 경우 예외 처리
+        // isPublic이 false이면 password가 null일 경우 예외 처리
+        if (request.getProgressStartDate() == null || request.getProgressEndDate() == null) {
+            throw new GlobalException(CANNOT_NULL_DATE);
+        }
+
+        if (!request.isPublic() && request.getPassword() == null) {
+            throw new GlobalException(CANNOT_NULL_PASSWORD);
+        }
     }
 
     /**
@@ -338,6 +352,7 @@ public class RoomService {
         UserRoom userRoom = getUserRoom(roomId, userId);
 
         userRoom.setStatus(EntityStatus.INACTIVE);
+        userRoom.setInActivatedAt(dateUtil.getCurrentTime());
         userRoomRepository.save(userRoom);
 
         return null;

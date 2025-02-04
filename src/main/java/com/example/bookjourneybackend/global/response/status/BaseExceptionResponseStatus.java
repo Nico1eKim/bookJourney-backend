@@ -80,6 +80,9 @@ public enum BaseExceptionResponseStatus implements ResponseStatus {
     CANNOT_ENTER_PAGE_IN_EXPIRED_ROOM(8009, BAD_REQUEST, "기간이 지난 방에는 페이지를 입력할 수 없습니다."),
     CANNOT_COMMENT_IN_EXPIRED_ROOM(8009, BAD_REQUEST, "기간이 지난 방에는 댓글을 남길 수 없습니다."),
 
+    CANNOT_NULL_DATE(8009, BAD_REQUEST, "같이읽기 방 생성시, 기간은 필수 입력값입니다."),
+    CANNOT_NULL_PASSWORD(8010, BAD_REQUEST, "비공개 방 생성시, 비밀번호는 필수 입력값입니다."),
+
     /**
      * 9000 : record 관련
      */

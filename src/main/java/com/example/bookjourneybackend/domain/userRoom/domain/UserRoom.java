@@ -10,6 +10,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
 import static com.example.bookjourneybackend.global.entity.EntityStatus.DELETED;
 
 @Entity
@@ -36,6 +38,9 @@ public class UserRoom extends BaseEntity {
 
     @Column(nullable = false)
     private Integer currentPage;
+
+    @Setter
+    private LocalDateTime inActivatedAt;
 
     // Room의 관계 추가
     @Setter

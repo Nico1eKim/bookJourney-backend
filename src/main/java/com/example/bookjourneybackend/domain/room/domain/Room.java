@@ -81,6 +81,7 @@ public class Room extends BaseEntity {
         return Room.builder()
                 .roomType(RoomType.ALONE)
                 .book(book)
+                .startDate(LocalDate.now())
                 .roomPercentage(0.0)
                 .recruitCount(1)
                 .build();
