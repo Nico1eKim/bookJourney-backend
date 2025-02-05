@@ -86,6 +86,7 @@ public class CommentService {
         return GetCommentListResponse.of(commentList, recordInfo);
     }
 
+    @Transactional
     public PostCommentLikeResponse toggleCommentLike(Long commentId, Long userId) {
         Comment comment = commentRepository.findById(commentId).orElseThrow(() -> new GlobalException(CANNOT_FOUND_COMMENT));
         User user = userRepository.findById(userId).orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER));
