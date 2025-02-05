@@ -56,7 +56,7 @@ public class CommentService {
         Record record = recordRepository.findById(recordId).orElseThrow(() -> new GlobalException(CANNOT_FOUND_RECORD));
         User user = userRepository.findById(userId).orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER));
         Room room = record.getRoom();
-        UserRoom userRoom = userRoomRepository.findUserRoomByRoomAndUser(room, user).orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER_ROOM));
+        UserRoom userRoom = userRoomRepository.findFirstByRoomAndUser(room, user).orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER_ROOM));
 
         // 유저가 방에 속해 있지 않거나, 방에서 삭제된 경우 예외 발생
         if (userRoom.getStatus() == DELETED) {

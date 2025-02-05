@@ -55,7 +55,7 @@ public class RecordService {
 
         Room room = roomRepository.findById(roomId).orElseThrow(() -> new GlobalException(CANNOT_FOUND_ROOM));
         User user = userRepository.findById(userId).orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER));
-        UserRoom userRoom = userRoomRepository.findUserRoomByRoomAndUser(room, user).orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER_ROOM));
+        UserRoom userRoom = userRoomRepository.findFirstByRoomAndUser(room, user).orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER_ROOM));
 
         // UserRoom이 INACTIVE 상태이면 ACTIVE로 변경
         if (userRoom.getStatus() == INACTIVE) {
@@ -249,7 +249,7 @@ public class RecordService {
     public PostRecordPageResponse enterRecordPage(Long roomId, Long userId, Integer currentPage) {
         Room room = roomRepository.findById(roomId).orElseThrow(() -> new GlobalException(CANNOT_FOUND_ROOM));
         User user = userRepository.findById(userId).orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER));
-        UserRoom userRoom = userRoomRepository.findUserRoomByRoomAndUser(room, user).orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER_ROOM));
+        UserRoom userRoom = userRoomRepository.findFirstByRoomAndUser(room, user).orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER_ROOM));
 
         Book book = room.getBook();
         int totalPages = book.getPageCount();

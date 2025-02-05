@@ -9,7 +9,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,7 +26,7 @@ public interface UserRoomRepository extends JpaRepository<UserRoom, Long> {
             "ORDER BY ur.userPercentage DESC")
     List<UserRoom> findUserRoomsOrderByUserPercentage(@Param("userId") Long userId);
 
-    Optional<UserRoom> findUserRoomByRoomAndUser(Room room, User user);
+    Optional<UserRoom> findFirstByRoomAndUser(Room room, User user);
 
     Optional<UserRoom> findUserRoomByRoomAndUserAndStatus(Room room, User user, EntityStatus status);
 
