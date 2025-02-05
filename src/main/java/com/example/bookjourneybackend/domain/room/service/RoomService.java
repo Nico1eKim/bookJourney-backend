@@ -261,6 +261,9 @@ public class RoomService {
     private Room createRoom(PostRoomCreateRequest request, Book book, UserRoom userRoom) {
         Room room;
         if (request.getRecruitCount() == 1) {
+            if(userRoomRepository.existsUnExpiredAloneRoomByUserAndBook(userRoom.getUser().getUserId(), book.getIsbn())) {
+                throw new GlobalException(ALREADY_CREATED_ALONE_ROOM);
+            }
             room = Room.makeReadAloneRoom(book);
         } else {
             validatedRoomCreateRequest(request);
