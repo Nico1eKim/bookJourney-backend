@@ -6,6 +6,7 @@ import com.example.bookjourneybackend.domain.book.domain.repository.BookReposito
 import com.example.bookjourneybackend.domain.book.dto.request.GetBookListRequest;
 import com.example.bookjourneybackend.domain.book.dto.response.*;
 import com.example.bookjourneybackend.domain.favorite.domain.repository.FavoriteRepository;
+import com.example.bookjourneybackend.domain.recentSearch.service.RecentSearchService;
 import com.example.bookjourneybackend.domain.user.domain.FavoriteGenre;
 import com.example.bookjourneybackend.domain.user.domain.User;
 import com.example.bookjourneybackend.domain.user.domain.repository.UserRepository;
@@ -40,6 +41,8 @@ public class BookService {
     private final BookCacheService bookCacheService;
     private final UserRepository userRepository;
 
+    private final RecentSearchService recentSearchService;
+
     /**
      * 1. Redis에 있는지 확인하고 있으면 Redis에 value로 반환
      * 2. RestTemplate을 이용해 동기적으로 현재 페이지 불러와서 Redis에 저장 후 응답 전송
@@ -49,8 +52,10 @@ public class BookService {
      * @return
      */
     //todo Thread Pool Monitoring 로그 출력
-    public GetBookListResponse searchBook(GetBookListRequest getBookListRequest) {
+    public GetBookListResponse searchBook(GetBookListRequest getBookListRequest, Long userId) {
         log.info("------------------------[BookService.searchBook]------------------------");
+
+        recentSearchService.addRecentSearch(userId, getBookListRequest.getSearchTerm());
 
         // 현재 페이지 데이터 가져오기
         String currentResponse = bookCacheService.getCurrentPage(getBookListRequest);
