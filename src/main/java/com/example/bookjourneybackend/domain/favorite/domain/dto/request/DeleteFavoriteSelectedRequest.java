@@ -21,7 +21,7 @@ public class DeleteFavoriteSelectedRequest {
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor(access = PRIVATE)
-    public static class FavoriteInfo {
+    private static class FavoriteInfo {
 
         private Long favoriteId;
     }
