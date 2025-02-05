@@ -1,15 +1,13 @@
 package com.example.bookjourneybackend.domain.comment.controller;
 
 import com.example.bookjourneybackend.domain.comment.domain.dto.response.GetCommentListResponse;
+import com.example.bookjourneybackend.domain.comment.domain.dto.response.PostCommentLikeResponse;
 import com.example.bookjourneybackend.domain.comment.service.CommentService;
 import com.example.bookjourneybackend.global.annotation.LoginUserId;
 import com.example.bookjourneybackend.global.response.BaseResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @RestController
@@ -25,5 +23,13 @@ public class CommentController {
             @LoginUserId final Long userId
     ) {
         return BaseResponse.ok(commentService.showComments(recordId, userId));
+    }
+
+    @PostMapping("/{commentId}/likes")
+    public BaseResponse<PostCommentLikeResponse> likesComment(
+            @PathVariable("commentId") final Long commentId,
+            @LoginUserId final Long userId
+    ) {
+        return BaseResponse.ok(commentService.toggleCommentLike(commentId, userId));
     }
 }
