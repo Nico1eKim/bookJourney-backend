@@ -104,7 +104,12 @@ public enum BaseExceptionResponseStatus implements ResponseStatus {
     /**
      * 11000 : recentSearch 관련
      */
-    CANNOT_FAVORITE(11000, BAD_REQUEST, "이미 즐겨찾기 한 책입니다.");
+    CANNOT_FAVORITE(11000, BAD_REQUEST, "이미 즐겨찾기 한 책입니다."),
+
+    /**
+     * 12000 : comment 관련
+     */
+    CANNOT_FOUND_COMMENT(12001, BAD_REQUEST, "댓글을 찾을 수 없습니다.");
 
     private final int code;
     private final HttpStatus status;
