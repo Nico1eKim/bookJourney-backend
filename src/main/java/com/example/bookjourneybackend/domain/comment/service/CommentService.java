@@ -64,8 +64,8 @@ public class CommentService {
         }
 
         // 방이 EXPIRED 상태이면 댓글을 남길 수 없음
-        if (room.getStatus() == EXPIRED) {
-            throw new GlobalException(CANNOT_WRITE_IN_EXPIRED_ROOM);
+        if (userRoom.getStatus() == EXPIRED) {
+            throw new GlobalException(CANNOT_COMMENT_IN_EXPIRED_ROOM);
         }
 
         Comment newComment = Comment.builder()
