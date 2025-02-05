@@ -2,6 +2,7 @@ package com.example.bookjourneybackend.domain.room.service;
 
 import com.example.bookjourneybackend.domain.book.domain.GenreType;
 import com.example.bookjourneybackend.domain.favorite.domain.repository.FavoriteRepository;
+import com.example.bookjourneybackend.domain.recentSearch.service.RecentSearchService;
 import com.example.bookjourneybackend.domain.record.domain.repository.RecordRepository;
 import com.example.bookjourneybackend.domain.room.domain.Room;
 import com.example.bookjourneybackend.domain.room.domain.SearchType;
@@ -58,6 +59,8 @@ public class RoomService {
     private final RecordRepository recordRepository;
     private final FavoriteRepository favoriteRepository;
 
+    private final RecentSearchService recentSearchService;
+
     /**
      * 방 상세정보 조회
      */
@@ -110,7 +113,7 @@ public class RoomService {
             String searchTerm, String searchType, String genre,
             String recruitStartDate, String recruitEndDate,
             String roomStartDate, String roomEndDate,
-            Integer recordCount, Integer page
+            Integer recordCount, Integer page, Long userId
     ) {
         log.info("------------------------[RoomService.searchRooms]------------------------");
 
@@ -118,6 +121,8 @@ public class RoomService {
 
         SearchType effectiveSearchType = SearchType.from(searchType);
         GenreType genreType = genre != null && !genre.isEmpty() ? GenreType.fromGenreType(genre) : null;
+
+        recentSearchService.addRecentSearch(userId, searchTerm);
 
         Slice<Room> rooms = roomRepository.findRoomsByFilters(
                 genreType,
