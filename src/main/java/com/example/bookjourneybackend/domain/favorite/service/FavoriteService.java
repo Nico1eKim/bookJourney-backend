@@ -139,9 +139,7 @@ public class FavoriteService {
                 .orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER));
 
         // 삭제할 favoriteId 리스트 추출
-        List<Long> favoriteIds = deleteFavoriteSelectedRequest.getFavoriteList().stream()
-                .map(DeleteFavoriteSelectedRequest.FavoriteInfo::getFavoriteId)
-                .toList();
+        List<Long> favoriteIds = deleteFavoriteSelectedRequest.getFavoriteIds();
 
         // 삭제할 즐겨찾기가 선택되지않음
         if (favoriteIds.isEmpty()) {

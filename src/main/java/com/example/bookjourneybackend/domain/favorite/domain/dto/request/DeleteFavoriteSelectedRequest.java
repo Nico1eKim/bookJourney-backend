@@ -22,8 +22,14 @@ public class DeleteFavoriteSelectedRequest {
     @NoArgsConstructor
     @AllArgsConstructor(access = PRIVATE)
     private static class FavoriteInfo {
-
         private Long favoriteId;
+
+    }
+
+    public List<Long> getFavoriteIds() {
+        return favoriteList.stream()
+                .map(FavoriteInfo::getFavoriteId)
+                .toList();
     }
 
 }
