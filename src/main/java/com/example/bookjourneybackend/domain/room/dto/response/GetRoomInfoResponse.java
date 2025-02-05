@@ -8,6 +8,7 @@ import java.util.List;
 @Getter
 @AllArgsConstructor
 public class GetRoomInfoResponse {
+    private Long roomId;
     private String bookTitle;
     private String roomName;
     private boolean isPublic;
@@ -16,7 +17,7 @@ public class GetRoomInfoResponse {
     private boolean isMember;
     private List<RoomMemberInfo> memberList;
 
-    public static GetRoomInfoResponse of(String bookTitle, String roomName, boolean isPublic, int roomPercentage, String progressEndDate, boolean isMember, List<RoomMemberInfo> memberList) {
-        return new GetRoomInfoResponse(bookTitle, roomName, isPublic, roomPercentage, progressEndDate, isMember, memberList);
+    public static GetRoomInfoResponse of(Long roomId, String bookTitle, String roomName, boolean isPublic, int roomPercentage, String progressEndDate, boolean isMember, List<RoomMemberInfo> memberList) {
+        return new GetRoomInfoResponse(roomId, bookTitle, roomName, isPublic, roomPercentage, progressEndDate, isMember, memberList);
     }
 }

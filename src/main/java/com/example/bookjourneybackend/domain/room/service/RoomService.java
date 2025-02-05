@@ -93,14 +93,14 @@ public class RoomService {
         boolean isMember = userRoomRepository.existsByRoomAndUser(room, user);
 
         return GetRoomInfoResponse.of(
+                room.getRoomId(),
                 room.getBook().getBookTitle(),
                 room.getRoomName(),
                 room.isPublic(),
                 room.getRoomPercentage().intValue(),
                 dateUtil.calculateDday(room.getProgressEndDate()),
-                isMember,
-                members // DELETED가 아닌 유저들만 포함
-        );
+                isMember,  // DELETED가 아닌 유저들만 포함
+                members);
     }
 
     /**
