@@ -7,6 +7,7 @@ import com.example.bookjourneybackend.domain.book.dto.response.BookInfo;
 import com.example.bookjourneybackend.domain.book.dto.response.GetBookInfoResponse;
 import com.example.bookjourneybackend.domain.book.service.BookCacheService;
 import com.example.bookjourneybackend.domain.favorite.domain.Favorite;
+import com.example.bookjourneybackend.domain.favorite.domain.dto.request.DeleteFavoriteSelectedRequest;
 import com.example.bookjourneybackend.domain.favorite.domain.dto.response.GetFavoriteListResponse;
 import com.example.bookjourneybackend.domain.favorite.domain.dto.response.PostFavoriteAddResponse;
 import com.example.bookjourneybackend.domain.favorite.domain.repository.FavoriteRepository;
@@ -14,6 +15,8 @@ import com.example.bookjourneybackend.domain.user.domain.User;
 import com.example.bookjourneybackend.domain.user.domain.repository.UserRepository;
 import com.example.bookjourneybackend.global.exception.GlobalException;
 import com.example.bookjourneybackend.global.util.DateUtil;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -37,6 +40,8 @@ public class FavoriteService {
     private final BookRepository bookRepository;
     private final BookCacheService bookCacheService;
     private final DateUtil dateUtil;
+    @PersistenceContext
+    private final EntityManager entityManager;
 
     /**
      * isbn에 해당하는 책을 즐겨찾기에 추가
@@ -118,4 +123,45 @@ public class FavoriteService {
         return GetFavoriteListResponse.of(bookList);
     }
 
+    /**
+     * 해당 유저가 선택한 즐겨찾기 삭제
+     * 1.삭제할 즐겨찾기 선택되었는지 검증(리스트가 비어서 요청보내진건지 검증)
+     * 2.존재하는 즐겨찾기인지 검증
+     * 3.요청을 보낸 사용자가 등록한 즐겨찾기인지 검증
+     * 4.선택한 즐겨찾기 전체삭제
+     * @param deleteFavoriteSelectedRequest,userId
+     */
+    public Void deleteSelectedFavorite(DeleteFavoriteSelectedRequest deleteFavoriteSelectedRequest, Long userId) {
+        log.info("[FavoriteService.deleteSelectedFavorite]");
+
+        // 사용자 조회
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER));
+
+        // 삭제할 favoriteId 리스트 추출
+        List<Long> favoriteIds = deleteFavoriteSelectedRequest.getFavoriteIds();
+
+        // 삭제할 즐겨찾기가 선택되지않음
+        if (favoriteIds.isEmpty()) {
+            throw new GlobalException(NOT_SELECTED_FAVORITE);
+        }
+
+        // 존재하는 즐겨찾기인지 확인
+        List<Favorite> favorites = favoriteRepository.findAllById(favoriteIds);
+        if (favorites.isEmpty()) {
+            throw new GlobalException(CANNOT_FOUND_FAVORITE);
+        }
+
+        // 사용자 소유의 즐겨찾기인지 검증
+        if (favorites.stream().anyMatch(favorite -> !favorite.getUser().equals(user))) {
+            throw new GlobalException(CANNOT_DELETE_FAVORITE);
+        }
+
+        // 즐겨찾기 삭제 (Batch 처리)
+        favoriteRepository.deleteAllByIdInBatch(favoriteIds);
+        // 영속성 컨텍스트 초기화하여 최신 상태 반영
+        entityManager.flush();
+        entityManager.clear();
+        return null;
+    }
 }
