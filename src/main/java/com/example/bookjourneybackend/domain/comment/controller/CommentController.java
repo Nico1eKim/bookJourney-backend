@@ -6,6 +6,7 @@ import com.example.bookjourneybackend.domain.comment.domain.dto.response.PostCom
 import com.example.bookjourneybackend.domain.comment.service.CommentService;
 import com.example.bookjourneybackend.global.annotation.LoginUserId;
 import com.example.bookjourneybackend.global.response.BaseResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -30,7 +31,7 @@ public class CommentController {
     public BaseResponse<PostCommentResponse> postComment(
             @PathVariable final Long recordId,
             @LoginUserId final Long userId,
-            @RequestBody final PostCommentRequest postCommentRequest
+            @RequestBody @Valid final PostCommentRequest postCommentRequest
     ) {
         return BaseResponse.ok(commentService.createComment(recordId, userId, postCommentRequest));
     }
