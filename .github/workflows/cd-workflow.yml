@@ -40,6 +40,7 @@ jobs:
           # docker push ${{ secrets.DOCKER_IMAGE }}
 
       - name: 🚀 deploy to server
+        if: github.event_name == 'push'
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.EC2_HOST }}
