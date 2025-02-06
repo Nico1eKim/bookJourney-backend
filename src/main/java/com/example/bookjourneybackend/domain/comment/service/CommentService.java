@@ -14,7 +14,6 @@ import com.example.bookjourneybackend.domain.user.domain.repository.UserReposito
 import com.example.bookjourneybackend.global.exception.GlobalException;
 import com.example.bookjourneybackend.global.util.DateUtil;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,7 +23,6 @@ import static com.example.bookjourneybackend.domain.record.domain.RecordType.PAG
 import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.CANNOT_FOUND_RECORD;
 import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.CANNOT_FOUND_USER;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CommentService {

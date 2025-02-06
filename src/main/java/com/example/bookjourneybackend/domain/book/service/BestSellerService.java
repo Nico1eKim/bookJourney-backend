@@ -8,7 +8,6 @@ import com.example.bookjourneybackend.domain.user.domain.repository.FavoriteGenr
 import com.example.bookjourneybackend.global.exception.GlobalException;
 import com.example.bookjourneybackend.global.util.AladinApiUtil;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,7 +20,6 @@ import java.util.Optional;
 
 import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.*;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -35,8 +33,6 @@ public class BestSellerService {
     @Transactional
     @Async
     public void updateBestsellers() {
-
-        log.info("[BestSellerService.updateBestsellers]");
 
         //장르별로 베스트셀러 정보 얻어오기
         for (GenreType genre : GenreType.values()) {
@@ -137,7 +133,6 @@ public class BestSellerService {
         try {
             currentResponse = restTemplate.getForEntity(requestUrl, String.class).getBody();
             aladinApiUtil.checkValidatedResponse(currentResponse);
-            log.info("알라딘 API 응답 Body: {}", currentResponse);
 
         } catch (RestClientException e) {
             throw new GlobalException(ALADIN_API_ERROR);

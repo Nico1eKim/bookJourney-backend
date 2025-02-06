@@ -6,7 +6,6 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -25,7 +24,6 @@ import java.util.List;
 @Order(0)
 @RequiredArgsConstructor
 @Component
-@Slf4j
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
@@ -70,7 +68,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         // SecurityContext에 Authentication 객체 저장
         SecurityContextHolder.getContext().setAuthentication(authenticated);
-
 
     }
 

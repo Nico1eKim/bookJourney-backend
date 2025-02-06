@@ -22,7 +22,6 @@ import com.example.bookjourneybackend.domain.userRoom.domain.repository.UserRoom
 import com.example.bookjourneybackend.global.exception.GlobalException;
 import com.example.bookjourneybackend.global.util.DateUtil;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,7 +37,6 @@ import java.util.stream.Collectors;
 import static com.example.bookjourneybackend.domain.record.domain.RecordSortType.LATEST;
 import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.*;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class RecordService {
@@ -51,7 +49,6 @@ public class RecordService {
 
     @Transactional
     public PostRecordResponse createRecord(PostRecordRequest postRecordRequest, Long roomId, Long userId) {
-        log.info("------------------------[RecordService.createRecord]------------------------");
 
         Room room = roomRepository.findById(roomId).orElseThrow(() -> new GlobalException(CANNOT_FOUND_ROOM));
         User user = userRepository.findById(userId).orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER));
