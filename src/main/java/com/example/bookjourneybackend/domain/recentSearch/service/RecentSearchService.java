@@ -7,6 +7,7 @@ import com.example.bookjourneybackend.domain.recentSearch.domain.repository.Rece
 import com.example.bookjourneybackend.domain.user.domain.User;
 import com.example.bookjourneybackend.domain.user.domain.repository.UserRepository;
 import com.example.bookjourneybackend.global.exception.GlobalException;
+import com.example.bookjourneybackend.global.util.DateUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -26,6 +27,7 @@ public class RecentSearchService {
 
     private final RecentSearchRepository recentSearchRepository;
     private final UserRepository userRepository;
+    private final DateUtil dateUtil;
 
     /**
      * 로그인 한 유저의 최근검색어 리스트 조회
@@ -41,7 +43,7 @@ public class RecentSearchService {
                 .orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER));
 
         //사용자의 최근 검색어 조회
-        Optional<List<RecentSearch>> recentSearchList = recentSearchRepository.findTop12ByUserOrderByCreatedAtDesc(user);
+        Optional<List<RecentSearch>> recentSearchList = recentSearchRepository.findTop12ByUserOrderByModifiedAtDesc(user);
 
         return getGetRecentSearchResponse(recentSearchList);
     }
@@ -101,4 +103,46 @@ public class RecentSearchService {
         throw new GlobalException(CANNOT_DELETE_RECENT_SEARCH);
     }
 
+    /**
+     * 로그인 한 유저의 최근검색어 추가
+     * 이미 해당 유저가 최근 검색어를 추가한 경우에는 해당 RecentSearch의 modified_at을 현재 시간으로 업데이트
+     * 해당 유저의 최근검색어의 개수가 12개 이상인 경우에는 가장 오래된 최근검색어를 삭제하고 새로운 최근검색어를 추가
+     * @param userId, recentSearch
+     */
+    @Transactional
+    public void addRecentSearch(Long userId, String recentSearch) {
+        log.info("[RecentSearchService.addRecentSearch]");
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER));
+
+        //사용자의 최근 검색어 조회
+        Optional<RecentSearch> recentSearchOptional = recentSearchRepository.findByUserAndRecentSearch(user, recentSearch);
+
+        // 최근 검색어가 존재하면 modified_at 업데이트하고 끝
+        if (recentSearchOptional.isPresent()) {
+            recentSearchOptional.get().setModifiedAt(dateUtil.getCurrentTime());
+            return;
+        }
+
+        // 최근 검색어의 개수가 12개 이상인 경우 가장 오래된 최근 검색어 삭제
+        recentSearchRepository.countRecentSearchByUser(user)
+                .ifPresent(count -> {
+                    if (count >= 12) {
+                        recentSearchRepository.findTop1ByUserOrderByModifiedAtAsc(user)
+                                .ifPresent(oldRecentSearch -> {
+                                    recentSearchRepository.delete(oldRecentSearch);
+                                    recentSearchRepository.flush(); // 즉시 삭제
+                                });
+                    }
+                });
+
+        // 최근 검색어가 존재하지 않으면 새로 추가
+        RecentSearch newRecentSearch = RecentSearch.builder()
+                .user(user)
+                .recentSearch(recentSearch)
+                .build();
+
+        recentSearchRepository.save(newRecentSearch);
+    }
 }

@@ -10,7 +10,12 @@ import java.util.Optional;
 
 @Repository
 public interface RecentSearchRepository extends JpaRepository<RecentSearch, Long> {
-    Optional<List<RecentSearch>>  findTop12ByUserOrderByCreatedAtDesc(User user);
+    Optional<List<RecentSearch>>  findTop12ByUserOrderByModifiedAtDesc(User user);
     Optional<List<RecentSearch>>  findByUser(User user);
     Optional<RecentSearch> findByUserAndRecentSearchId(User user, Long recentSearchId);
+    Optional<RecentSearch> findByUserAndRecentSearch(User user, String recentSearch);
+
+    Optional<Integer> countRecentSearchByUser(User user);
+
+    Optional<RecentSearch> findTop1ByUserOrderByModifiedAtAsc(User user);
 }

@@ -27,6 +27,7 @@ public abstract class BaseEntity {
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    @Setter
     @LastModifiedDate
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     @JsonSerialize(using = LocalDateSerializer.class)

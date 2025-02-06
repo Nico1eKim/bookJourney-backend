@@ -82,6 +82,7 @@ public enum BaseExceptionResponseStatus implements ResponseStatus {
 
     CANNOT_NULL_DATE(8009, BAD_REQUEST, "같이읽기 방 생성시, 기간은 필수 입력값입니다."),
     CANNOT_NULL_PASSWORD(8010, BAD_REQUEST, "비공개 방 생성시, 비밀번호는 필수 입력값입니다."),
+    ALREADY_CREATED_ALONE_ROOM(8011, BAD_REQUEST, "이미 해당 책으로 생성된 혼자읽기 방이 존재합니다."),
 
     /**
      * 9000 : record 관련
