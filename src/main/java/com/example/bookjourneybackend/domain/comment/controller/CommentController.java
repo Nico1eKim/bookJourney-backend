@@ -2,6 +2,7 @@ package com.example.bookjourneybackend.domain.comment.controller;
 
 import com.example.bookjourneybackend.domain.comment.domain.dto.request.PostCommentRequest;
 import com.example.bookjourneybackend.domain.comment.domain.dto.response.GetCommentListResponse;
+import com.example.bookjourneybackend.domain.comment.domain.dto.response.PostCommentLikeResponse;
 import com.example.bookjourneybackend.domain.comment.domain.dto.response.PostCommentResponse;
 import com.example.bookjourneybackend.domain.comment.service.CommentService;
 import com.example.bookjourneybackend.global.annotation.LoginUserId;
@@ -34,5 +35,13 @@ public class CommentController {
             @RequestBody @Valid final PostCommentRequest postCommentRequest
     ) {
         return BaseResponse.ok(commentService.createComment(recordId, userId, postCommentRequest));
+    }
+
+    @PostMapping("/{commentId}/likes")
+    public BaseResponse<PostCommentLikeResponse> likesComment(
+            @PathVariable("commentId") final Long commentId,
+            @LoginUserId final Long userId
+    ) {
+        return BaseResponse.ok(commentService.toggleCommentLike(commentId, userId));
     }
 }

@@ -1,10 +1,12 @@
 package com.example.bookjourneybackend.domain.comment.service;
 
 import com.example.bookjourneybackend.domain.comment.domain.Comment;
+import com.example.bookjourneybackend.domain.comment.domain.CommentLike;
 import com.example.bookjourneybackend.domain.comment.domain.dto.request.PostCommentRequest;
 import com.example.bookjourneybackend.domain.comment.domain.dto.response.CommentInfo;
 import com.example.bookjourneybackend.domain.comment.domain.dto.response.GetCommentListResponse;
 import com.example.bookjourneybackend.domain.comment.domain.dto.response.PostCommentResponse;
+import com.example.bookjourneybackend.domain.comment.domain.dto.response.PostCommentLikeResponse;
 import com.example.bookjourneybackend.domain.comment.domain.repository.CommentLikeRepository;
 import com.example.bookjourneybackend.domain.comment.domain.repository.CommentRepository;
 import com.example.bookjourneybackend.domain.record.domain.Record;
@@ -24,6 +26,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 import static com.example.bookjourneybackend.domain.record.domain.RecordType.PAGE;
 import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.CANNOT_FOUND_RECORD;
@@ -110,5 +113,38 @@ public class CommentService {
         commentRepository.save(newComment);
 
         return PostCommentResponse.of(newComment.getCommentId());
+    }
+
+    @Transactional
+    public PostCommentLikeResponse toggleCommentLike(Long commentId, Long userId) {
+        Comment comment = commentRepository.findById(commentId).orElseThrow(() -> new GlobalException(CANNOT_FOUND_COMMENT));
+        User user = userRepository.findById(userId).orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER));
+
+        Record record = comment.getRecord();
+        Room room = record.getRoom();
+
+        // 방에 속해있지 않으면 좋아요를 누를 수 없음
+        if (!userRoomRepository.existsByRoomAndUser(room, user)) {
+            throw new GlobalException(NOT_PARTICIPATING_IN_ROOM);
+        }
+
+        // 방이 EXPIRED 상태이면 좋아요를 누를 수 없음
+        if (room.getStatus() == EXPIRED) {
+            throw new GlobalException(CANNOT_LIKE_IN_EXPIRED_ROOM);
+        }
+
+        Optional<CommentLike> existingLike = commentLikeRepository.findByCommentAndUser(comment, user);
+
+        if (existingLike.isPresent()) {
+            commentLikeRepository.delete(existingLike.get());
+            return new PostCommentLikeResponse(false);
+        } else {
+            CommentLike newLike = CommentLike.builder()
+                    .comment(comment)
+                    .user(user)
+                    .build();
+            commentLikeRepository.save(newLike);
+            return new PostCommentLikeResponse(true);
+        }
     }
 }
