@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 import static com.example.bookjourneybackend.domain.record.domain.RecordType.PAGE;
 import static com.example.bookjourneybackend.global.entity.EntityStatus.EXPIRED;
@@ -104,14 +105,18 @@ public class CommentService {
             throw new GlobalException(CANNOT_LIKE_IN_EXPIRED_ROOM);
         }
 
-        boolean isLiked = commentLikeRepository.existsByCommentAndUser(comment, user);
+        Optional<CommentLike> existingLike = commentLikeRepository.findByCommentAndUser(comment, user);
 
-        if (isLiked) {
-            commentLikeRepository.deleteByCommentAndUser(comment, user);
+        if (existingLike.isPresent()) {
+            commentLikeRepository.delete(existingLike.get());
+            return new PostCommentLikeResponse(false);
         } else {
-            commentLikeRepository.save(CommentLike.builder().comment(comment).user(user).build());
+            CommentLike newLike = CommentLike.builder()
+                    .comment(comment)
+                    .user(user)
+                    .build();
+            commentLikeRepository.save(newLike);
+            return new PostCommentLikeResponse(true);
         }
-
-        return PostCommentLikeResponse.of(!isLiked);
     }
 }
