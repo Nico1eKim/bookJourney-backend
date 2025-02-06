@@ -31,6 +31,7 @@ public class BestSellerService {
     private final RestTemplate restTemplate;
     private final BookRepository bookRepository;
     private final FavoriteGenreRepository favoriteGenreRepository;
+    private final BookService bookService;
 
     @Transactional
     @Async
@@ -120,9 +121,10 @@ public class BestSellerService {
         oldBestSeller.setBestSeller(false);
         bookRepository.save(oldBestSeller);
         //이 책에해당하는 방이 없거나, 이책을 즐겨찾기 한사람이 없으면 db에서 삭제
-        if(oldBestSeller.getRooms().isEmpty() && oldBestSeller.getFavorites().isEmpty()) {
-            bookRepository.delete(oldBestSeller);
-        }
+        bookService.deleteBook(oldBestSeller);
+//        if(oldBestSeller.getRooms().isEmpty() && oldBestSeller.getFavorites().isEmpty()) {
+//            bookRepository.delete(oldBestSeller);
+//        }
     }
 
 

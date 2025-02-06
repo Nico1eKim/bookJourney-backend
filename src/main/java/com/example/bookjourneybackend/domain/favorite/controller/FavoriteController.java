@@ -37,4 +37,9 @@ public class FavoriteController {
         log.info("[FavoriteController.deleteSelectedFavorite]");
         return BaseResponse.ok(favoriteService.deleteSelectedFavorite(deleteFavoriteSelectedRequest,userId));
     }
+
+    @DeleteMapping("/{isbn}")
+    public BaseResponse<PostFavoriteAddResponse> deleteFavorite(@PathVariable("isbn") final String isbn, @LoginUserId final Long userId) {
+        return BaseResponse.ok(favoriteService.deleteFavorite(isbn,userId));
+    }
 }
