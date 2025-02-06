@@ -106,7 +106,6 @@ public class RecentSearchService {
      */
     @Transactional
     public void addRecentSearch(Long userId, String recentSearch) {
-        log.info("[RecentSearchService.addRecentSearch]");
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER));
