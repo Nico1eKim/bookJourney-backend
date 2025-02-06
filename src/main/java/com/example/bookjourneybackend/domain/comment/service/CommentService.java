@@ -58,11 +58,6 @@ public class CommentService {
         Room room = record.getRoom();
         UserRoom userRoom = userRoomRepository.findFirstByRoomAndUser(room, user).orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER_ROOM));
 
-        // 유저가 방에 속해 있지 않거나, 방에서 삭제된 경우 예외 발생
-        if (userRoom.getStatus() == DELETED) {
-            throw new GlobalException(NOT_PARTICIPATING_IN_ROOM);
-        }
-
         // 방이 EXPIRED 상태이면 댓글을 남길 수 없음
         if (userRoom.getStatus() == EXPIRED) {
             throw new GlobalException(CANNOT_COMMENT_IN_EXPIRED_ROOM);
