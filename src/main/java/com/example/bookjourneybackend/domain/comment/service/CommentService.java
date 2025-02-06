@@ -22,7 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-import static com.example.bookjourneybackend.global.entity.EntityStatus.DELETED;
 import static com.example.bookjourneybackend.global.entity.EntityStatus.EXPIRED;
 import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.*;
 
@@ -56,7 +55,7 @@ public class CommentService {
         Record record = recordRepository.findById(recordId).orElseThrow(() -> new GlobalException(CANNOT_FOUND_RECORD));
         User user = userRepository.findById(userId).orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER));
         Room room = record.getRoom();
-        UserRoom userRoom = userRoomRepository.findFirstByRoomAndUser(room, user).orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER_ROOM));
+        UserRoom userRoom = userRoomRepository.findUserRoomByRoomAndUser(room, user).orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER_ROOM));
 
         // 방이 EXPIRED 상태이면 댓글을 남길 수 없음
         if (userRoom.getStatus() == EXPIRED) {
