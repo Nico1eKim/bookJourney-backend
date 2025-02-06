@@ -7,6 +7,7 @@ import com.example.bookjourneybackend.global.entity.EntityStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -49,4 +50,14 @@ public interface UserRoomRepository extends JpaRepository<UserRoom, Long> {
             "AND (r.progressEndDate IS NULL OR (MONTH(r.progressEndDate) >= :month AND YEAR(r.progressEndDate) >= :year)) " +
             "AND r.roomType = 'ALONE'")
     List<UserRoom> findInActiveAloneRoomsByUserIdAndDate(@Param("userId") Long userId, @Param("year") Integer year, @Param("month") Integer month, @Param("status") EntityStatus status);
+
+
+    //해당 User가 Book으로 혼자읽기 방을 이미 만들었고 그 혼자읽기 방의 status가 EXPIRED가 아니라면 true
+    @Query(
+            "SELECT CASE WHEN COUNT(ur) > 0 THEN TRUE ELSE FALSE END " +
+                    "FROM UserRoom ur " +
+                    "LEFT JOIN ur.room r " +
+                    "WHERE ur.user.userId = :userId AND r.book.isbn = :isbn AND r.roomType = 'ALONE' AND r.status != 'EXPIRED'"
+    )
+    boolean existsUnExpiredAloneRoomByUserAndBook(@Param("userId") Long userId, @Param("isbn") String isbn);
 }

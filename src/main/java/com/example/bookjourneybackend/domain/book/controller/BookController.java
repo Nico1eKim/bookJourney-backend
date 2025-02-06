@@ -22,8 +22,9 @@ public class BookController {
     private final BookService bookService;
 
     @GetMapping("/search")
-    public BaseResponse<GetBookListResponse> viewBookList(@Valid final GetBookListRequest getBookListRequest) {
-        return BaseResponse.ok(bookService.searchBook(getBookListRequest));
+    public BaseResponse<GetBookListResponse> viewBookList(@Valid final GetBookListRequest getBookListRequest,
+                                                          @LoginUserId final Long userId) {
+        return BaseResponse.ok(bookService.searchBook(getBookListRequest, userId));
     }
 
     @GetMapping("/info/{isbn}")

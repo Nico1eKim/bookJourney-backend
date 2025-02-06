@@ -43,10 +43,11 @@ public class RoomController {
             @RequestParam(required = false) final String roomStartDate,
             @RequestParam(required = false) final String roomEndDate,
             @RequestParam(required = false) final Integer recordCount,
-            @RequestParam(required = true, defaultValue = "0") final Integer page
+            @RequestParam(required = true, defaultValue = "0") final Integer page,
+            @LoginUserId final Long userId
     ) {
         return BaseResponse.ok(
-                roomService.searchRooms(searchTerm, searchType, genre, recruitStartDate, recruitEndDate, roomStartDate, roomEndDate, recordCount, page)
+                roomService.searchRooms(searchTerm, searchType, genre, recruitStartDate, recruitEndDate, roomStartDate, roomEndDate, recordCount, page, userId)
         );
     }
 
