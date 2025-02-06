@@ -224,16 +224,19 @@ public class RecordService {
             throw new GlobalException(CANNOT_LIKE_IN_EXPIRED_ROOM);
         }
 
-        boolean isLiked = recordLikeRepository.existsByRecordAndUser(record, user);
+        Optional<RecordLike> existingLike = recordLikeRepository.findByRecordAndUser(record, user);
 
-        if (isLiked) {
-            recordLikeRepository.deleteByRecordAndUser(record, user);
+        if(existingLike.isPresent()) {
+            recordLikeRepository.delete(existingLike.get());
+            return new PostRecordLikeResponse(false);
         } else {
-            recordLikeRepository.save(RecordLike.builder().record(record).user(user).build());
+            RecordLike newLike = RecordLike.builder()
+                    .record(record)
+                    .user(user)
+                    .build();
+            recordLikeRepository.save(newLike);
+            return new PostRecordLikeResponse(true);
         }
-
-        // 사용자의 좋아요 상태가 변경된 후의 결과를 반환
-        return PostRecordLikeResponse.of(!isLiked);
     }
 
     /**

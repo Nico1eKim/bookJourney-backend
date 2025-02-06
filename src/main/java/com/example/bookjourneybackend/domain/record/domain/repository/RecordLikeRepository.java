@@ -13,5 +13,5 @@ public interface RecordLikeRepository extends JpaRepository<RecordLike, Long> {
 
     boolean existsByRecordAndUser(Record record, User user);
 
-    void deleteByRecordAndUser(Record record, User user);
+    Optional<RecordLike> findByRecordAndUser(Record record, User user);
 }
