@@ -3,15 +3,16 @@ package com.example.bookjourneybackend.domain.user.service;
 import com.example.bookjourneybackend.domain.auth.service.RedisService;
 import com.example.bookjourneybackend.domain.book.domain.GenreType;
 import com.example.bookjourneybackend.domain.book.domain.repository.BookRepository;
+import com.example.bookjourneybackend.domain.user.domain.DefaultImage;
 import com.example.bookjourneybackend.domain.user.domain.EmailContentTemplate;
 import com.example.bookjourneybackend.domain.user.domain.FavoriteGenre;
 import com.example.bookjourneybackend.domain.user.domain.User;
-import com.example.bookjourneybackend.domain.user.domain.dto.request.PostUsersEmailRequest;
-import com.example.bookjourneybackend.domain.user.domain.dto.request.PostUsersNicknameValidationRequest;
-import com.example.bookjourneybackend.domain.user.domain.dto.request.PostUsersSignUpRequest;
-import com.example.bookjourneybackend.domain.user.domain.dto.request.PostUsersVerificationEmailRequest;
-import com.example.bookjourneybackend.domain.user.domain.dto.response.PostUsersSignUpResponse;
-import com.example.bookjourneybackend.domain.user.domain.dto.response.PostUsersValidationResponse;
+import com.example.bookjourneybackend.domain.user.dto.request.PostUsersEmailRequest;
+import com.example.bookjourneybackend.domain.user.dto.request.PostUsersNicknameValidationRequest;
+import com.example.bookjourneybackend.domain.user.dto.request.PostUsersSignUpRequest;
+import com.example.bookjourneybackend.domain.user.dto.request.PostUsersVerificationEmailRequest;
+import com.example.bookjourneybackend.domain.user.dto.response.PostUsersSignUpResponse;
+import com.example.bookjourneybackend.domain.user.dto.response.PostUsersValidationResponse;
 import com.example.bookjourneybackend.domain.user.domain.repository.UserRepository;
 import com.example.bookjourneybackend.global.exception.GlobalException;
 import com.example.bookjourneybackend.global.util.DateUtil;
@@ -40,10 +41,13 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final BookRepository bookRepository;
+
     private final PasswordEncoder passwordEncoder;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+
     private final JwtUtil jwtUtil;
     private final DateUtil dateUtil;
+
     private final RedisService redisService;
     private final MailService mailService;
 
@@ -67,8 +71,9 @@ public class UserService {
         User newUser = User.builder()
                 .email(postUsersSignUpRequest.getEmail())
                 .password(encodedPassword)
-                .imageUrl(postUsersSignUpRequest.getImageUrl())
                 .nickname(postUsersSignUpRequest.getNickName())
+                .imageUrl(postUsersSignUpRequest.getImageUrl() == null? //사용자가 이미지를 선택하지 않으면 기본 이미지에서 랜덤 배정
+                        DefaultImage.assignRandomUserImage() : postUsersSignUpRequest.getImageUrl())
                 .build();
 
         // 관심 장르 매핑
