@@ -10,7 +10,6 @@ import com.example.bookjourneybackend.domain.userRoom.domain.repository.UserRoom
 import com.example.bookjourneybackend.global.entity.EntityStatus;
 import com.example.bookjourneybackend.global.util.DateUtil;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -22,7 +21,6 @@ import java.util.stream.Collectors;
 import static com.example.bookjourneybackend.global.entity.EntityStatus.EXPIRED;
 import static com.example.bookjourneybackend.global.entity.EntityStatus.INACTIVE;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class RoomArchiveService {
@@ -38,7 +36,6 @@ public class RoomArchiveService {
      * 정렬은 inActivatedAt 내림차순으로 정렬
      */
     public GetRoomArchiveResponse viewArchiveRooms(Long userId, Integer month, Integer year, EntityStatus status) {
-        log.info("------------------------[RoomArchiveService.viewArchiveRooms]------------------------");
 
         if (year == null) {
             // year가 null이면 이번달과 겹치는 모든 방을 조회

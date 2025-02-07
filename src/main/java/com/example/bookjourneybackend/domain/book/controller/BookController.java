@@ -11,10 +11,8 @@ import com.example.bookjourneybackend.global.annotation.LoginUserId;
 import com.example.bookjourneybackend.global.response.BaseResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
-@Slf4j
 @RestController
 @RequestMapping("/books")
 @RequiredArgsConstructor
@@ -41,7 +39,6 @@ public class BookController {
     //사용자별베스트 셀러 조회
     @GetMapping("/best-sellers")
     public BaseResponse<GetBookBestSellersResponse> viewBestSellers(@LoginUserId final Long userId) {
-        log.info("[BookController.viewBestSellers]");
         return BaseResponse.ok(bookService.showBestSellers(userId));
     }
 

@@ -21,7 +21,6 @@ import com.example.bookjourneybackend.domain.userRoom.domain.repository.UserRoom
 import com.example.bookjourneybackend.global.exception.GlobalException;
 import com.example.bookjourneybackend.global.util.DateUtil;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,7 +33,6 @@ import static com.example.bookjourneybackend.global.response.status.BaseExceptio
 import static com.example.bookjourneybackend.global.entity.EntityStatus.EXPIRED;
 import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.*;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CommentService {

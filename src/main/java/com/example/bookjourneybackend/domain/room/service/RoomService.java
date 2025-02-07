@@ -29,7 +29,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import com.example.bookjourneybackend.global.util.AladinApiUtil;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -45,7 +44,6 @@ import static com.example.bookjourneybackend.domain.room.domain.SortType.LASTEST
 import static com.example.bookjourneybackend.global.entity.EntityStatus.*;
 import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.*;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class RoomService {
@@ -65,7 +63,6 @@ public class RoomService {
      * 방 상세정보 조회
      */
     public GetRoomDetailResponse showRoomDetails(Long roomId, Long userId) {
-        log.info("------------------------[RoomService.showRoomDetails]------------------------");
 
         Room room = roomRepository.findById(roomId)
                 .orElseThrow(() -> new GlobalException(CANNOT_FOUND_ROOM));
@@ -85,7 +82,6 @@ public class RoomService {
      * 방 정보 조회
      */
     public GetRoomInfoResponse showRoomInfo(Long roomId, Long userId) {
-        log.info("------------------------[RoomService.showRoomInfo]------------------------");
 
         Room room = roomRepository.findById(roomId)
                 .orElseThrow(() -> new GlobalException(CANNOT_FOUND_ROOM));
@@ -115,7 +111,6 @@ public class RoomService {
             String roomStartDate, String roomEndDate,
             Integer recordCount, Integer page, Long userId
     ) {
-        log.info("------------------------[RoomService.searchRooms]------------------------");
 
         validateSearchParams(searchTerm, searchType, page);
 
@@ -210,7 +205,6 @@ public class RoomService {
      */
     @Transactional
     public PostRoomCreateResponse createRoom(PostRoomCreateRequest postRoomCreateRequest, Long userId) {
-        log.info("------------------------[RoomService.createRoom]------------------------");
         Book book = findOrCreateBook(postRoomCreateRequest.getIsbn());
 
         UserRoom userRoom = createUserRoom(userId);
@@ -220,7 +214,6 @@ public class RoomService {
         bookRepository.save(book);
         roomRepository.save(room); //CascadeType.All 옵션을 제거하고 room도 save (이유 : CascadeType.ALL을 했더니 roomRepository에 메서드가 종료되고 저장되어서 roomId가 null이 뜨는 현상이 발생
 
-        log.info("Created RoomID: {}", room.getRoomId());
         return PostRoomCreateResponse.of(room);
     }
 
@@ -242,7 +235,6 @@ public class RoomService {
     }
 
     private Book saveBookFromAladinApi(String isbn) {
-        log.info("[saveBookFromAladinApi] isbn: {}", isbn);
 
         String requestUrl = aladinApiUtil.buildLookUpApiUrl(isbn);
         String currentResponse = aladinApiUtil.requestBookInfoFromAladinApi(requestUrl);
@@ -303,8 +295,6 @@ public class RoomService {
     //todo 추후에 예외처리 메시지 수정
     @Transactional(readOnly = true)
     public GetRoomActiveResponse searchActiveRooms(String sort, Long userId) {
-        log.info("------------------------[RoomService.searchActiveRooms]------------------------");
-        log.info("sort: {}", sort);
         SortType sortType = (sort == null) ? LASTEST : SortType.from(sort);
         List<UserRoom> userRooms = findUserRoomsBySortType(sortType, userId);
 
@@ -348,7 +338,6 @@ public class RoomService {
      */
     @Transactional
     public Void putRoomsInactive(Long roomId, Long userId) {
-        log.info("------------------------[RoomService.putRoomsInactive]------------------------");
         UserRoom userRoom = getUserRoom(roomId, userId);
 
         userRoom.setStatus(EntityStatus.INACTIVE);
@@ -378,7 +367,6 @@ public class RoomService {
      */
     @Transactional
     public Void exitRoom(Long roomId, Long userId) {
-        log.info("------------------------[RoomService.exitRoom]------------------------");
 
         UserRoom userRoom = getUserRoom(roomId, userId);
         Room room = userRoom.getRoom();
@@ -469,7 +457,6 @@ public class RoomService {
      * 4. 최근에 방 생성된 순
      */
     public GetRoomRecruitmentResponse searchRecruitmentRooms() {
-        log.info("------------------------[RoomService.searchRecruitmentRooms]------------------------");
 
         LocalDate now = LocalDate.now();
         String weekOfMonth = dateUtil.getCurrentWeekOfMonth(now);   //현재 주차를 기준으로 "~월 ~주차 반환"

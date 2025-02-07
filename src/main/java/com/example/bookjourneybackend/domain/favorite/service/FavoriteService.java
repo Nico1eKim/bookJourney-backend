@@ -18,7 +18,6 @@ import com.example.bookjourneybackend.global.util.DateUtil;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,7 +28,6 @@ import java.util.List;
 import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.CANNOT_FOUND_BOOK;
 import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.CANNOT_FOUND_USER;
 
-@Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -52,7 +50,6 @@ public class FavoriteService {
      * @return PostFavoriteAddResponse
      */
     public PostFavoriteAddResponse addFavorite(String isbn, Long userId) {
-        log.info("[FavoriteService.addFavorite]");
 
         // 사용자 조회
         User user = userRepository.findById(userId)
@@ -107,7 +104,6 @@ public class FavoriteService {
      */
     @Transactional(readOnly = true)
     public GetFavoriteListResponse showFavoriteList(Long userId) {
-        log.info("[FavoriteService.showFavoriteList]");
 
         // 사용자 조회
         User user = userRepository.findById(userId)
@@ -132,7 +128,6 @@ public class FavoriteService {
      * @param deleteFavoriteSelectedRequest,userId
      */
     public Void deleteSelectedFavorite(DeleteFavoriteSelectedRequest deleteFavoriteSelectedRequest, Long userId) {
-        log.info("[FavoriteService.deleteSelectedFavorite]");
 
         // 사용자 조회
         User user = userRepository.findById(userId)

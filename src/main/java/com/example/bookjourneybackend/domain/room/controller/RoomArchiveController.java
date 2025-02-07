@@ -5,7 +5,6 @@ import com.example.bookjourneybackend.domain.room.service.RoomArchiveService;
 import com.example.bookjourneybackend.global.annotation.LoginUserId;
 import com.example.bookjourneybackend.global.response.BaseResponse;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -14,7 +13,6 @@ import org.springframework.web.bind.annotation.RestController;
 import static com.example.bookjourneybackend.global.entity.EntityStatus.EXPIRED;
 import static com.example.bookjourneybackend.global.entity.EntityStatus.INACTIVE;
 
-@Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/rooms/archive")

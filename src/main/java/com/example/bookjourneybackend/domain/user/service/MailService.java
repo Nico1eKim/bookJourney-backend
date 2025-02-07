@@ -3,9 +3,7 @@ package com.example.bookjourneybackend.domain.user.service;
 import com.example.bookjourneybackend.global.exception.GlobalException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -14,7 +12,6 @@ import org.springframework.transaction.annotation.Transactional;
 import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.CANNOT_CREAT_EMAIL;
 import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.UNABLE_TO_SEND_EMAIL;
 
-@Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -31,8 +28,6 @@ public class MailService {
         try {
             emailSender.send(emailForm);
         } catch (RuntimeException e) {
-            log.info("MailService.sendEmail exception occur toEmail: {}, " +
-                    "title: {}, text: {}", toEmail, title, text);
             throw new GlobalException(UNABLE_TO_SEND_EMAIL);
         }
     }

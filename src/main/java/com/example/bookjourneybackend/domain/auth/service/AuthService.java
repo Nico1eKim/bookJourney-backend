@@ -12,7 +12,6 @@ import com.example.bookjourneybackend.global.util.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -21,7 +20,6 @@ import org.springframework.transaction.annotation.Transactional;
 import static com.example.bookjourneybackend.global.entity.EntityStatus.ACTIVE;
 import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.*;
 
-@Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -42,7 +40,6 @@ public class AuthService {
      */
     @Transactional
     public PostAuthLoginResponse login(PostAuthLoginRequest postAuthLoginRequest, HttpServletRequest request, HttpServletResponse response) {
-        log.info("[AuthService.login]");
 
         String email = postAuthLoginRequest.getEmail();
         String password = postAuthLoginRequest.getPassword();
@@ -77,7 +74,6 @@ public class AuthService {
     @Transactional(readOnly = true)
     public PostAuthAccessTokenReissueResponse tokenReissue(PostAuthAccessTokenReissueRequest postAuthAccessTokenReissueRequest,
                                                            HttpServletResponse response, HttpServletRequest request) {
-        log.info("[AuthService.tokenReissue]");
 
         String refreshToken = postAuthAccessTokenReissueRequest.getRefreshToken();
 
@@ -114,7 +110,6 @@ public class AuthService {
      */
     @Transactional
     public Void logout(Long userId) {
-        log.info("[AuthService.logout]");
 
         //해당하는 유저 찾기
         userRepository.findByUserIdAndStatus(userId, ACTIVE)

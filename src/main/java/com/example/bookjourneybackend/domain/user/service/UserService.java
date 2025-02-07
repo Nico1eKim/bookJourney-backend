@@ -22,7 +22,6 @@ import com.example.bookjourneybackend.global.util.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,7 +35,6 @@ import static com.example.bookjourneybackend.domain.user.domain.EmailContentTemp
 import static com.example.bookjourneybackend.global.entity.EntityStatus.ACTIVE;
 import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.*;
 
-@Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -65,7 +63,6 @@ public class UserService {
     @Transactional
     public PostUsersSignUpResponse signup(PostUsersSignUpRequest postUsersSignUpRequest,
                                           HttpServletRequest request, HttpServletResponse response) {
-        log.info("[UserService.signUp]");
 
         //비밀번호 암호화
         String encodedPassword = passwordEncoder.encode(postUsersSignUpRequest.getPassword());
@@ -116,7 +113,6 @@ public class UserService {
      * @return PostUsersSignUpResponse
      */
     public PostUsersValidationResponse validateNickname(PostUsersNicknameValidationRequest postUsersNicknameValidationRequest) {
-        log.info("[UserService.validateNickname]");
         return PostUsersValidationResponse.of(
                 !userRepository.existsByNicknameAndStatus(postUsersNicknameValidationRequest.getNickName(), ACTIVE));
     }
@@ -127,7 +123,6 @@ public class UserService {
      * @param postUsersEmailRequest
      */
     public Void sendCodeToEmail(PostUsersEmailRequest postUsersEmailRequest) {
-        log.info("[UserService.sendCodeToEmail]");
 
         //이미 가입된 유저인지 검증
         checkDuplicatedEmail(postUsersEmailRequest.getEmail());
