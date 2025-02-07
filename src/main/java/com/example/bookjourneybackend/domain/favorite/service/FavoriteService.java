@@ -209,7 +209,8 @@ public class FavoriteService {
 
         //즐겨찾기에서 삭제
         favoriteRepository.deleteFavoriteByUserAndBook(user,book);
-        log.info("{}{} {} {} ",book.getBookTitle(),book.getIsbn(),user.getUserId(),user.getNickname());
+        entityManager.flush();
+
         //즐겨찾기한 책 db에서 삭제
         bookService.deleteBook(book);
 
