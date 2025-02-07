@@ -32,10 +32,9 @@ public enum BaseExceptionResponseStatus implements ResponseStatus {
      * 5100 : image 관련
      */
     EMPTY_FILE_EXCEPTION(5101, BAD_REQUEST, "업로드하려는 이미지가 비어있습니다."),
-    IO_EXCEPTION_ON_IMAGE_UPLOAD(5102, BAD_REQUEST, "파일 업로드에 실패하였습니다"),
+    EXCEPTION_ON_IMAGE_UPLOAD(5102, BAD_REQUEST, "이미지 업로드에 실패하였습니다."),
     INVALID_FILE_EXTENTION(5103, BAD_REQUEST, "올바르지 않은 파일 형식입니다."),
-    PUT_OBJECT_EXCEPTION(5104, BAD_REQUEST, "이미지 업로드하는데 실패하였습니다"),
-    IO_EXCEPTION_ON_IMAGE_DELETE(5105, BAD_REQUEST, "파일 삭제에 실패하였습니다"),
+    IO_EXCEPTION_ON_IMAGE_DELETE(5104, BAD_REQUEST, "파일 삭제에 실패하였습니다"),
 
     /**
      * 6000 : book 관련

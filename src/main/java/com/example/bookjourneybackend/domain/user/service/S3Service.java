@@ -6,10 +6,8 @@ import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.transfer.TransferManager;
 import com.amazonaws.services.s3.transfer.Upload;
 import com.amazonaws.util.IOUtils;
-import com.example.bookjourneybackend.domain.user.domain.DefaultImage;
 import com.example.bookjourneybackend.global.exception.GlobalException;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -28,7 +26,6 @@ import java.util.UUID;
 
 import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.*;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class S3Service {
@@ -53,7 +50,7 @@ public class S3Service {
         try {
             return this.uploadImageToS3(image);
         } catch (IOException e) {
-            throw new GlobalException(IO_EXCEPTION_ON_IMAGE_UPLOAD);
+            throw new GlobalException(EXCEPTION_ON_IMAGE_UPLOAD);
         }
     }
 
@@ -103,8 +100,7 @@ public class S3Service {
 //            upload.waitForCompletion();
 
         }catch (Exception e){
-            log.info("[S3 Error]: {}", e.getMessage());
-            throw new GlobalException(PUT_OBJECT_EXCEPTION);
+            throw new GlobalException(EXCEPTION_ON_IMAGE_UPLOAD);
         }finally {
             byteArrayInputStream.close();
             is.close();
