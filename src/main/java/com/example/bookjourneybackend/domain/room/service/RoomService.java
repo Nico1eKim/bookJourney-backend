@@ -17,7 +17,6 @@ import com.example.bookjourneybackend.domain.room.dto.response.GetRoomInfoRespon
 import com.example.bookjourneybackend.domain.room.dto.response.PostRoomCreateResponse;
 import com.example.bookjourneybackend.domain.room.dto.response.RoomMemberInfo;
 import com.example.bookjourneybackend.domain.user.domain.User;
-import com.example.bookjourneybackend.domain.user.domain.UserImage;
 import com.example.bookjourneybackend.domain.user.domain.repository.UserRepository;
 import com.example.bookjourneybackend.domain.userRoom.domain.UserRole;
 import com.example.bookjourneybackend.domain.userRoom.domain.UserRoom;
@@ -35,7 +34,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.example.bookjourneybackend.domain.room.domain.RoomType.ALONE;
@@ -187,9 +185,7 @@ public class RoomService {
                     User user = userRoom.getUser();
                     return RoomMemberInfo.builder()
                             .userRole(userRoom.getUserRole())
-                            .imageUrl(Optional.ofNullable(user.getUserImage())
-                                    .map(UserImage::getImageUrl)
-                                    .orElse(null))
+                            .imageUrl(user.getImageUrl())
                             .nickName(user.getNickname())
                             .userPercentage(userRoom.getUserPercentage().intValue())
                             .build();

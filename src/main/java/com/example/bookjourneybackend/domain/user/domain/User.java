@@ -36,8 +36,8 @@ public class User extends BaseEntity{
     @Column(name = "nickname", nullable = false, length = 60)
     private String nickname;
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private UserImage userImage; // User와 UserImage의 연관 관계 추가
+    @Column(name = "image_url", columnDefinition = "TEXT", nullable = false)
+    private String imageUrl;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
