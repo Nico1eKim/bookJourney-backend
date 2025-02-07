@@ -1,4 +1,4 @@
-package com.example.bookjourneybackend.domain.user.domain.dto.request;
+package com.example.bookjourneybackend.domain.user.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
