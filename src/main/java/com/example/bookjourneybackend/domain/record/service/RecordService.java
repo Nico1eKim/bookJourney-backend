@@ -22,7 +22,6 @@ import com.example.bookjourneybackend.domain.userRoom.domain.repository.UserRoom
 import com.example.bookjourneybackend.global.exception.GlobalException;
 import com.example.bookjourneybackend.global.util.DateUtil;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,7 +37,6 @@ import java.util.stream.Collectors;
 import static com.example.bookjourneybackend.domain.record.domain.RecordSortType.LATEST;
 import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.*;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class RecordService {
@@ -51,7 +49,6 @@ public class RecordService {
 
     @Transactional
     public PostRecordResponse createRecord(PostRecordRequest postRecordRequest, Long roomId, Long userId) {
-        log.info("------------------------[RecordService.createRecord]------------------------");
 
         Room room = roomRepository.findById(roomId).orElseThrow(() -> new GlobalException(CANNOT_FOUND_ROOM));
         User user = userRepository.findById(userId).orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER));
@@ -227,16 +224,19 @@ public class RecordService {
             throw new GlobalException(CANNOT_LIKE_IN_EXPIRED_ROOM);
         }
 
-        boolean isLiked = recordLikeRepository.existsByRecordAndUser(record, user);
+        Optional<RecordLike> existingLike = recordLikeRepository.findByRecordAndUser(record, user);
 
-        if (isLiked) {
-            recordLikeRepository.deleteByRecordAndUser(record, user);
+        if(existingLike.isPresent()) {
+            recordLikeRepository.delete(existingLike.get());
+            return new PostRecordLikeResponse(false);
         } else {
-            recordLikeRepository.save(RecordLike.builder().record(record).user(user).build());
+            RecordLike newLike = RecordLike.builder()
+                    .record(record)
+                    .user(user)
+                    .build();
+            recordLikeRepository.save(newLike);
+            return new PostRecordLikeResponse(true);
         }
-
-        // 사용자의 좋아요 상태가 변경된 후의 결과를 반환
-        return PostRecordLikeResponse.of(!isLiked);
     }
 
     /**

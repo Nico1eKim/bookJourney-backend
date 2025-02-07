@@ -54,7 +54,6 @@ public class BookService {
      */
     //todo Thread Pool Monitoring 로그 출력
     public GetBookListResponse searchBook(GetBookListRequest getBookListRequest, Long userId) {
-        log.info("------------------------[BookService.searchBook]------------------------");
 
         recentSearchService.addRecentSearch(userId, getBookListRequest.getSearchTerm());
 

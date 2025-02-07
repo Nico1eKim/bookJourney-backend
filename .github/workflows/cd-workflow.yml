@@ -40,6 +40,7 @@ jobs:
           # docker push ${{ secrets.DOCKER_IMAGE }}
 
       - name: 🚀 deploy to server
+        if: github.event_name == 'push'
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -56,7 +57,7 @@ jobs:
 
             cd bookJourney-backend
             git pull origin develop
-            sudo docker-compose down -v
+            sudo docker-compose down
 
              ./gradlew clean
              set -a && source .env && set +a && ./gradlew build

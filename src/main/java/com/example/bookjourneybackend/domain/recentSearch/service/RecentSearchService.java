@@ -9,7 +9,6 @@ import com.example.bookjourneybackend.domain.user.domain.repository.UserReposito
 import com.example.bookjourneybackend.global.exception.GlobalException;
 import com.example.bookjourneybackend.global.util.DateUtil;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,7 +18,6 @@ import java.util.stream.Collectors;
 
 import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.*;
 
-@Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -36,7 +34,6 @@ public class RecentSearchService {
      */
     @Transactional(readOnly = true)
     public GetRecentSearchResponse showRecentSearch(Long userId) {
-        log.info("[RecentSearchService.showRecentSearch]");
 
         // 사용자 조회
         User user = userRepository.findById(userId)
@@ -67,7 +64,6 @@ public class RecentSearchService {
      * @param recentSearchId,userId
      */
     public Void deleteRecentSearch(Long recentSearchId, Long userId) {
-        log.info("[RecentSearchService.deleteRecentSearch]");
         // 사용자 조회
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER));
@@ -85,7 +81,6 @@ public class RecentSearchService {
      * @param userId
      */
     public Void deleteRecentSearchAll(Long userId) {
-        log.info("[RecentSearchService.deleteRecentSearchAll]");
 
         // 사용자 조회
         User user = userRepository.findById(userId)
@@ -111,7 +106,6 @@ public class RecentSearchService {
      */
     @Transactional
     public void addRecentSearch(Long userId, String recentSearch) {
-        log.info("[RecentSearchService.addRecentSearch]");
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER));
