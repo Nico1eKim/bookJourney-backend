@@ -200,7 +200,6 @@ public class FavoriteService {
         //즐겨찾기 한 책 찾기
         Book book = bookRepository.findByIsbn(isbn)
                 .orElseThrow(() -> new GlobalException(CANNOT_FOUND_BOOK));
-        log.info("{}{}",book.getBookTitle(),book.getIsbn());
 
         //즐겨찾기에서 삭제
         favoriteRepository.deleteFavoriteByUserAndBook(user,book);
