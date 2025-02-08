@@ -6,6 +6,7 @@ import com.example.bookjourneybackend.domain.book.domain.repository.BookReposito
 import com.example.bookjourneybackend.domain.book.dto.response.BookInfo;
 import com.example.bookjourneybackend.domain.book.dto.response.GetBookInfoResponse;
 import com.example.bookjourneybackend.domain.book.service.BookCacheService;
+import com.example.bookjourneybackend.domain.book.service.BookService;
 import com.example.bookjourneybackend.domain.favorite.domain.Favorite;
 import com.example.bookjourneybackend.domain.favorite.domain.dto.request.DeleteFavoriteSelectedRequest;
 import com.example.bookjourneybackend.domain.favorite.domain.dto.response.FavoriteInfo;
@@ -25,6 +26,8 @@ import org.springframework.transaction.annotation.Transactional;
 import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.*;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.CANNOT_FOUND_BOOK;
 import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.CANNOT_FOUND_USER;
@@ -39,6 +42,7 @@ public class FavoriteService {
     private final BookRepository bookRepository;
     private final BookCacheService bookCacheService;
     private final DateUtil dateUtil;
+    private final BookService bookService;
     @PersistenceContext
     private final EntityManager entityManager;
 
@@ -126,6 +130,7 @@ public class FavoriteService {
      * 2.존재하는 즐겨찾기인지 검증
      * 3.요청을 보낸 사용자가 등록한 즐겨찾기인지 검증
      * 4.선택한 즐겨찾기 전체삭제
+     * 5.선택한 즐겨찾기의 책에해당하는 방이 없거나, 이책을 즐겨찾기 한사람이 없으면 db에서 삭제
      * @param deleteFavoriteSelectedRequest,userId
      */
     public Void deleteSelectedFavorite(DeleteFavoriteSelectedRequest deleteFavoriteSelectedRequest, Long userId) {
@@ -153,11 +158,57 @@ public class FavoriteService {
             throw new GlobalException(CANNOT_DELETE_FAVORITE);
         }
 
+        // 삭제할 Favorite이 참조하는 Book 목록 가져오기
+        Set<Book> booksToCheck = favorites.stream()
+                .map(Favorite::getBook)
+                .collect(Collectors.toSet());
+
         // 즐겨찾기 삭제 (Batch 처리)
         favoriteRepository.deleteAllByIdInBatch(favoriteIds);
+
+        // 삭제할 수 있는 Book 삭제
+        for (Book book : booksToCheck) {
+            bookService.deleteBook(book);
+        }
+
         // 영속성 컨텍스트 초기화하여 최신 상태 반영
         entityManager.flush();
         entityManager.clear();
+
         return null;
+    }
+
+
+    /**
+     * isbn에 해당하는 책을 즐겨찾기에서 삭제
+     * 1. 해당책이 이미 즐겨찾기 되어있는지 검사
+     * 2. 즐겨찾기 중이 아니라면 예외
+     * 3. 즐겨찾기 삭제 후, 책이 삭제할수 있는 상태라면 db에서 삭제
+     * @param isbn,userId
+     * @return PostFavoriteAddResponse
+     */
+    public PostFavoriteAddResponse deleteFavorite(String isbn, Long userId) {
+
+        // 사용자 조회
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER));
+
+        // 즐겨찾기 중인지 검사
+        if (!favoriteRepository.existsFavoriteByUserIdAndIsbn(userId, isbn)) {
+            throw new GlobalException(CANNOT_DELETE_FAVORITE);
+        }
+
+        //즐겨찾기 한 책 찾기
+        Book book = bookRepository.findByIsbn(isbn)
+                .orElseThrow(() -> new GlobalException(CANNOT_FOUND_BOOK));
+
+        //즐겨찾기에서 삭제
+        favoriteRepository.deleteFavoriteByUserAndBook(user,book);
+        favoriteRepository.flush();
+
+        //즐겨찾기한 책 db에서 삭제
+        bookService.deleteBook(book);
+
+        return PostFavoriteAddResponse.of(book.getBookId(),false);
     }
 }
