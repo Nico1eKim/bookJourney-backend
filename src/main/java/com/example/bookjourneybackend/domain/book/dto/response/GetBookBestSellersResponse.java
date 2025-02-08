@@ -12,9 +12,10 @@ import java.util.List;
 public class GetBookBestSellersResponse {
 
     private List<BestSellerImageUrl> bestSellerList;
+    private String nickName;
 
-    public static GetBookBestSellersResponse of(List<BestSellerImageUrl> bestSellerList){
-        return new GetBookBestSellersResponse(bestSellerList);
+    public static GetBookBestSellersResponse of(List<BestSellerImageUrl> bestSellerList, String nickName){
+        return new GetBookBestSellersResponse(bestSellerList,nickName);
     }
 
 }
