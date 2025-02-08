@@ -172,7 +172,7 @@ public class BookService {
             BestSellerImageUrl imageUrl = new BestSellerImageUrl(bestseller.getImageUrl());
             imageUrls.add(imageUrl);
         }
-        return GetBookBestSellersResponse.of(imageUrls);
+        return GetBookBestSellersResponse.of(imageUrls,user.getNickname());
 
     }
 
