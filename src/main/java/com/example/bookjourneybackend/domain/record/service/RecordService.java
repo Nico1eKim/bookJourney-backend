@@ -158,7 +158,7 @@ public class RecordService {
                     return RecordInfo.fromEntireRecord(
                             record.getUser().getUserId(),
                             record.getRecordId(),
-                            (record.getUser().getUserImage() != null) ? record.getUser().getUserImage().getImageUrl() : null,
+                            (record.getUser().getImageUrl()),
                             record.getUser().getNickname(),
                             record.getRecordTitle(),
                             dateUtil.formatLocalDateTime(record.getCreatedAt()),
@@ -177,7 +177,7 @@ public class RecordService {
                     return RecordInfo.fromPageRecord(
                             record.getUser().getUserId(),
                             record.getRecordId(),
-                            (record.getUser().getUserImage() != null) ? record.getUser().getUserImage().getImageUrl() : null,
+                            (record.getUser().getImageUrl()),
                             record.getUser().getNickname(),
                             record.getRecordPage(),
                             dateUtil.formatLocalDateTime(record.getCreatedAt()),

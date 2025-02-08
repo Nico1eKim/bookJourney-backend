@@ -1,11 +1,11 @@
 package com.example.bookjourneybackend.domain.user.controller;
 
-import com.example.bookjourneybackend.domain.user.domain.dto.request.PostUsersEmailRequest;
-import com.example.bookjourneybackend.domain.user.domain.dto.request.PostUsersNicknameValidationRequest;
-import com.example.bookjourneybackend.domain.user.domain.dto.request.PostUsersSignUpRequest;
-import com.example.bookjourneybackend.domain.user.domain.dto.request.PostUsersVerificationEmailRequest;
-import com.example.bookjourneybackend.domain.user.domain.dto.response.PostUsersValidationResponse;
-import com.example.bookjourneybackend.domain.user.domain.dto.response.PostUsersSignUpResponse;
+import com.example.bookjourneybackend.domain.user.dto.request.PostUsersEmailRequest;
+import com.example.bookjourneybackend.domain.user.dto.request.PostUsersNicknameValidationRequest;
+import com.example.bookjourneybackend.domain.user.dto.request.PostUsersSignUpRequest;
+import com.example.bookjourneybackend.domain.user.dto.request.PostUsersVerificationEmailRequest;
+import com.example.bookjourneybackend.domain.user.dto.response.PostUsersSignUpResponse;
+import com.example.bookjourneybackend.domain.user.dto.response.PostUsersValidationResponse;
 import com.example.bookjourneybackend.domain.user.service.UserService;
 import com.example.bookjourneybackend.global.response.BaseResponse;
 import jakarta.servlet.http.HttpServletRequest;
@@ -46,5 +46,4 @@ public class UserController {
     public  BaseResponse<PostUsersValidationResponse> verificationEmail(@Valid @RequestBody final PostUsersVerificationEmailRequest postUsersVerificationEmailRequest) {
         return BaseResponse.ok(userService.verifiedCode(postUsersVerificationEmailRequest));
     }
-
 }
