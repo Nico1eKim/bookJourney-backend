@@ -3,6 +3,7 @@ package com.example.bookjourneybackend.global.config.initData;
 import com.example.bookjourneybackend.domain.book.domain.Book;
 import com.example.bookjourneybackend.domain.book.domain.GenreType;
 import com.example.bookjourneybackend.domain.book.domain.repository.BookRepository;
+import com.example.bookjourneybackend.global.util.AladinApiUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -16,54 +17,36 @@ import java.util.UUID;
 public class BookInitializer {
 
     private final BookRepository bookRepository;
+    private final AladinApiUtil aladinApiUtil;
+
+
+    private final List<String> dummyBestsellerIsbnList = List.of("9791130662480", "9788934900665","9788989024750","9788964076705",
+            "9791141085568","9791137206717","9788998336493","9788910107002"
+            ,"9788992426299","9791136787262","9788993690248","9788957576007",
+            "9788996612209","9788934966784","9791169211536","9788945214263");
+
+    private final List<String> dummyNomalIsbnList = List.of("9791166688621", "9791155817346","9791193937396","9791169090780",
+            "9791158512132","9791191887259","9791194172093","9791172132057"
+            ,"9788901289564","9791136791870","9791198528322","9791193712610",
+            "9788962626391","9791193794906","9791169213332","9791198807281");
 
     public void initializeBooks() {
 
-        GenreType[] genres = GenreType.values();
-        List<GenreType> validGenres = Arrays.stream(genres)
-                .filter(genre -> genre != GenreType.UNKNOWN) // UNKNOWN 장르 제외
-                .toList();
+        for (int i = 0; i < dummyNomalIsbnList.size(); i++) {
 
-        int index = 1;
-        long baseIsbn = 1234567891011L; // 시작 ISBN 값
+            String requestUrl = aladinApiUtil.buildLookUpApiUrl(dummyBestsellerIsbnList.get(i));
+            String currentResponse = aladinApiUtil.requestBookInfoFromAladinApi(requestUrl);
 
-        for (GenreType genre : validGenres) {
-            String uniqueIsbn = String.valueOf(baseIsbn + index);
+            Book book = aladinApiUtil.parseAladinApiResponseToBook(currentResponse,false,0);
+            book.setBestSeller(true);
+            bookRepository.save(book);
 
-            // bestSeller = true 책 생성
-            Book bestSellerBook = Book.builder()
-                    .genre(genre)
-                    .bookTitle("Best Seller Book " + index)
-                    .publisher("Publisher " + index)
-                    .publishedDate(LocalDate.of(2020, 1, 1))
-                    .isbn(uniqueIsbn)
-                    .pageCount(200 + index)
-                    .description("Description for Best Seller Book " + index)
-                    .authorName("Author " + index)
-                    .imageUrl("http://example.com/image" + index)
-                    .bestSeller(true)
-                    .build();
-            bookRepository.save(bestSellerBook);
+            requestUrl = aladinApiUtil.buildLookUpApiUrl(dummyNomalIsbnList.get(i));
+            currentResponse = aladinApiUtil.requestBookInfoFromAladinApi(requestUrl);
 
-            index++;
-            uniqueIsbn = String.valueOf(baseIsbn + index);
+            book = aladinApiUtil.parseAladinApiResponseToBook(currentResponse,false,0);
+            bookRepository.save(book);
 
-            // bestSeller = false 책 생성
-            Book normalBook = Book.builder()
-                    .genre(genre)
-                    .bookTitle("Normal Book " + index)
-                    .publisher("Publisher " + index)
-                    .publishedDate(LocalDate.of(2020, 1, 1))
-                    .isbn(uniqueIsbn)
-                    .pageCount(200 + index)
-                    .description("Description for Normal Book " + index)
-                    .authorName("Author " + index)
-                    .imageUrl("http://example.com/image" + index)
-                    .bestSeller(false)
-                    .build();
-            bookRepository.save(normalBook);
-
-            index++;
         }
     }
 
