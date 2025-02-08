@@ -41,6 +41,7 @@ import java.util.stream.Collectors;
 import static com.example.bookjourneybackend.domain.room.domain.RoomType.ALONE;
 import static com.example.bookjourneybackend.domain.room.domain.RoomType.TOGETHER;
 import static com.example.bookjourneybackend.domain.room.domain.SortType.LASTEST;
+import static com.example.bookjourneybackend.domain.userRoom.domain.UserRole.HOST;
 import static com.example.bookjourneybackend.global.entity.EntityStatus.*;
 import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.*;
 
@@ -248,7 +249,7 @@ public class RoomService {
                 .orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER));
         return UserRoom.builder()
                 .user(user)
-                .userRole(UserRole.HOST)
+                .userRole(HOST)
                 .currentPage(0)
                 .userPercentage(0.0)
                 .build();
@@ -258,7 +259,7 @@ public class RoomService {
     private Room createRoom(PostRoomCreateRequest request, Book book, UserRoom userRoom) {
         Room room;
         if (request.getRecruitCount() == 1) {
-            if(userRoomRepository.existsUnExpiredAloneRoomByUserAndBook(userRoom.getUser().getUserId(), book.getIsbn())) {
+            if (userRoomRepository.existsUnExpiredAloneRoomByUserAndBook(userRoom.getUser().getUserId(), book.getIsbn())) {
                 throw new GlobalException(ALREADY_CREATED_ALONE_ROOM);
             }
             room = Room.makeReadAloneRoom(book);
@@ -382,7 +383,7 @@ public class RoomService {
     }
 
     private void handleTogetherRoomExit(UserRoom userRoom, Room room) {
-        if (userRoom.getUserRole() == UserRole.HOST) {
+        if (userRoom.getUserRole() == HOST) {
             removeHostFromRoom(room);
         }
         if (userRoom.getUserRole() == UserRole.MEMBER) {
@@ -496,5 +497,25 @@ public class RoomService {
 
         return GetRoomPagesResponse.of(bookPage, currentPage);
 
+    }
+
+    /**
+     * 검색으로 비공개 방 진입 시 필요한 정보들
+     * 비밀번호, 방 이름, 호스트 닉네임 반환
+     */
+    public GetSearchPrivateRoomResponse showSearchPrivateRooms(Long roomId) {
+        Room room = roomRepository.findById(roomId).orElseThrow(() -> new GlobalException(CANNOT_FOUND_ROOM));
+
+        UserRoom host = room.getUserRooms().stream()
+                .filter(userRoom -> userRoom.getUserRole().equals(HOST))
+                .findFirst()
+                .orElseThrow(() -> new GlobalException(HOST_CANNOT_LEAVE_ROOM));
+
+        return GetSearchPrivateRoomResponse.of(
+                room.getRoomId(),
+                room.getRoomName(),
+                host.getUser().getNickname(),
+                room.getPassword()
+        );
     }
 }
