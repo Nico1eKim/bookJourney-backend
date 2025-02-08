@@ -9,6 +9,7 @@ import com.example.bookjourneybackend.domain.book.service.BookCacheService;
 import com.example.bookjourneybackend.domain.book.service.BookService;
 import com.example.bookjourneybackend.domain.favorite.domain.Favorite;
 import com.example.bookjourneybackend.domain.favorite.domain.dto.request.DeleteFavoriteSelectedRequest;
+import com.example.bookjourneybackend.domain.favorite.domain.dto.response.FavoriteInfo;
 import com.example.bookjourneybackend.domain.favorite.domain.dto.response.GetFavoriteListResponse;
 import com.example.bookjourneybackend.domain.favorite.domain.dto.response.PostFavoriteAddResponse;
 import com.example.bookjourneybackend.domain.favorite.domain.repository.FavoriteRepository;
@@ -114,13 +115,13 @@ public class FavoriteService {
                 .orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER));
 
         //즐겨찾기 리스트 조회
-        List<BookInfo> bookList = favoriteRepository.findByUserOrderByCreatedAtDesc(user)
+        List<FavoriteInfo> favoriteList = favoriteRepository.findByUserOrderByCreatedAtDesc(user)
                 .orElseGet(Collections::emptyList)
                 .stream()
-                .map(fav -> BookInfo.of(fav.getBook()))
+                .map(FavoriteInfo::of)
                 .toList();
 
-        return GetFavoriteListResponse.of(bookList);
+        return GetFavoriteListResponse.of(favoriteList);
     }
 
     /**
