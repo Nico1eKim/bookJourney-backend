@@ -41,6 +41,7 @@ public class Room extends BaseEntity {
 
     private Integer password;
 
+    @Setter
     @Column(nullable = false)
     private Double roomPercentage;
 
