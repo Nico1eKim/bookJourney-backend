@@ -135,6 +135,7 @@ public class CommentService {
 
         if (existingLike.isPresent()) {
             commentLikeRepository.delete(existingLike.get());
+            commentLikeRepository.flush(); // 즉시 db에 반영
             return new PostCommentLikeResponse(false);
         } else {
             CommentLike newLike = CommentLike.builder()
@@ -142,6 +143,7 @@ public class CommentService {
                     .user(user)
                     .build();
             commentLikeRepository.save(newLike);
+            commentLikeRepository.flush(); // 즉시 db에 반영
             return new PostCommentLikeResponse(true);
         }
     }
