@@ -12,8 +12,6 @@ import lombok.Setter;
 
 import java.time.LocalDateTime;
 
-import static com.example.bookjourneybackend.global.entity.EntityStatus.DELETED;
-
 @Entity
 @Table(name = "user_room")
 @NoArgsConstructor

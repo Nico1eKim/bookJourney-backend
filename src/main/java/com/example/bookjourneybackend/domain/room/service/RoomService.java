@@ -98,7 +98,7 @@ public class RoomService {
                 room.isPublic(),
                 room.getRoomPercentage().intValue(),
                 dateUtil.calculateDday(room.getProgressEndDate()),
-                isMember,  // DELETED가 아닌 유저들만 포함
+                isMember,
                 members);
     }
 
@@ -182,7 +182,6 @@ public class RoomService {
     //Room 객체의 UserRoom 정보를 RoomMemberInfo 객체로 매핑
     private List<RoomMemberInfo> getRoomMemberInfoList(Room room) {
         return room.getUserRooms().stream()
-                .filter(userRoom -> userRoom.getStatus() != DELETED) // DELETED 상태 제외
                 .map(userRoom -> {
                     User user = userRoom.getUser();
                     return RoomMemberInfo.builder()
