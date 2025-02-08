@@ -506,10 +506,15 @@ public class RoomService {
     public GetSearchPrivateRoomResponse showSearchPrivateRooms(Long roomId) {
         Room room = roomRepository.findById(roomId).orElseThrow(() -> new GlobalException(CANNOT_FOUND_ROOM));
 
+        // 방이 공개이면 예외 발생
+        if (room.isPublic()) {
+            throw new GlobalException(ROOM_IS_PUBLIC);
+        }
+
         UserRoom host = room.getUserRooms().stream()
                 .filter(userRoom -> userRoom.getUserRole().equals(HOST))
                 .findFirst()
-                .orElseThrow(() -> new GlobalException(HOST_CANNOT_LEAVE_ROOM));
+                .orElseThrow(() -> new GlobalException(CANNOT_FIND_HOST));
 
         return GetSearchPrivateRoomResponse.of(
                 room.getRoomId(),
