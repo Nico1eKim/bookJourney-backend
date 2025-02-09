@@ -1,9 +1,8 @@
-package com.example.bookjourneybackend.domain.user.domain.dto.request;
+package com.example.bookjourneybackend.domain.user.dto.request;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -27,7 +26,6 @@ public class PostUsersSignUpRequest {
     @NotBlank(message = "닉네임 입력은 필수입니다.")
     private String nickName;
 
-    @NotBlank(message = "프로필 사진은 필수입니다.")
     private String imageUrl;
 
     private List<favoriteGenres> favoriteGenres;

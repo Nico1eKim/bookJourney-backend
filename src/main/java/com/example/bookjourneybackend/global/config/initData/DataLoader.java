@@ -30,6 +30,7 @@ public class DataLoader implements ApplicationRunner {
     private final RecordInitializer recordInitializer;
     private final CommentInitializer commentInitializer;
     private final FavoriteGenreInitializer favoriteGenreInitializer;
+    private final UserImageInitializer userImageInitializer;
     private final UserRoomInitializer userRoomInitializer;
     private final FavoriteInitializer favoriteInitializer;
     private final RecentSearchInitializer recentSearchInitializer;

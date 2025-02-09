@@ -3,17 +3,16 @@ package com.example.bookjourneybackend.domain.user.service;
 import com.example.bookjourneybackend.domain.auth.service.RedisService;
 import com.example.bookjourneybackend.domain.book.domain.GenreType;
 import com.example.bookjourneybackend.domain.book.domain.repository.BookRepository;
+import com.example.bookjourneybackend.domain.user.domain.DefaultImage;
 import com.example.bookjourneybackend.domain.user.domain.EmailContentTemplate;
 import com.example.bookjourneybackend.domain.user.domain.FavoriteGenre;
 import com.example.bookjourneybackend.domain.user.domain.User;
-import com.example.bookjourneybackend.domain.user.domain.UserImage;
-import com.example.bookjourneybackend.domain.user.domain.dto.request.PostUsersEmailRequest;
-import com.example.bookjourneybackend.domain.user.domain.dto.request.PostUsersNicknameValidationRequest;
-import com.example.bookjourneybackend.domain.user.domain.dto.request.PostUsersSignUpRequest;
-import com.example.bookjourneybackend.domain.user.domain.dto.request.PostUsersVerificationEmailRequest;
-import com.example.bookjourneybackend.domain.user.domain.dto.response.PostUsersSignUpResponse;
-import com.example.bookjourneybackend.domain.user.domain.dto.response.PostUsersValidationResponse;
-import com.example.bookjourneybackend.domain.user.domain.repository.UserImageRepository;
+import com.example.bookjourneybackend.domain.user.dto.request.PostUsersEmailRequest;
+import com.example.bookjourneybackend.domain.user.dto.request.PostUsersNicknameValidationRequest;
+import com.example.bookjourneybackend.domain.user.dto.request.PostUsersSignUpRequest;
+import com.example.bookjourneybackend.domain.user.dto.request.PostUsersVerificationEmailRequest;
+import com.example.bookjourneybackend.domain.user.dto.response.PostUsersSignUpResponse;
+import com.example.bookjourneybackend.domain.user.dto.response.PostUsersValidationResponse;
 import com.example.bookjourneybackend.domain.user.domain.repository.UserRepository;
 import com.example.bookjourneybackend.global.exception.GlobalException;
 import com.example.bookjourneybackend.global.util.DateUtil;
@@ -41,12 +40,14 @@ import static com.example.bookjourneybackend.global.response.status.BaseExceptio
 public class UserService {
 
     private final UserRepository userRepository;
-    private final UserImageRepository userImageRepository;
     private final BookRepository bookRepository;
+
     private final PasswordEncoder passwordEncoder;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+
     private final JwtUtil jwtUtil;
     private final DateUtil dateUtil;
+
     private final RedisService redisService;
     private final MailService mailService;
 
@@ -71,14 +72,8 @@ public class UserService {
                 .email(postUsersSignUpRequest.getEmail())
                 .password(encodedPassword)
                 .nickname(postUsersSignUpRequest.getNickName())
-                .build();
-
-        //TODO s3 연동하고 수정
-        UserImage userImage = UserImage.builder()
-                .imageUrl(postUsersSignUpRequest.getImageUrl())
-                .user(newUser)
-                .path("///")
-                .size(11)
+                .imageUrl(postUsersSignUpRequest.getImageUrl() == null? //사용자가 이미지를 선택하지 않으면 기본 이미지에서 랜덤 배정
+                        DefaultImage.assignRandomUserImage() : postUsersSignUpRequest.getImageUrl())
                 .build();
 
         // 관심 장르 매핑
@@ -92,7 +87,6 @@ public class UserService {
         });
 
         userRepository.save(newUser);
-        userImageRepository.save(userImage);
 
         //토큰 발급
         String accessToken = jwtUtil.createAccessToken(newUser.getUserId());

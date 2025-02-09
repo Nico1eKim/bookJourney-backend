@@ -60,4 +60,17 @@ public interface UserRoomRepository extends JpaRepository<UserRoom, Long> {
                     "WHERE ur.user.userId = :userId AND r.book.isbn = :isbn AND r.roomType = 'ALONE' AND r.status != 'EXPIRED'"
     )
     boolean existsUnExpiredAloneRoomByUserAndBook(@Param("userId") Long userId, @Param("isbn") String isbn);
+
+    @Query("SELECT ur FROM UserRoom ur " +
+            "WHERE ur.user.userId = :userId AND ur.userPercentage >= 100 " +
+            "AND MONTH(ur.completedUserPercentageAt) = :month AND YEAR(ur.completedUserPercentageAt) = :year " +
+            "AND ur.completedUserPercentageAt IN (" +
+            "    SELECT MIN(ur2.completedUserPercentageAt) " +
+            "    FROM UserRoom ur2 " +
+            "    WHERE ur2.user.userId = :userId AND ur2.userPercentage >= 100 " +
+            "    AND MONTH(ur2.completedUserPercentageAt) = :month AND YEAR(ur2.completedUserPercentageAt) = :year " +
+            "    GROUP BY DAY(ur2.completedUserPercentageAt)" +
+            ") " +
+            "ORDER BY ur.completedUserPercentageAt ASC")
+    List<UserRoom> findUserRoomsByUserInCalendar(@Param("userId") Long userId, @Param("year") Integer year, @Param("month") Integer month);
 }

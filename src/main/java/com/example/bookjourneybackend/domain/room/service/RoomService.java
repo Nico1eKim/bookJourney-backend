@@ -17,7 +17,6 @@ import com.example.bookjourneybackend.domain.room.dto.response.GetRoomInfoRespon
 import com.example.bookjourneybackend.domain.room.dto.response.PostRoomCreateResponse;
 import com.example.bookjourneybackend.domain.room.dto.response.RoomMemberInfo;
 import com.example.bookjourneybackend.domain.user.domain.User;
-import com.example.bookjourneybackend.domain.user.domain.UserImage;
 import com.example.bookjourneybackend.domain.user.domain.repository.UserRepository;
 import com.example.bookjourneybackend.domain.userRoom.domain.UserRole;
 import com.example.bookjourneybackend.domain.userRoom.domain.UserRoom;
@@ -35,12 +34,12 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.example.bookjourneybackend.domain.room.domain.RoomType.ALONE;
 import static com.example.bookjourneybackend.domain.room.domain.RoomType.TOGETHER;
 import static com.example.bookjourneybackend.domain.room.domain.SortType.LASTEST;
+import static com.example.bookjourneybackend.domain.userRoom.domain.UserRole.HOST;
 import static com.example.bookjourneybackend.global.entity.EntityStatus.*;
 import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.*;
 
@@ -98,7 +97,7 @@ public class RoomService {
                 room.isPublic(),
                 room.getRoomPercentage().intValue(),
                 dateUtil.calculateDday(room.getProgressEndDate()),
-                isMember,  // DELETED가 아닌 유저들만 포함
+                isMember,
                 members);
     }
 
@@ -182,14 +181,11 @@ public class RoomService {
     //Room 객체의 UserRoom 정보를 RoomMemberInfo 객체로 매핑
     private List<RoomMemberInfo> getRoomMemberInfoList(Room room) {
         return room.getUserRooms().stream()
-                .filter(userRoom -> userRoom.getStatus() != DELETED) // DELETED 상태 제외
                 .map(userRoom -> {
                     User user = userRoom.getUser();
                     return RoomMemberInfo.builder()
                             .userRole(userRoom.getUserRole())
-                            .imageUrl(Optional.ofNullable(user.getUserImage())
-                                    .map(UserImage::getImageUrl)
-                                    .orElse(null))
+                            .imageUrl(user.getImageUrl())
                             .nickName(user.getNickname())
                             .userPercentage(userRoom.getUserPercentage().intValue())
                             .build();
@@ -248,7 +244,7 @@ public class RoomService {
                 .orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER));
         return UserRoom.builder()
                 .user(user)
-                .userRole(UserRole.HOST)
+                .userRole(HOST)
                 .currentPage(0)
                 .userPercentage(0.0)
                 .build();
@@ -258,7 +254,7 @@ public class RoomService {
     private Room createRoom(PostRoomCreateRequest request, Book book, UserRoom userRoom) {
         Room room;
         if (request.getRecruitCount() == 1) {
-            if(userRoomRepository.existsUnExpiredAloneRoomByUserAndBook(userRoom.getUser().getUserId(), book.getIsbn())) {
+            if (userRoomRepository.existsUnExpiredAloneRoomByUserAndBook(userRoom.getUser().getUserId(), book.getIsbn())) {
                 throw new GlobalException(ALREADY_CREATED_ALONE_ROOM);
             }
             room = Room.makeReadAloneRoom(book);
@@ -382,7 +378,7 @@ public class RoomService {
     }
 
     private void handleTogetherRoomExit(UserRoom userRoom, Room room) {
-        if (userRoom.getUserRole() == UserRole.HOST) {
+        if (userRoom.getUserRole() == HOST) {
             removeHostFromRoom(room);
         }
         if (userRoom.getUserRole() == UserRole.MEMBER) {
@@ -496,5 +492,34 @@ public class RoomService {
 
         return GetRoomPagesResponse.of(bookPage, currentPage);
 
+    }
+
+    /**
+     * 검색으로 비공개 방 진입 시 필요한 정보들
+     * 비밀번호, 방 이름, 호스트 닉네임 반환
+     */
+    public GetSearchPrivateRoomResponse showSearchPrivateRooms(Long roomId) {
+        Room room = roomRepository.findById(roomId).orElseThrow(() -> new GlobalException(CANNOT_FOUND_ROOM));
+
+        // 방이 공개이면 예외 발생
+        if (room.isPublic()) {
+            throw new GlobalException(ROOM_IS_PUBLIC);
+        }
+
+        if (room.getRoomType() == ALONE) {
+            throw new GlobalException(ROOM_IS_ALONE);
+        }
+
+        UserRoom host = room.getUserRooms().stream()
+                .filter(userRoom -> userRoom.getUserRole().equals(HOST))
+                .findFirst()
+                .orElseThrow(() -> new GlobalException(CANNOT_FIND_HOST));
+
+        return GetSearchPrivateRoomResponse.of(
+                room.getRoomId(),
+                room.getRoomName(),
+                host.getUser().getNickname(),
+                room.getPassword()
+        );
     }
 }

@@ -67,7 +67,7 @@ public class RoomController {
         return BaseResponse.ok(roomService.putRoomsInactive(roomId, userId));
     }
 
-    @PutMapping("/{roomId}/exit")
+    @DeleteMapping("/{roomId}/exit")
     public BaseResponse<Void> exitRoom(@PathVariable("roomId") final Long roomId,
                                        @LoginUserId final Long userId) {
         return BaseResponse.ok(roomService.exitRoom(roomId, userId));
@@ -94,5 +94,12 @@ public class RoomController {
             @LoginUserId final Long userId
     ) {
         return BaseResponse.ok(roomService.showRoomPages(roomId, userId));
+    }
+
+    @GetMapping("/search/{roomId}")
+    public BaseResponse<GetSearchPrivateRoomResponse> viewSearchPrivateRooms(
+            @PathVariable("roomId") final Long roomId
+    ) {
+        return BaseResponse.ok(roomService.showSearchPrivateRooms(roomId));
     }
 }

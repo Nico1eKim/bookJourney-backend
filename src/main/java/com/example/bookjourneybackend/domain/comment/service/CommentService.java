@@ -63,7 +63,7 @@ public class CommentService {
             recordInfo = RecordInfo.fromPageRecord(
                     record.getUser().getUserId(),
                     record.getRecordId(),
-                    (record.getUser().getUserImage() != null) ? record.getUser().getUserImage().getImageUrl() : null,
+                    (record.getUser().getImageUrl()),
                     record.getUser().getNickname(),
                     record.getRecordPage(),
                     dateUtil.formatLocalDateTime(record.getCreatedAt()),
@@ -76,7 +76,7 @@ public class CommentService {
             recordInfo = RecordInfo.fromEntireRecord(
                     record.getUser().getUserId(),
                     record.getRecordId(),
-                    (record.getUser().getUserImage() != null) ? record.getUser().getUserImage().getImageUrl() : null,
+                    (record.getUser().getImageUrl()),
                     record.getUser().getNickname(),
                     record.getRecordTitle(),
                     dateUtil.formatLocalDateTime(record.getCreatedAt()),
@@ -135,6 +135,7 @@ public class CommentService {
 
         if (existingLike.isPresent()) {
             commentLikeRepository.delete(existingLike.get());
+            commentLikeRepository.flush(); // 즉시 db에 반영
             return new PostCommentLikeResponse(false);
         } else {
             CommentLike newLike = CommentLike.builder()
@@ -142,6 +143,7 @@ public class CommentService {
                     .user(user)
                     .build();
             commentLikeRepository.save(newLike);
+            commentLikeRepository.flush(); // 즉시 db에 반영
             return new PostCommentLikeResponse(true);
         }
     }

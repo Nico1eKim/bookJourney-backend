@@ -11,14 +11,12 @@ import com.example.bookjourneybackend.domain.user.domain.FavoriteGenre;
 import com.example.bookjourneybackend.domain.user.domain.User;
 import com.example.bookjourneybackend.domain.user.domain.repository.UserRepository;
 import com.example.bookjourneybackend.global.exception.GlobalException;
-import com.example.bookjourneybackend.global.util.AladinApiUtil;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.Hibernate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

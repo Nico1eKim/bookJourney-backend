@@ -29,6 +29,14 @@ public enum BaseExceptionResponseStatus implements ResponseStatus {
     NO_SUCH_ALGORITHM(5007, BAD_REQUEST, "지정된 난수 생성 알고리즘을 찾을 수 없습니다."),
 
     /**
+     * 5100 : image 관련
+     */
+    EMPTY_FILE_EXCEPTION(5101, BAD_REQUEST, "업로드하려는 이미지가 비어있습니다."),
+    EXCEPTION_ON_IMAGE_UPLOAD(5102, BAD_REQUEST, "이미지 업로드에 실패하였습니다."),
+    INVALID_FILE_EXTENTION(5103, BAD_REQUEST, "올바르지 않은 파일 형식입니다."),
+    IO_EXCEPTION_ON_IMAGE_DELETE(5104, BAD_REQUEST, "파일 삭제에 실패하였습니다"),
+
+    /**
      * 6000 : book 관련
      */
     CANNOT_FOUND_BOOK(6000, BAD_REQUEST, "책을 찾을 수 없습니다."),
@@ -83,6 +91,10 @@ public enum BaseExceptionResponseStatus implements ResponseStatus {
     CANNOT_NULL_DATE(8009, BAD_REQUEST, "같이읽기 방 생성시, 기간은 필수 입력값입니다."),
     CANNOT_NULL_PASSWORD(8010, BAD_REQUEST, "비공개 방 생성시, 비밀번호는 필수 입력값입니다."),
     ALREADY_CREATED_ALONE_ROOM(8011, BAD_REQUEST, "이미 해당 책으로 생성된 혼자읽기 방이 존재합니다."),
+
+    ROOM_IS_PUBLIC(8012, BAD_REQUEST, "공개 방입니다."),
+    ROOM_IS_ALONE(8012, BAD_REQUEST, "혼자읽기 방입니다."),
+    CANNOT_FIND_HOST(8012, BAD_REQUEST, "호스트를 찾을 수 없습니다."),
 
     /**
      * 9000 : record 관련

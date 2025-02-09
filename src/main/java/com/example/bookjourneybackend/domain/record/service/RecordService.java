@@ -30,6 +30,7 @@ import static com.example.bookjourneybackend.domain.room.domain.RoomType.ALONE;
 import static com.example.bookjourneybackend.global.entity.EntityStatus.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -58,11 +59,6 @@ public class RecordService {
         if (userRoom.getStatus() == INACTIVE) {
             userRoom.setStatus(ACTIVE);
             userRoomRepository.save(userRoom);
-        }
-
-        // 유저가 방에 속해 있지 않거나, 방에서 삭제된 경우 예외 발생
-        if (userRoom.getStatus() == DELETED) {
-            throw new GlobalException(NOT_PARTICIPATING_IN_ROOM);
         }
 
         // 방이 EXPIRED 상태이면 기록을 남길 수 없음
@@ -158,7 +154,7 @@ public class RecordService {
                     return RecordInfo.fromEntireRecord(
                             record.getUser().getUserId(),
                             record.getRecordId(),
-                            (record.getUser().getUserImage() != null) ? record.getUser().getUserImage().getImageUrl() : null,
+                            (record.getUser().getImageUrl()),
                             record.getUser().getNickname(),
                             record.getRecordTitle(),
                             dateUtil.formatLocalDateTime(record.getCreatedAt()),
@@ -177,7 +173,7 @@ public class RecordService {
                     return RecordInfo.fromPageRecord(
                             record.getUser().getUserId(),
                             record.getRecordId(),
-                            (record.getUser().getUserImage() != null) ? record.getUser().getUserImage().getImageUrl() : null,
+                            (record.getUser().getImageUrl()),
                             record.getUser().getNickname(),
                             record.getRecordPage(),
                             dateUtil.formatLocalDateTime(record.getCreatedAt()),
@@ -266,6 +262,11 @@ public class RecordService {
         // 유저의 진행률 & current page 업데이트
         double userPercentage = ((double) currentPage / totalPages) * 100;
         userRoom.updateUserProgress(userPercentage, currentPage);
+
+        //유저가 책을 다읽으면 독서달력을 위해 현재 시각을 저장
+        if (userPercentage >= 100) {
+            userRoom.setCompletedUserPercentageAt(LocalDateTime.now());
+        }
 
         // 방의 진행률 업데이트
         List<UserRoom> roomMembers = userRoomRepository.findAllByRoom(room);
