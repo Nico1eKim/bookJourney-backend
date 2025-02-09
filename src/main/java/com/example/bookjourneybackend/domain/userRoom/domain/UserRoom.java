@@ -40,6 +40,9 @@ public class UserRoom extends BaseEntity {
     @Setter
     private LocalDateTime inActivatedAt;
 
+    @Setter
+    private LocalDateTime completedUserPercentageAt;
+
     // Room의 관계 추가
     @Setter
     @ManyToOne(fetch = FetchType.LAZY)
