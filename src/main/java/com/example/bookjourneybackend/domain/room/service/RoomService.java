@@ -104,6 +104,7 @@ public class RoomService {
     /**
      * 방 검색
      */
+    @Transactional
     public GetRoomSearchResponse searchRooms(
             String searchTerm, String searchType, String genre,
             String recruitStartDate, String recruitEndDate,

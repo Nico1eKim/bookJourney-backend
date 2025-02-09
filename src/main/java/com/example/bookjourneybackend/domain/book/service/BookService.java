@@ -17,6 +17,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.text.StringEscapeUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -51,6 +52,7 @@ public class BookService {
      * @return
      */
     //todo Thread Pool Monitoring 로그 출력
+    @Transactional
     public GetBookListResponse searchBook(GetBookListRequest getBookListRequest, Long userId) {
 
         recentSearchService.addRecentSearch(userId, getBookListRequest.getSearchTerm());
@@ -87,7 +89,7 @@ public class BookService {
 
             if (items != null && items.isArray()) {
                 for (JsonNode item : items) {
-                    String title = item.get("title").asText();
+                    String title = StringEscapeUtils.unescapeHtml4(item.get("title").asText());
                     String author = item.get("author").asText();
 
                     //isbn 13자리가 비어있는 경우 10자리 사용
