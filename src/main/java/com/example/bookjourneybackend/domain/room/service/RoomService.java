@@ -506,6 +506,10 @@ public class RoomService {
             throw new GlobalException(ROOM_IS_PUBLIC);
         }
 
+        if (room.getRoomType() == ALONE) {
+            throw new GlobalException(ROOM_IS_ALONE);
+        }
+
         UserRoom host = room.getUserRooms().stream()
                 .filter(userRoom -> userRoom.getUserRole().equals(HOST))
                 .findFirst()

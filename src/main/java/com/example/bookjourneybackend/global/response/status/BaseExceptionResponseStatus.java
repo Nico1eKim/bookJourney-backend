@@ -93,6 +93,7 @@ public enum BaseExceptionResponseStatus implements ResponseStatus {
     ALREADY_CREATED_ALONE_ROOM(8011, BAD_REQUEST, "이미 해당 책으로 생성된 혼자읽기 방이 존재합니다."),
 
     ROOM_IS_PUBLIC(8012, BAD_REQUEST, "공개 방입니다."),
+    ROOM_IS_ALONE(8012, BAD_REQUEST, "혼자읽기 방입니다."),
     CANNOT_FIND_HOST(8012, BAD_REQUEST, "호스트를 찾을 수 없습니다."),
 
     /**
