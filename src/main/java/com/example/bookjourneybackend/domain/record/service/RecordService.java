@@ -30,6 +30,7 @@ import static com.example.bookjourneybackend.domain.room.domain.RoomType.ALONE;
 import static com.example.bookjourneybackend.global.entity.EntityStatus.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -261,6 +262,11 @@ public class RecordService {
         // 유저의 진행률 & current page 업데이트
         double userPercentage = ((double) currentPage / totalPages) * 100;
         userRoom.updateUserProgress(userPercentage, currentPage);
+
+        //유저가 책을 다읽으면 독서달력을 위해 현재 시각을 저장
+        if (userPercentage >= 100) {
+            userRoom.setCompletedUserPercentageAt(LocalDateTime.now());
+        }
 
         // 방의 진행률 업데이트
         List<UserRoom> roomMembers = userRoomRepository.findAllByRoom(room);
