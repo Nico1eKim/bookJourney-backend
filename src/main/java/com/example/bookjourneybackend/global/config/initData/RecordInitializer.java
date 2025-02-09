@@ -14,6 +14,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -89,6 +90,7 @@ public class RecordInitializer {
                 if (recordType == PAGE || room.getRoomId() >= 48) {
                     double userPercentage = (room.getRoomId() >= 48) ? 100.0 : ((double) currentPage / totalPages) * 100;
                     userRoom.updateUserProgress(userPercentage, currentPage);
+                    userRoom.setCompletedUserPercentageAt(LocalDateTime.now());
                 }
 
                 Record record = Record.builder()
