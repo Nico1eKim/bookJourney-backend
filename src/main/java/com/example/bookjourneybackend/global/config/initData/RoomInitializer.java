@@ -6,6 +6,7 @@ import com.example.bookjourneybackend.domain.room.domain.Room;
 import com.example.bookjourneybackend.domain.room.domain.repository.RoomRepository;
 import com.example.bookjourneybackend.global.util.DateUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
@@ -14,6 +15,7 @@ import java.util.Random;
 
 import static com.example.bookjourneybackend.global.entity.EntityStatus.EXPIRED;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class RoomInitializer {
@@ -30,62 +32,46 @@ public class RoomInitializer {
     );
 
     //1~20 ACTIVE 21~30 EXPIRED 같이읽기 짝수 공개방 홀수 비공개방 비밀번호 1234로 고정 모집인원 방아이디 +2
+    //32~47 혼자읽기 ACTIVE 48~55 혼자읽기 EXPIRED
     public void initializeRooms() {
 
         List<Book> books = bookRepository.findAll();
-        LocalDate startDate = LocalDate.now();
-        LocalDate progressEndDate = startDate.plusMonths(2); //모집기간 2개월로 고정
-        LocalDate recruitEndDate = dateUtil.calculateRecruitEndDate(startDate, progressEndDate);
-        int index = 0;
 
-        //1~20 같이읽기 ACTIVE
-        for (index = 0; index < 20; index++) {
+        // 1~30 같이 읽기 방 생성 (1~20 ACTIVE, 21~30 EXPIRED)
+        for (int index = 0; index < 31; index++) {
+
+            LocalDate startDate = index < 20 ? LocalDate.now() : LocalDate.of(2024, 8, 1);
+            LocalDate progressEndDate = startDate.plusMonths(2);
+            LocalDate recruitEndDate = dateUtil.calculateRecruitEndDate(startDate, progressEndDate);
 
             Room room = Room.makeReadTogetherRoom(
                     roomNames.get(random.nextInt(roomNames.size())),
                     books.get(index),
-                    true,
-                    null,
+                    (index + 1) % 2 == 0, // 짝수 공개, 홀수 비공개
+                    (index + 1) % 2 == 0 ? null : 1234, // 비공개일 때 비밀번호 1234
                     startDate,
                     progressEndDate,
                     recruitEndDate,
-                    index +2
+                    index + 2
             );
+
+            if (index >= 20) { // 21~30 EXPIRED 설정
+                room.setStatus(EXPIRED);
+            }
+
             roomRepository.save(room);
         }
 
-        startDate = LocalDate.of(2024, 8, 1); // 2024년 8월 1일로 설정
-        progressEndDate = startDate.plusMonths(2); // 모집기간 2개월로 고정
-        recruitEndDate = dateUtil.calculateRecruitEndDate(startDate, progressEndDate);
-
-
-        //21~31 같이읽기 EXPIRED
-        for (index = 20; index < 31; index++) {
-            Room room = Room.makeReadTogetherRoom(
-                    roomNames.get(random.nextInt(roomNames.size())),
-                    books.get(index),
-                    false,
-                    1234,
-                    startDate,
-                    progressEndDate,
-                    recruitEndDate,
-                    index +2
-            );
-            room.setStatus(EXPIRED);
-            roomRepository.save(room);
-        }
-
-        //32~47 혼자읽기 ACTIVE
-        for (index = 0; index < 16; index++) {
+        // 32~55 혼자 읽기 방 생성 (32~47 ACTIVE, 48~55 EXPIRED)
+        for (int index = 0; index < 24; index++) {
             Room room = Room.makeReadAloneRoom(books.get(index));
-            roomRepository.save(room);
-        }
 
-        //48~55 혼자읽기 EXPIRED
-        for (index = 16; index <24; index++) {
-            Room room = Room.makeReadAloneRoom(books.get(index));
-            room.setStatus(EXPIRED);
-            room.setRoomPercentage(100.0);
+            if (index >= 16) { // 48~55 EXPIRED 설정
+                room.setStatus(EXPIRED);
+                room.setProgressEndDate(LocalDate.now());
+                room.setRoomPercentage(100.0);
+            }
+
             roomRepository.save(room);
         }
     }

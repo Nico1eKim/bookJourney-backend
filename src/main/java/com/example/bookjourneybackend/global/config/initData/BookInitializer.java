@@ -1,14 +1,11 @@
 package com.example.bookjourneybackend.global.config.initData;
 
 import com.example.bookjourneybackend.domain.book.domain.Book;
-import com.example.bookjourneybackend.domain.book.domain.GenreType;
 import com.example.bookjourneybackend.domain.book.domain.repository.BookRepository;
 import com.example.bookjourneybackend.global.util.AladinApiUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDate;
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 

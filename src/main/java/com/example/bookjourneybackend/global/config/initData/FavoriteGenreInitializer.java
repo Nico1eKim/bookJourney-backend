@@ -1,21 +1,20 @@
 package com.example.bookjourneybackend.global.config.initData;
 
-import com.example.bookjourneybackend.domain.book.domain.Book;
 import com.example.bookjourneybackend.domain.book.domain.GenreType;
 import com.example.bookjourneybackend.domain.book.domain.repository.BookRepository;
-import com.example.bookjourneybackend.domain.recentSearch.domain.RecentSearch;
 import com.example.bookjourneybackend.domain.user.domain.FavoriteGenre;
 import com.example.bookjourneybackend.domain.user.domain.User;
 import com.example.bookjourneybackend.domain.user.domain.repository.FavoriteGenreRepository;
 import com.example.bookjourneybackend.domain.user.domain.repository.UserRepository;
 import com.example.bookjourneybackend.global.exception.GlobalException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
-
-import jakarta.transaction.Transactional;
-
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -35,7 +34,7 @@ public class FavoriteGenreInitializer {
     @Transactional // 트랜잭션 추가
     public void initializeFavoriteGenres() {
 
-        List<User> users = userRepository.findAll(); // User 리스트 로드
+        List<User> users = userRepository.findAll();
 
         for (User user : users) {
             favoriteGenres = getRandomGenreNames();

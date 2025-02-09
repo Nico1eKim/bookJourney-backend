@@ -1,26 +1,17 @@
 package com.example.bookjourneybackend.global.config.initData;
 
 import com.example.bookjourneybackend.domain.book.domain.Book;
-import com.example.bookjourneybackend.domain.book.domain.GenreType;
 import com.example.bookjourneybackend.domain.book.domain.repository.BookRepository;
 import com.example.bookjourneybackend.domain.favorite.domain.Favorite;
 import com.example.bookjourneybackend.domain.favorite.domain.repository.FavoriteRepository;
-import com.example.bookjourneybackend.domain.user.domain.FavoriteGenre;
 import com.example.bookjourneybackend.domain.user.domain.User;
 import com.example.bookjourneybackend.domain.user.domain.repository.UserRepository;
-import com.example.bookjourneybackend.global.exception.GlobalException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-
-import jakarta.transaction.Transactional;
-import org.springframework.stereotype.Component;
-
-import java.util.List;
 import java.util.Random;
-
-import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.CANNOT_FOUND_BESTSELLER;
 
 @Component
 @RequiredArgsConstructor
@@ -33,8 +24,8 @@ public class FavoriteInitializer {
 
     @Transactional // 트랜잭션 추가
     public void initializeFavorites() {
-        List<User> users = userRepository.findAll(); // User 리스트 로드
-        List<Book> books = bookRepository.findAll(); // Book 리스트 로드
+        List<User> users = userRepository.findAll();
+        List<Book> books = bookRepository.findAll();
 
         int favoriteCount;
 

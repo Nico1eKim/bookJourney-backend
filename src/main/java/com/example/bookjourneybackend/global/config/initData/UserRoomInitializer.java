@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 
 import jakarta.transaction.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Random;
@@ -35,74 +36,69 @@ public class UserRoomInitializer {
     //혼자읽기 32~39 ACTIVE 40~47 INACTIVE 48~55 EXPIRED
     @Transactional
     public void initializeUserRooms() {
+
         List<User> users = userRepository.findAll();
         List<Room> rooms = roomRepository.findAll();
 
-        int index = 0;
-        int flag =0;
+        int flag = 0;
 
-        //같이읽기 1~20 ACTIVE/INACTIVE 21~31 EXPIRED
-        for (index = 0; index < 31; index++) {
-
+        // 같이 읽기 1~20 ACTIVE/INACTIVE, 21~31 EXPIRED
+        for (int index = 0; index < 31; index++) {
             Room room = rooms.get(index);
-            int maxUsers = index < 6 ? room.getRecruitCount() : 7;  //방인원 무조건 7명 방1,2,3,4,5는 각각 2,3,4,5,6명
+            int maxUsers = index < 6 ? room.getRecruitCount() : 7; //방인원 무조건 7명 방1,2,3,4,5는 각각 2,3,4,5,6명
 
             for (int j = 0; j < maxUsers; j++) {
-
-                User user = users.get(flag % users.size()); // 사용자들이 돌아가면서 순차적으로 선택
-                flag++;
-
+                User user = users.get(flag++ % 8);
                 UserRoom userRoom = UserRoom.builder()
                         .user(user)
                         .room(room)
-                        .userRole((j == 0) ? UserRole.HOST : UserRole.MEMBER)
+                        .userRole(j == 0 ? UserRole.HOST : UserRole.MEMBER)
                         .currentPage(0)
                         .userPercentage(0.0)
                         .build();
 
-
-                if((index < 10 && user.getUserId()%2 ==0) || ((index >= 10  && index < 20) && user.getUserId()%2 !=0)) {
-                    userRoom.setStatus(INACTIVE); //1~10번방은 짝수 유저가 INACTIVE 11~20번방은 홀수 유저가 INACTIVE
+                // 1~10번 방은 짝수 유저 INACTIVE, 11~20번 방은 홀수 유저 INACTIVE
+                if ((index < 10 && user.getUserId() % 2 == 0) || (index >= 10 && index < 20 && user.getUserId() % 2 != 0)) {
+                    userRoom.setStatus(INACTIVE);
                     userRoom.setInActivatedAt(LocalDateTime.now());
                 }
-                if(index>=20)
-                    userRoom.setStatus(EXPIRED); //21~31 EXPIRED
+
+                // 21~31 EXPIRED
+                if (index >= 20) {
+                    userRoom.setStatus(EXPIRED);
+                }
 
                 room.addUserRoom(userRoom);
                 user.addUserRoom(userRoom);
-
                 userRoomRepository.save(userRoom);
             }
-
         }
 
-        flag= -1;
-        //혼자읽기 32~39 ACTIVE 40~47 INACTIVE 48~55 EXPIRED
-        for (index = 31; index < 55; index++) {
+        flag = 0;
 
+        // 혼자 읽기 32~39 ACTIVE, 40~47 INACTIVE, 48~55 EXPIRED
+        for (int index = 31; index < 55; index++) {
             Room room = rooms.get(index);
-            flag = (flag + 1) % 8;
-            User user = users.get(flag);
-                UserRoom userRoom = UserRoom.builder()
-                        .user(user)
-                        .userRole(UserRole.HOST)
-                        .currentPage(0)
-                        .userPercentage(0.0)
-                        .build();
+            User user = users.get(flag++ % 8); // 8명의 유저가 순환
 
-                if(index >= 39 && index <= 46) {
-                    userRoom.setStatus(INACTIVE); //40~47 INACTIVE
-                    userRoom.setInActivatedAt(LocalDateTime.now());
-                }
-                if(index>=47)
-                    userRoom.setStatus(EXPIRED); //21~31 EXPIRED
+            UserRoom userRoom = UserRoom.builder()
+                    .user(user)
+                    .room(room)
+                    .userRole(UserRole.HOST)
+                    .currentPage(0)
+                    .userPercentage(0.0)
+                    .build();
+
+            if (index >= 39 && index <= 46) { // 40~47 INACTIVE
+                userRoom.setStatus(INACTIVE);
+                userRoom.setInActivatedAt(LocalDateTime.now());
+            } else if (index >= 47) { // 48~55 EXPIRED
+                userRoom.setStatus(EXPIRED);
+            }
 
             room.addUserRoom(userRoom);
             user.addUserRoom(userRoom);
-
             userRoomRepository.save(userRoom);
-
-
         }
 
         }

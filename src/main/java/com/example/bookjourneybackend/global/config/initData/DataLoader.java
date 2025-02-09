@@ -43,11 +43,11 @@ public class DataLoader implements ApplicationRunner {
          roomInitializer.initializeRooms();
          userRoomInitializer.initializeUserRooms();
          recordInitializer.initializeRecords();
-        // commentInitializer.initializeComments();
+         commentInitializer.initializeComments();
          favoriteGenreInitializer.initializeFavoriteGenres();
          favoriteInitializer.initializeFavorites();
          recentSearchInitializer.initializeRecentSearches();
          recordLikeInitializer.initializeRecordLikes();
-        // commentLikeInitializer.initializeCommentLikes();
+        commentLikeInitializer.initializeCommentLikes();
     }
 }

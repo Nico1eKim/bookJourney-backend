@@ -4,13 +4,11 @@ import com.example.bookjourneybackend.domain.recentSearch.domain.RecentSearch;
 import com.example.bookjourneybackend.domain.recentSearch.domain.repository.RecentSearchRepository;
 import com.example.bookjourneybackend.domain.user.domain.User;
 import com.example.bookjourneybackend.domain.user.domain.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-
-import jakarta.transaction.Transactional;
-
 import java.util.Random;
 
 @Component
@@ -34,21 +32,21 @@ public class RecentSearchInitializer {
     public void initializeRecentSearches() {
         List<User> users = userRepository.findAll(); // User 리스트 로드
 
-            for (User user : users) {
-                int recentSearchCount = random.nextInt(12) + 1 ;//사용자당 검색어기록 1~12개 사이 랜덤
-                for (int i = 0; i < recentSearchCount; i++) {
+        for (User user : users) {
+            int recentSearchCount = random.nextInt(12) + 1 ;//사용자당 검색어기록 1~12개 사이 랜덤
+            for (int i = 0; i < recentSearchCount; i++) {
 
-                    String randomSearch = bookTitles.get(random.nextInt(bookTitles.size()));
+                String randomSearch = bookTitles.get(random.nextInt(bookTitles.size()));
 
-                    RecentSearch recentSearch = RecentSearch.builder()
-                            .user(user)
-                            .recentSearch(randomSearch) // 랜덤 책 제목을 검색어로 저장
-                            .build();
+                RecentSearch recentSearch = RecentSearch.builder()
+                        .user(user)
+                        .recentSearch(randomSearch) // 랜덤 책 제목을 검색어로 저장
+                        .build();
 
-                    user.addRecentSearch(recentSearch);
-                    recentSearchRepository.save(recentSearch);
-                }
+                user.addRecentSearch(recentSearch);
+                recentSearchRepository.save(recentSearch);
             }
+        }
 
 
     }

@@ -1,19 +1,16 @@
 package com.example.bookjourneybackend.global.config.initData;
 
 import com.example.bookjourneybackend.domain.book.domain.Book;
-import com.example.bookjourneybackend.domain.book.domain.GenreType;
 import com.example.bookjourneybackend.domain.record.domain.Record;
 import com.example.bookjourneybackend.domain.record.domain.RecordType;
 import com.example.bookjourneybackend.domain.record.domain.repository.RecordRepository;
 import com.example.bookjourneybackend.domain.room.domain.Room;
 import com.example.bookjourneybackend.domain.room.domain.repository.RoomRepository;
-import com.example.bookjourneybackend.domain.user.domain.FavoriteGenre;
 import com.example.bookjourneybackend.domain.user.domain.User;
-import com.example.bookjourneybackend.domain.user.domain.repository.FavoriteGenreRepository;
 import com.example.bookjourneybackend.domain.user.domain.repository.UserRepository;
 import com.example.bookjourneybackend.domain.userRoom.domain.UserRoom;
 import com.example.bookjourneybackend.domain.userRoom.domain.repository.UserRoomRepository;
-import com.example.bookjourneybackend.global.exception.GlobalException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -21,15 +18,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 
-import jakarta.transaction.Transactional;
-import org.springframework.stereotype.Component;
-
 import static com.example.bookjourneybackend.domain.record.domain.RecordType.ENTIRE;
 import static com.example.bookjourneybackend.domain.record.domain.RecordType.PAGE;
-import static com.example.bookjourneybackend.global.entity.EntityStatus.ACTIVE;
-import static com.example.bookjourneybackend.global.entity.EntityStatus.INACTIVE;
-import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.*;
-import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.CANNOT_FOUND_USER_ROOM;
 
 @Component
 @RequiredArgsConstructor
@@ -86,18 +76,18 @@ public class RecordInitializer {
                 UserRoom userRoom =  userRoomOpt.get();
                 RecordType recordType;
 
-                //방아이디 + 유저아이디 짝수면 페이지기록, 홀수면 전체기록
-                recordType = (room.getRoomId() + user.getUserId()) % 2 == 0 ? PAGE : ENTIRE ;
-                if(room.getRoomId()>=32 ) // 혼자읽기 방일경우 짝수유저는 페이지기록, 홀수 유저는 전체기록
-                    recordType = user.getUserId() % 2 == 0 ? PAGE : ENTIRE ;
+                //방아이디 + 유저아이디 짝수면 페이지기록, 홀수면 전체기록 // 혼자읽기 방일경우 페이지기록
+                recordType = (room.getRoomId() >= 32) ? PAGE :
+                        ((room.getRoomId() + user.getUserId()) % 2 == 0 ? PAGE : ENTIRE);
 
-                String recordTitle = recordType== PAGE ?  null : titleWords.get(random.nextInt(titleWords.size()));
+                String recordTitle = (room.getRoomId() >= 48 || recordType == PAGE) ? null : titleWords.get(random.nextInt(titleWords.size()));
                 String content = contentWords.get(random.nextInt(contentWords.size()));
-                Integer currentPage = recordType== PAGE ? (int) (Math.random() * (totalPages-20)) + 1 : null  ; // 1부터 totalPages-20까지 랜덤한 페이지(만료되지못하게
+                Integer currentPage = (room.getRoomId() >= 48) ? totalPages :
+                        ((recordType == PAGE) ? ((int) (Math.random() * (totalPages - 20)) + 1) : 0);
 
-                //유저 진행율 업데이트
-                if(recordType == PAGE) {
-                    double userPercentage = ((double) currentPage / totalPages) * 100;
+                // 유저 진행율 업데이트
+                if (recordType == PAGE || room.getRoomId() >= 48) {
+                    double userPercentage = (room.getRoomId() >= 48) ? 100.0 : ((double) currentPage / totalPages) * 100;
                     userRoom.updateUserProgress(userPercentage, currentPage);
                 }
 
@@ -111,17 +101,20 @@ public class RecordInitializer {
                         .build();
 
                 // 연관관계 설정
-                room.addRecord(record); // `Room` 엔티티의 addRecord 사용
+                room.addRecord(record);
                 recordRepository.save(record);
             }
 
-            // 방의 진행률 업데이트
-            List<UserRoom> roomMembers = userRoomRepository.findAllByRoom(room);
-            double roomPercentage = roomMembers.stream()
-                    .mapToDouble(UserRoom::getUserPercentage)
-                    .average()
-                    .orElse(0.0);
-            room.updateRoomPercentage(roomPercentage);
+            if(room.getRoomId()<48) {
+                // 방 진행율 업데이트
+                List<UserRoom> roomMembers = userRoomRepository.findAllByRoom(room);
+                double roomPercentage = roomMembers.stream()
+                        .mapToDouble(UserRoom::getUserPercentage)
+                        .average()
+                        .orElse(0.0);
+                room.updateRoomPercentage(roomPercentage);
+            }
+
 
         }
     }
