@@ -73,4 +73,10 @@ public interface UserRoomRepository extends JpaRepository<UserRoom, Long> {
             ") " +
             "ORDER BY ur.completedUserPercentageAt ASC")
     List<UserRoom> findUserRoomsByUserInCalendar(@Param("userId") Long userId, @Param("year") Integer year, @Param("month") Integer month);
+
+    @Query("SELECT ur FROM UserRoom ur " +
+            "WHERE ur.user.userId = :userId AND ur.userPercentage >= 100 " +
+            "AND MONTH(ur.completedUserPercentageAt) = :month AND YEAR(ur.completedUserPercentageAt) = :year " +
+            "AND DAY(ur.completedUserPercentageAt) = :date ORDER BY ur.completedUserPercentageAt ASC")
+    List<UserRoom> findUserRoomsByUserInCalendarInfo(@Param("userId") Long userId, @Param("year") Integer year, @Param("month") Integer month, @Param("date") Integer date);
 }

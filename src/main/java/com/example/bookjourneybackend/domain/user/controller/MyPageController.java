@@ -24,4 +24,14 @@ public class MyPageController {
             @RequestParam final Integer year) {
         return BaseResponse.ok(myPageService.showMyPageCalendar(userId, month, year));
     }
+
+    @GetMapping("/calendar/info")
+    public BaseResponse<GetMyPageCalendarResponse> getMyPageCalendarInfo(
+            @LoginUserId final Long userId,
+            @RequestParam final Integer month,
+            @RequestParam final Integer year,
+            @RequestParam final Integer day) {
+        return BaseResponse.ok(myPageService.showMyPageCalendarInfo(userId, month, year, day));
+    }
+
 }

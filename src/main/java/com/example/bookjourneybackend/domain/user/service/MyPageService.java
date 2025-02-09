@@ -1,6 +1,7 @@
 package com.example.bookjourneybackend.domain.user.service;
 
 import com.example.bookjourneybackend.domain.book.domain.Book;
+import com.example.bookjourneybackend.domain.room.domain.Room;
 import com.example.bookjourneybackend.domain.room.domain.repository.RoomRepository;
 import com.example.bookjourneybackend.domain.user.domain.User;
 import com.example.bookjourneybackend.domain.user.domain.repository.UserRepository;
@@ -10,7 +11,6 @@ import com.example.bookjourneybackend.domain.userRoom.domain.repository.UserRoom
 import com.example.bookjourneybackend.global.exception.GlobalException;
 import com.example.bookjourneybackend.global.util.DateUtil;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.CANNOT_FOUND_USER;
+import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.INVALID_DATE;
 
 @Service
 @RequiredArgsConstructor
@@ -62,5 +63,27 @@ public class MyPageService {
                             .build();
                 }).collect(Collectors.toList());
         return calendarDataList;
+    }
+
+    public GetMyPageCalendarResponse showMyPageCalendarInfo(Long userId, Integer month, Integer year, Integer day) {
+        if(month == null || year == null || day == null) {
+            throw new GlobalException(INVALID_DATE);
+        }
+
+        List<CalendarData> calendarDataInfoList = userRoomRepository.findUserRoomsByUserInCalendarInfo(userId, year, month, day)
+                .stream()
+                .map(userRoom -> {
+                    LocalDate localDate = userRoom.getCompletedUserPercentageAt().toLocalDate();
+                    Room room = userRoom.getRoom();
+                    Book book = room.getBook();
+                    return CalendarData.builder()
+                            .date(dateUtil.formatDateRange(room.getStartDate(), localDate))
+                            .roomType(room.getRoomType().getRoomType())
+                            .bookTitle(book.getBookTitle())
+                            .authorName(book.getAuthorName())
+                            .imageUrl(book.getImageUrl())
+                            .build();
+                }).toList();
+        return GetMyPageCalendarResponse.of(calendarDataInfoList);
     }
 }
