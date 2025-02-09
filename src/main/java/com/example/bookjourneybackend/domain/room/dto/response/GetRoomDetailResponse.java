@@ -55,7 +55,7 @@ public class GetRoomDetailResponse {
                 dateUtil.formatDate(book.getPublishedDate()),
                 book.getIsbn(),
                 book.getDescription(),
-                memberList // DELETED가 아닌 유저들만 포함
+                memberList
         );
     }
 }
