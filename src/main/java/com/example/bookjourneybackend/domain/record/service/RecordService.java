@@ -60,11 +60,6 @@ public class RecordService {
             userRoomRepository.save(userRoom);
         }
 
-        // 유저가 방에 속해 있지 않거나, 방에서 삭제된 경우 예외 발생
-        if (userRoom.getStatus() == DELETED) {
-            throw new GlobalException(NOT_PARTICIPATING_IN_ROOM);
-        }
-
         // 방이 EXPIRED 상태이면 기록을 남길 수 없음
         if (room.getStatus() == EXPIRED) {
             throw new GlobalException(CANNOT_WRITE_IN_EXPIRED_ROOM);
@@ -158,7 +153,7 @@ public class RecordService {
                     return RecordInfo.fromEntireRecord(
                             record.getUser().getUserId(),
                             record.getRecordId(),
-                            (record.getUser().getUserImage() != null) ? record.getUser().getUserImage().getImageUrl() : null,
+                            (record.getUser().getImageUrl()),
                             record.getUser().getNickname(),
                             record.getRecordTitle(),
                             dateUtil.formatLocalDateTime(record.getCreatedAt()),
@@ -177,7 +172,7 @@ public class RecordService {
                     return RecordInfo.fromPageRecord(
                             record.getUser().getUserId(),
                             record.getRecordId(),
-                            (record.getUser().getUserImage() != null) ? record.getUser().getUserImage().getImageUrl() : null,
+                            (record.getUser().getImageUrl()),
                             record.getUser().getNickname(),
                             record.getRecordPage(),
                             dateUtil.formatLocalDateTime(record.getCreatedAt()),

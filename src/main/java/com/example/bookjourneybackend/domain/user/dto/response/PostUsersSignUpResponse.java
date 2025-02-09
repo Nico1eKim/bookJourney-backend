@@ -1,4 +1,4 @@
-package com.example.bookjourneybackend.domain.user.domain.dto.response;
+package com.example.bookjourneybackend.domain.user.dto.response;
 
 
 import lombok.AllArgsConstructor;

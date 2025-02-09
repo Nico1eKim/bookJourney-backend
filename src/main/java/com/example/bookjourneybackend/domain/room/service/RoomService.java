@@ -17,7 +17,6 @@ import com.example.bookjourneybackend.domain.room.dto.response.GetRoomInfoRespon
 import com.example.bookjourneybackend.domain.room.dto.response.PostRoomCreateResponse;
 import com.example.bookjourneybackend.domain.room.dto.response.RoomMemberInfo;
 import com.example.bookjourneybackend.domain.user.domain.User;
-import com.example.bookjourneybackend.domain.user.domain.UserImage;
 import com.example.bookjourneybackend.domain.user.domain.repository.UserRepository;
 import com.example.bookjourneybackend.domain.userRoom.domain.UserRole;
 import com.example.bookjourneybackend.domain.userRoom.domain.UserRoom;
@@ -35,7 +34,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.example.bookjourneybackend.domain.room.domain.RoomType.ALONE;
@@ -99,7 +97,7 @@ public class RoomService {
                 room.isPublic(),
                 room.getRoomPercentage().intValue(),
                 dateUtil.calculateDday(room.getProgressEndDate()),
-                isMember,  // DELETED가 아닌 유저들만 포함
+                isMember,
                 members);
     }
 
@@ -183,14 +181,11 @@ public class RoomService {
     //Room 객체의 UserRoom 정보를 RoomMemberInfo 객체로 매핑
     private List<RoomMemberInfo> getRoomMemberInfoList(Room room) {
         return room.getUserRooms().stream()
-                .filter(userRoom -> userRoom.getStatus() != DELETED) // DELETED 상태 제외
                 .map(userRoom -> {
                     User user = userRoom.getUser();
                     return RoomMemberInfo.builder()
                             .userRole(userRoom.getUserRole())
-                            .imageUrl(Optional.ofNullable(user.getUserImage())
-                                    .map(UserImage::getImageUrl)
-                                    .orElse(null))
+                            .imageUrl(user.getImageUrl())
                             .nickName(user.getNickname())
                             .userPercentage(userRoom.getUserPercentage().intValue())
                             .build();

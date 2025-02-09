@@ -28,7 +28,7 @@ public class CommentInfo {
                 .commentId(comment.getCommentId())
                 .recordId(comment.getRecord().getRecordId())
                 .userId(comment.getUser().getUserId())
-                .imageUrl(comment.getUser().getUserImage() != null ? comment.getUser().getUserImage().toString() : null)
+                .imageUrl(comment.getUser().getImageUrl())
                 .nickName(comment.getUser().getNickname())
                 .createdAt(comment.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
                 .content(comment.getContent())

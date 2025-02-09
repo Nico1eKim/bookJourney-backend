@@ -11,7 +11,6 @@ import com.example.bookjourneybackend.domain.user.domain.FavoriteGenre;
 import com.example.bookjourneybackend.domain.user.domain.User;
 import com.example.bookjourneybackend.domain.user.domain.repository.UserRepository;
 import com.example.bookjourneybackend.global.exception.GlobalException;
-import com.example.bookjourneybackend.global.util.AladinApiUtil;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -173,6 +172,13 @@ public class BookService {
         }
         return GetBookBestSellersResponse.of(imageUrls,user.getNickname());
 
+    }
+
+    @Transactional
+    public void deleteBook(Book book) {
+        if(book.getRooms().isEmpty() && book.getFavorites().isEmpty()){
+            bookRepository.delete(book);
+        }
     }
 
 

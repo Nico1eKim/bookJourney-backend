@@ -67,7 +67,7 @@ public class RoomController {
         return BaseResponse.ok(roomService.putRoomsInactive(roomId, userId));
     }
 
-    @PutMapping("/{roomId}/exit")
+    @DeleteMapping("/{roomId}/exit")
     public BaseResponse<Void> exitRoom(@PathVariable("roomId") final Long roomId,
                                        @LoginUserId final Long userId) {
         return BaseResponse.ok(roomService.exitRoom(roomId, userId));

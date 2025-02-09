@@ -162,3 +162,16 @@ springdoc:
   swagger-ui:
     enabled: true
     path: /swagger-ui/index.html
+
+cloud:
+  aws:
+    s3:
+      bucket: ${S3_BUCKET_NAME}
+    credentials:
+      access-key: ${AWS_ACCESS_KEY}
+      secret-key: ${AWS_SECRET_ACCESS_KEY}
+    region:
+      static: eu-north-1
+      auto: false
+    stack:
+      auto: false
