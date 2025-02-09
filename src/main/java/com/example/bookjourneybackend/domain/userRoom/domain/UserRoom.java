@@ -26,6 +26,7 @@ public class UserRoom extends BaseEntity {
     @Column(nullable = false)
     private UserRole userRole;
 
+    @Setter
     @Column(nullable = false)
     private Double userPercentage;
 
