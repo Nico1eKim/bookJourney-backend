@@ -36,9 +36,6 @@ public class MyPageService {
      * 같은 날짜의 completedUserPercentageAt이 있으면 가장 최근에 완료된 UserRoom의 책 이미지를 가져와서 반환
      */
     public GetMyPageCalendarResponse showMyPageCalendar(Long userId, Integer month, Integer year) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER));
-
         if(month == null) {
             month = LocalDate.now().getMonthValue();
         }
