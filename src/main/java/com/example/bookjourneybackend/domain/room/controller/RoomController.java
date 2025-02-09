@@ -95,4 +95,11 @@ public class RoomController {
     ) {
         return BaseResponse.ok(roomService.showRoomPages(roomId, userId));
     }
+
+    @GetMapping("/search/{roomId}")
+    public BaseResponse<GetSearchPrivateRoomResponse> viewSearchPrivateRooms(
+            @PathVariable("roomId") final Long roomId
+    ) {
+        return BaseResponse.ok(roomService.showSearchPrivateRooms(roomId));
+    }
 }
