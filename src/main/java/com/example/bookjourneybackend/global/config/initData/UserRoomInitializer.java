@@ -94,6 +94,7 @@ public class UserRoomInitializer {
                 userRoom.setInActivatedAt(LocalDateTime.now());
             } else if (index >= 47) { // 48~55 EXPIRED
                 userRoom.setStatus(EXPIRED);
+                userRoom.setCompletedUserPercentageAt(LocalDateTime.now());
             }
 
             room.addUserRoom(userRoom);
