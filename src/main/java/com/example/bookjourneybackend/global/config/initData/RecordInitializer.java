@@ -84,12 +84,19 @@ public class RecordInitializer {
                 String recordTitle = (room.getRoomId() >= 48 || recordType == PAGE) ? null : titleWords.get(random.nextInt(titleWords.size()));
                 String content = contentWords.get(random.nextInt(contentWords.size()));
                 Integer currentPage = (room.getRoomId() >= 48) ? totalPages :
-                        ((recordType == PAGE) ? ((int) (Math.random() * (totalPages - 20)) + 1) : 0);
+                        ((recordType == PAGE)
+                                ? ((room.getRoomId() >= 32 && room.getRoomId() <= 47)
+                                ? (int) (Math.random() * (totalPages - 20)) + 1
+                                : (int) (Math.random() * totalPages) + 1)
+                                : 0);
 
                 // 유저 진행율 업데이트
                 if (recordType == PAGE || room.getRoomId() >= 48) {
                     double userPercentage = (room.getRoomId() >= 48) ? 100.0 : ((double) currentPage / totalPages) * 100;
                     userRoom.updateUserProgress(userPercentage, currentPage);
+                }
+                if (userRoom.getUserPercentage() == 100){
+                    userRoom.setCompletedUserPercentageAt(LocalDateTime.now());
                 }
 
                 Record record = Record.builder()
