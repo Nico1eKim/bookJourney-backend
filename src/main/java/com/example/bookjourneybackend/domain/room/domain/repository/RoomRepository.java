@@ -2,6 +2,7 @@ package com.example.bookjourneybackend.domain.room.domain.repository;
 
 import com.example.bookjourneybackend.domain.book.domain.GenreType;
 import com.example.bookjourneybackend.domain.room.domain.Room;
+import com.example.bookjourneybackend.global.entity.EntityStatus;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -50,4 +51,6 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
             "GROUP BY r " +
             "ORDER BY (COUNT(rec) + COUNT(com)) DESC, r.recruitEndDate DESC, r.startDate ASC")
     List<Room> findRecruitmentRooms(LocalDate firstDayOfWeek, LocalDate lastDayOfWeek, PageRequest of);
+
+    List<Room> findByProgressEndDateBefore(LocalDate localDate);
 }

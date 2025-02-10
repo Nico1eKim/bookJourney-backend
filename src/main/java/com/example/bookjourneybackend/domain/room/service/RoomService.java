@@ -28,6 +28,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import com.example.bookjourneybackend.global.util.AladinApiUtil;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -522,5 +523,23 @@ public class RoomService {
                 host.getUser().getNickname(),
                 room.getPassword()
         );
+    }
+
+    /**
+     * 매일 자정마다 만료된 방 체크
+     */
+    @Async
+    @Transactional
+    public void checkExpiredRooms() {
+        List<Room> expiredRooms = roomRepository.findByProgressEndDateBefore(dateUtil.getCurrentDate());
+        expiredRooms.forEach(room -> {
+            List<UserRoom> userRooms = room.getUserRooms();
+            userRooms.forEach(userRoom -> {
+                userRoom.setStatus(EXPIRED);
+                userRoomRepository.save(userRoom);
+            });
+            room.setStatus(EXPIRED);
+            roomRepository.save(room);
+        });
     }
 }
