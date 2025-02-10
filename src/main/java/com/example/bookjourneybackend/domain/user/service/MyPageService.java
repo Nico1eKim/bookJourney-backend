@@ -7,6 +7,7 @@ import com.example.bookjourneybackend.domain.user.domain.User;
 import com.example.bookjourneybackend.domain.user.domain.repository.UserRepository;
 import com.example.bookjourneybackend.domain.user.dto.response.CalendarData;
 import com.example.bookjourneybackend.domain.user.dto.response.GetMyPageCalendarResponse;
+import com.example.bookjourneybackend.domain.user.dto.response.GetMyPageUserInfoResponse;
 import com.example.bookjourneybackend.domain.userRoom.domain.repository.UserRoomRepository;
 import com.example.bookjourneybackend.global.exception.GlobalException;
 import com.example.bookjourneybackend.global.util.DateUtil;
@@ -61,7 +62,10 @@ public class MyPageService {
                 }).collect(Collectors.toList());
         return calendarDataList;
     }
-
+    
+    /**
+     * 독서달력에서 날짜하나 눌렀을 경우 해당 날짜에 종료된 모든 방 반환
+     */
     public GetMyPageCalendarResponse showMyPageCalendarInfo(Long userId, Integer month, Integer year, Integer day) {
         if(month == null || year == null || day == null) {
             throw new GlobalException(INVALID_DATE);
@@ -82,5 +86,14 @@ public class MyPageService {
                             .build();
                 }).toList();
         return GetMyPageCalendarResponse.of(calendarDataInfoList);
+
+    /**
+     * 마이페이지 처음 진입했을 때 유저 정보를 반환
+     */
+    public GetMyPageUserInfoResponse showMyPageUserInfo(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER));
+
+        return GetMyPageUserInfoResponse.of(user);
     }
 }

@@ -1,6 +1,7 @@
 package com.example.bookjourneybackend.domain.user.controller;
 
 import com.example.bookjourneybackend.domain.user.dto.response.GetMyPageCalendarResponse;
+import com.example.bookjourneybackend.domain.user.dto.response.GetMyPageUserInfoResponse;
 import com.example.bookjourneybackend.domain.user.service.MyPageService;
 import com.example.bookjourneybackend.global.annotation.LoginUserId;
 import com.example.bookjourneybackend.global.response.BaseResponse;
@@ -32,6 +33,13 @@ public class MyPageController {
             @RequestParam final Integer year,
             @RequestParam final Integer day) {
         return BaseResponse.ok(myPageService.showMyPageCalendarInfo(userId, month, year, day));
+    }
+
+    @GetMapping
+    public BaseResponse<GetMyPageUserInfoResponse> getMyPageUserInfo(
+            @LoginUserId final Long userId
+    ) {
+        return BaseResponse.ok(myPageService.showMyPageUserInfo(userId));
     }
 
 }
