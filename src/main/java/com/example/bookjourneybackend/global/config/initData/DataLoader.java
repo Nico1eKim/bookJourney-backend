@@ -25,16 +25,16 @@ public class DataLoader implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
-//         bookInitializer.initializeBooks();
-//         userInitializer.initializeUsers();
-//         roomInitializer.initializeRooms();
-//         userRoomInitializer.initializeUserRooms();
-//         recordInitializer.initializeRecords();
-//         commentInitializer.initializeComments();
-//         favoriteGenreInitializer.initializeFavoriteGenres();
-//         favoriteInitializer.initializeFavorites();
-//         recentSearchInitializer.initializeRecentSearches();
-//         recordLikeInitializer.initializeRecordLikes();
-//        commentLikeInitializer.initializeCommentLikes();
+         bookInitializer.initializeBooks();
+         userInitializer.initializeUsers();
+         roomInitializer.initializeRooms();
+         userRoomInitializer.initializeUserRooms();
+         recordInitializer.initializeRecords();
+         commentInitializer.initializeComments();
+         favoriteGenreInitializer.initializeFavoriteGenres();
+         favoriteInitializer.initializeFavorites();
+         recentSearchInitializer.initializeRecentSearches();
+         recordLikeInitializer.initializeRecordLikes();
+        commentLikeInitializer.initializeCommentLikes();
     }
 }
