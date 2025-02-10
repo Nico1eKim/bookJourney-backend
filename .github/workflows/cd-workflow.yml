@@ -57,7 +57,7 @@ jobs:
 
             cd bookJourney-backend
             git pull origin develop
-            sudo docker-compose down -v
+            sudo docker-compose down
 
              ./gradlew clean
              set -a && source .env && set +a && ./gradlew build
