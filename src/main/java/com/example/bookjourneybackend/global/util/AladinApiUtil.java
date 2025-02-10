@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.text.StringEscapeUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClientException;
@@ -135,7 +136,7 @@ public class AladinApiUtil {
 
                 selectedItem = items.get(nthItem);
 
-                String title = selectedItem.get("title").asText();
+                String title = StringEscapeUtils.unescapeHtml4(selectedItem.get("title").asText());
                 String author = selectedItem.get("author").asText();
 
 //              isbn 13자리가 비어있는 경우 10자리 사용
