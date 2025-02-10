@@ -37,10 +37,10 @@ public class MyPageService {
      * 같은 날짜의 completedUserPercentageAt이 있으면 가장 최근에 완료된 UserRoom의 책 이미지를 가져와서 반환
      */
     public GetMyPageCalendarResponse showMyPageCalendar(Long userId, Integer month, Integer year) {
-        if(month == null) {
+        if (month == null) {
             month = LocalDate.now().getMonthValue();
         }
-        if(year == null) {
+        if (year == null) {
             year = LocalDate.now().getYear();
         }
 
@@ -62,12 +62,12 @@ public class MyPageService {
                 }).collect(Collectors.toList());
         return calendarDataList;
     }
-    
+
     /**
      * 독서달력에서 날짜하나 눌렀을 경우 해당 날짜에 종료된 모든 방 반환
      */
     public GetMyPageCalendarResponse showMyPageCalendarInfo(Long userId, Integer month, Integer year, Integer day) {
-        if(month == null || year == null || day == null) {
+        if (month == null || year == null || day == null) {
             throw new GlobalException(INVALID_DATE);
         }
 
@@ -86,6 +86,7 @@ public class MyPageService {
                             .build();
                 }).toList();
         return GetMyPageCalendarResponse.of(calendarDataInfoList);
+    }
 
     /**
      * 마이페이지 처음 진입했을 때 유저 정보를 반환
