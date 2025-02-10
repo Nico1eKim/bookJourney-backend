@@ -1,5 +1,6 @@
-package com.example.bookjourneybackend.domain.book.service;
+package com.example.bookjourneybackend.global.scheduler;
 
+import com.example.bookjourneybackend.domain.book.service.BestSellerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
