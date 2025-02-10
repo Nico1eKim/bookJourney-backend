@@ -125,7 +125,12 @@ public enum BaseExceptionResponseStatus implements ResponseStatus {
     /**
      * 12000 : comment 관련
      */
-    CANNOT_FOUND_COMMENT(12001, BAD_REQUEST, "댓글을 찾을 수 없습니다.");
+    CANNOT_FOUND_COMMENT(12001, BAD_REQUEST, "댓글을 찾을 수 없습니다."),
+
+    /**
+     * 13000 : mypage 관련
+     */
+    INVALID_DATE(13000, BAD_REQUEST, "유효하지 않은 날짜입니다.");
 
     private final int code;
     private final HttpStatus status;
