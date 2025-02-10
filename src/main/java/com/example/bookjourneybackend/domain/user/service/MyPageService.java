@@ -6,6 +6,7 @@ import com.example.bookjourneybackend.domain.user.domain.User;
 import com.example.bookjourneybackend.domain.user.domain.repository.UserRepository;
 import com.example.bookjourneybackend.domain.user.dto.response.CalendarData;
 import com.example.bookjourneybackend.domain.user.dto.response.GetMyPageCalendarResponse;
+import com.example.bookjourneybackend.domain.user.dto.response.GetMyPageUserInfoResponse;
 import com.example.bookjourneybackend.domain.userRoom.domain.repository.UserRoomRepository;
 import com.example.bookjourneybackend.global.exception.GlobalException;
 import com.example.bookjourneybackend.global.util.DateUtil;
@@ -62,5 +63,15 @@ public class MyPageService {
                             .build();
                 }).collect(Collectors.toList());
         return calendarDataList;
+    }
+
+    /**
+     * 마이페이지 처음 진입했을 때 유저 정보를 반환
+     */
+    public GetMyPageUserInfoResponse showMyPageUserInfo(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER));
+
+        return GetMyPageUserInfoResponse.of(user);
     }
 }
