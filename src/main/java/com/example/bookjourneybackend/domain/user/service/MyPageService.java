@@ -112,13 +112,13 @@ public class MyPageService {
                 .orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER));
 
         //프로필 이미지 변경
-        if (!patchUserInfoRequest.getImageUrl().isEmpty()) {
+        if (!patchUserInfoRequest.getImageUrl().isBlank()) {
             if (!userRepository.existsByImageUrlAndUserIdNot(user.getImageUrl(), userId))
                 s3Service.deleteImageFromS3(user.getImageUrl());
             user.setImageUrl(patchUserInfoRequest.getImageUrl());
         }
         //닉네임 변경
-        if(!patchUserInfoRequest.getNickName().isEmpty()){
+        if(!patchUserInfoRequest.getNickName().isBlank()){
             user.setNickname(patchUserInfoRequest.getNickName());
         }
         userRepository.save(user);
