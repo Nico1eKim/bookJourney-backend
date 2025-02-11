@@ -2,17 +2,19 @@ package com.example.bookjourneybackend.domain.user.service;
 
 import com.example.bookjourneybackend.domain.book.domain.Book;
 import com.example.bookjourneybackend.domain.room.domain.Room;
-import com.example.bookjourneybackend.domain.room.domain.repository.RoomRepository;
 import com.example.bookjourneybackend.domain.user.domain.User;
 import com.example.bookjourneybackend.domain.user.domain.repository.UserRepository;
+import com.example.bookjourneybackend.domain.user.dto.request.PatchUserInfoRequest;
 import com.example.bookjourneybackend.domain.user.dto.response.CalendarData;
 import com.example.bookjourneybackend.domain.user.dto.response.GetMyPageCalendarResponse;
 import com.example.bookjourneybackend.domain.user.dto.response.GetMyPageUserInfoResponse;
+import com.example.bookjourneybackend.domain.user.dto.response.PatchUserInfoResponse;
 import com.example.bookjourneybackend.domain.userRoom.domain.repository.UserRoomRepository;
 import com.example.bookjourneybackend.global.exception.GlobalException;
 import com.example.bookjourneybackend.global.util.DateUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -25,10 +27,10 @@ import static com.example.bookjourneybackend.global.response.status.BaseExceptio
 @RequiredArgsConstructor
 public class MyPageService {
 
-    private final RoomRepository roomRepository;
     private final UserRepository userRepository;
     private final UserRoomRepository userRoomRepository;
     private final DateUtil dateUtil;
+    private final S3Service s3Service;
 
     /**
      * 마이페이지 캘린더 조회
@@ -96,5 +98,31 @@ public class MyPageService {
                 .orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER));
 
         return GetMyPageUserInfoResponse.of(user);
+    }
+
+    /**
+     * 프로필 수정
+     * 프로필 사진 -> 유저의 기존 사진이 동일한 유저가있다면 s3 삭제 XX 없다면 기존 사진 삭제 후 프로필 이미지 변경
+     * 닉네임 변경 -> 닉네임 변경
+     */
+    @Transactional
+    public PatchUserInfoResponse updateMyPageProfile(PatchUserInfoRequest patchUserInfoRequest,Long userId) {
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER));
+
+        //프로필 이미지 변경
+        if (!patchUserInfoRequest.getImageUrl().isEmpty()) {
+            if (!userRepository.existsByImageUrlAndUserIdNot(user.getImageUrl(), userId))
+                s3Service.deleteImageFromS3(user.getImageUrl());
+            user.setImageUrl(patchUserInfoRequest.getImageUrl());
+        }
+        //닉네임 변경
+        if(!patchUserInfoRequest.getNickName().isEmpty()){
+            user.setNickname(patchUserInfoRequest.getNickName());
+        }
+        userRepository.save(user);
+
+        return PatchUserInfoResponse.of(user);
     }
 }
