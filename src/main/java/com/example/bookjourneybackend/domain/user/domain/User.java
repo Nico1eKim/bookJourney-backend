@@ -6,10 +6,7 @@ import com.example.bookjourneybackend.domain.room.domain.Room;
 import com.example.bookjourneybackend.domain.userRoom.domain.UserRoom;
 import com.example.bookjourneybackend.global.entity.BaseEntity;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,9 +30,11 @@ public class User extends BaseEntity{
     @Column(name = "password", nullable = false, length = 255)
     private String password;
 
+    @Setter
     @Column(name = "nickname", nullable = false, length = 60)
     private String nickname;
 
+    @Setter
     @Column(name = "image_url", columnDefinition = "TEXT", nullable = false)
     private String imageUrl;
 
