@@ -1,15 +1,15 @@
 package com.example.bookjourneybackend.domain.user.controller;
 
+import com.example.bookjourneybackend.domain.user.dto.request.PatchUserInfoRequest;
 import com.example.bookjourneybackend.domain.user.dto.response.GetMyPageCalendarResponse;
 import com.example.bookjourneybackend.domain.user.dto.response.GetMyPageUserInfoResponse;
+import com.example.bookjourneybackend.domain.user.dto.response.PatchUserInfoResponse;
 import com.example.bookjourneybackend.domain.user.service.MyPageService;
 import com.example.bookjourneybackend.global.annotation.LoginUserId;
 import com.example.bookjourneybackend.global.response.BaseResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequiredArgsConstructor
@@ -40,6 +40,13 @@ public class MyPageController {
             @LoginUserId final Long userId
     ) {
         return BaseResponse.ok(myPageService.showMyPageUserInfo(userId));
+    }
+
+    @PatchMapping("/profile")
+    public BaseResponse<PatchUserInfoResponse> updateMyPageProfile(
+            @RequestBody final PatchUserInfoRequest patchUserInfoRequest,
+            @LoginUserId final Long userId){
+        return BaseResponse.ok(myPageService.updateMyPageProfile(patchUserInfoRequest,userId));
     }
 
 }
