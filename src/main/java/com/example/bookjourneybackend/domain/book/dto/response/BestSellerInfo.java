@@ -7,4 +7,5 @@ import lombok.Getter;
 @AllArgsConstructor
 public class BestSellerInfo {
     private String imageUrl;
+    private String isbn;
 }

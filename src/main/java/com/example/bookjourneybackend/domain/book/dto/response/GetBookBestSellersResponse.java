@@ -11,10 +11,10 @@ import java.util.List;
 @NoArgsConstructor
 public class GetBookBestSellersResponse {
 
-    private List<BestSellerImageUrl> bestSellerList;
+    private List<BestSellerInfo> bestSellerList;
     private String nickName;
 
-    public static GetBookBestSellersResponse of(List<BestSellerImageUrl> bestSellerList, String nickName){
+    public static GetBookBestSellersResponse of(List<BestSellerInfo> bestSellerList, String nickName){
         return new GetBookBestSellersResponse(bestSellerList,nickName);
     }
 
