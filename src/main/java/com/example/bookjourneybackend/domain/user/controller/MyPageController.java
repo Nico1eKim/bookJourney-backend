@@ -2,6 +2,7 @@ package com.example.bookjourneybackend.domain.user.controller;
 
 import com.example.bookjourneybackend.domain.user.dto.request.PatchUserInfoRequest;
 import com.example.bookjourneybackend.domain.user.dto.response.GetMyPageCalendarResponse;
+import com.example.bookjourneybackend.domain.user.dto.response.GetMyPageCollectorNicknameResponse;
 import com.example.bookjourneybackend.domain.user.dto.response.GetMyPageUserInfoResponse;
 import com.example.bookjourneybackend.domain.user.dto.response.PatchUserInfoResponse;
 import com.example.bookjourneybackend.domain.user.service.MyPageService;
@@ -47,6 +48,13 @@ public class MyPageController {
             @RequestBody final PatchUserInfoRequest patchUserInfoRequest,
             @LoginUserId final Long userId){
         return BaseResponse.ok(myPageService.updateMyPageProfile(patchUserInfoRequest,userId));
+    }
+
+    @GetMapping("/collector-nickname")
+    public BaseResponse<GetMyPageCollectorNicknameResponse> getMyPageRecordCount(
+            @LoginUserId final Long userId
+    ) {
+        return BaseResponse.ok(myPageService.showMyPageRecordCount(userId));
     }
 
 }
