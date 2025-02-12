@@ -5,9 +5,13 @@ import com.example.bookjourneybackend.domain.room.domain.Room;
 import com.example.bookjourneybackend.domain.room.domain.repository.RoomRepository;
 import com.example.bookjourneybackend.domain.room.dto.response.GetRoomArchiveResponse;
 import com.example.bookjourneybackend.domain.room.dto.response.RecordInfo;
+import com.example.bookjourneybackend.domain.user.domain.User;
+import com.example.bookjourneybackend.domain.user.domain.repository.UserRepository;
 import com.example.bookjourneybackend.domain.userRoom.domain.UserRoom;
 import com.example.bookjourneybackend.domain.userRoom.domain.repository.UserRoomRepository;
 import com.example.bookjourneybackend.global.entity.EntityStatus;
+import com.example.bookjourneybackend.global.exception.GlobalException;
+import com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus;
 import com.example.bookjourneybackend.global.util.DateUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -20,11 +24,13 @@ import java.util.stream.Collectors;
 
 import static com.example.bookjourneybackend.global.entity.EntityStatus.EXPIRED;
 import static com.example.bookjourneybackend.global.entity.EntityStatus.INACTIVE;
+import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.CANNOT_FOUND_USER;
 
 @Service
 @RequiredArgsConstructor
 public class RoomArchiveService {
 
+    private final UserRepository userRepository;
     private final RoomRepository roomRepository;
     private final UserRoomRepository userRoomRepository;
     private final DateUtil dateUtil;
@@ -36,6 +42,8 @@ public class RoomArchiveService {
      * 정렬은 inActivatedAt 내림차순으로 정렬
      */
     public GetRoomArchiveResponse viewArchiveRooms(Long userId, Integer month, Integer year, EntityStatus status) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER));
 
         if (year == null) {
             // year가 null이면 이번달과 겹치는 모든 방을 조회
@@ -47,7 +55,7 @@ public class RoomArchiveService {
         List<UserRoom> togetherArchiveList = userRoomRepository.findInActiveTogetherRoomsByUserIdAndDate(userId, year, month, status);
         List<UserRoom> aloneArchiveList = userRoomRepository.findInActiveAloneRoomsByUserIdAndDate(userId, year, month, status);
 
-        return new GetRoomArchiveResponse(combineAndParseToRecordInfo(togetherArchiveList, aloneArchiveList, status));
+        return GetRoomArchiveResponse.of(user.getNickname(), combineAndParseToRecordInfo(togetherArchiveList, aloneArchiveList, status));
     }
 
     //DB에서 찾은 같이읽기와 혼자읽기 방을 InActivatedAt 내림차순으로 정렬하여 RecordInfo의 리스트로 파싱
