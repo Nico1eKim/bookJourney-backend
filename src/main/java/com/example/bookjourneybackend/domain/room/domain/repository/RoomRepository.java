@@ -23,6 +23,9 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
             "AND (:roomStartDate IS NULL OR r.startDate >= :roomStartDate) " +
             "AND (:roomEndDate IS NULL OR r.progressEndDate <= :roomEndDate) " +
             "AND (:recordCount IS NULL OR SIZE(r.records) >= :recordCount) " +
+            "AND (LOWER(r.roomName) LIKE LOWER(CONCAT('%', :searchTerm, '%')) " +
+            "OR LOWER(r.book.bookTitle) LIKE LOWER(CONCAT('%', :searchTerm, '%')) " +
+            "OR LOWER(r.book.authorName) LIKE LOWER(CONCAT('%', :searchTerm, '%'))) " + // 검색어 필터링
             "ORDER BY r.recruitEndDate ASC, r.progressEndDate DESC, SIZE(r.records) DESC")
     Slice<Room> findRoomsByFilters(
             @Param("genre") GenreType genre,
@@ -31,8 +34,8 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
             @Param("roomStartDate") LocalDate roomStartDate,
             @Param("roomEndDate") LocalDate roomEndDate,
             @Param("recordCount") Integer recordCount,
+            @Param("searchTerm") String searchTerm, // 검색어 추가
             Pageable pageable);
-
 
     /**
      * 정렬 기준 순서
