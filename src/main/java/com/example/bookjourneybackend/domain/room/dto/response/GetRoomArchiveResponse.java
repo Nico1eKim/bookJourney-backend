@@ -9,13 +9,15 @@ import java.util.List;
 @NoArgsConstructor
 public class GetRoomArchiveResponse {
 
+    private String nickName;
     private List<RecordInfo> recordList;
 
-    public GetRoomArchiveResponse(List<RecordInfo> recordList) {
+    public GetRoomArchiveResponse(String nickName, List<RecordInfo> recordList) {
+        this.nickName = nickName;
         this.recordList = recordList;
     }
 
-    public static GetRoomArchiveResponse of(List<RecordInfo> recordList) {
-        return new GetRoomArchiveResponse(recordList);
+    public static GetRoomArchiveResponse of(String nickName, List<RecordInfo> recordList) {
+        return new GetRoomArchiveResponse(nickName, recordList);
     }
 }
