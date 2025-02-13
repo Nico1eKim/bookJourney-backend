@@ -51,12 +51,12 @@ public class MyPageController {
     }
 
     @PatchMapping("/password")
-    public BaseResponse<Long> updateMyPagePassword(
+    public BaseResponse<Void> updateMyPagePassword(
             @LoginUserId final Long userId,
             @Valid @RequestBody final PatchUsersPasswordRequest patchUsersPasswordRequest
     ) {
         myPageService.updateMyPagePassword(userId, patchUsersPasswordRequest);
-        return BaseResponse.ok(userId);
+        return BaseResponse.ok();
     }
 
 }
