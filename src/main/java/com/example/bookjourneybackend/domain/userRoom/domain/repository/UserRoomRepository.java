@@ -39,7 +39,7 @@ public interface UserRoomRepository extends JpaRepository<UserRoom, Long> {
             "JOIN FETCH ur.room r " +
             "WHERE ur.user.userId = :userId AND ur.status = :status " +
             "AND ((:month IS NULL OR MONTH(r.startDate) <= :month) AND YEAR(r.startDate) <= :year " +
-            "OR (:month IS NULL OR MONTH(r.progressEndDate) >= :month) AND YEAR(r.progressEndDate) >= :year) " +
+            "AND (:month IS NULL OR MONTH(r.progressEndDate) >= :month) AND YEAR(r.progressEndDate) >= :year) " +
             "AND r.roomType = 'TOGETHER'")
    List<UserRoom> findInActiveTogetherRoomsByUserIdAndDate(@Param("userId") Long userId, @Param("year") Integer year, @Param("month") Integer month, @Param("status") EntityStatus status);
 
