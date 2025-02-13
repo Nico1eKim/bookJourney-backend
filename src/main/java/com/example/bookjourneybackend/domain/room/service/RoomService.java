@@ -99,6 +99,7 @@ public class RoomService {
                 room.getRoomPercentage().intValue(),
                 dateUtil.calculateDday(room.getProgressEndDate()),
                 isMember,
+                room.getRecruitCount(),
                 members);
     }
 
