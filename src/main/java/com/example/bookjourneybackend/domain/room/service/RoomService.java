@@ -127,6 +127,7 @@ public class RoomService {
                 dateUtil.parseDate(roomStartDate),
                 dateUtil.parseDate(roomEndDate),
                 recordCount,
+                searchType,
                 searchQuery, // LIKE 검색 수행
                 PageRequest.of(page, 10)
         );
@@ -149,15 +150,6 @@ public class RoomService {
         if (page == null) {
             throw new GlobalException(INVALID_PAGE);
         }
-    }
-
-    //검색 조건에 따라 방 필터링
-    private boolean filterRooms(Room room, SearchType searchType, String searchTerm) {
-        return switch (searchType) {
-            case ROOM_NAME -> room.getRoomName().contains(searchTerm);
-            case BOOK_TITLE -> room.getBook().getBookTitle().contains(searchTerm);
-            case AUTHOR_NAME -> room.getBook().getAuthorName().contains(searchTerm);
-        };
     }
 
     //Room 객체를 RoomInfo 객체로 매핑
