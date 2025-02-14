@@ -115,6 +115,8 @@ public class RoomService {
     ) {
         validateSearchParams(searchTerm, searchType, page);
 
+        SearchType searchTypeEnum = SearchType.from(searchType);
+
         GenreType genreType = genre != null && !genre.isEmpty() ? GenreType.fromGenreType(genre) : null;
         recentSearchService.addRecentSearch(userId, searchTerm);
 
@@ -128,7 +130,7 @@ public class RoomService {
                 dateUtil.parseDate(roomStartDate),
                 dateUtil.parseDate(roomEndDate),
                 recordCount,
-                searchType,
+                searchTypeEnum.name(),
                 searchQuery, // LIKE 검색 수행
                 PageRequest.of(page, 10)
         );

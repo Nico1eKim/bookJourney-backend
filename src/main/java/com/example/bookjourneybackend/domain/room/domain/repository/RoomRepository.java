@@ -24,9 +24,9 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
             "AND (:roomEndDate IS NULL OR r.progressEndDate <= :roomEndDate) " +
             "AND (:recordCount IS NULL OR SIZE(r.records) >= :recordCount) " +
             "AND ( " +
-            "  (:searchType = '방 이름' AND LOWER(r.roomName) LIKE LOWER(CONCAT('%', :searchTerm, '%'))) " +
-            "  OR (:searchType = '책 제목' AND LOWER(r.book.bookTitle) LIKE LOWER(CONCAT('%', :searchTerm, '%'))) " +
-            "  OR (:searchType = '작가 이름' AND LOWER(r.book.authorName) LIKE LOWER(CONCAT('%', :searchTerm, '%'))) " +
+            "  (:searchType = 'ROOM_NAME' AND LOWER(r.roomName) LIKE LOWER(CONCAT('%', :searchTerm, '%'))) " +
+            "  OR (:searchType = 'BOOK_TITLE' AND LOWER(r.book.bookTitle) LIKE LOWER(CONCAT('%', :searchTerm, '%'))) " +
+            "  OR (:searchType = 'AUTHOR_NAME' AND LOWER(r.book.authorName) LIKE LOWER(CONCAT('%', :searchTerm, '%'))) " +
             ") " +
             "ORDER BY r.recruitEndDate ASC, r.progressEndDate DESC, SIZE(r.records) DESC")
     Slice<Room> findRoomsByFilters(
