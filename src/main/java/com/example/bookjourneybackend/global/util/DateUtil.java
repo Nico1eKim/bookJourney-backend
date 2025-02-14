@@ -142,4 +142,11 @@ public class DateUtil {
         return startDate.format(DateTimeFormatter.ofPattern("yyyy.MM.dd")) + " ~ " + endDate.format(DateTimeFormatter.ofPattern("yyyy.MM.dd"));
     }
 
+    //LocalDateTime에서 LocalDate만 추출하여 String으로 반환 (ex. 2024.11.14)
+    public String extractDateFromLocalDateTime(LocalDateTime localDateTime) {
+        return Optional.ofNullable(localDateTime)
+                .map(dateTime -> dateTime.toLocalDate().format(DateTimeFormatter.ofPattern("yyyy.MM.dd")))
+                .orElse(null);
+    }
+
 }

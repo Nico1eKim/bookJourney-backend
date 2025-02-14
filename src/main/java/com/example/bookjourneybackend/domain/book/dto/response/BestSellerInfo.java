@@ -5,6 +5,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class BestSellerImageUrl {
+public class BestSellerInfo {
     private String imageUrl;
+    private String isbn;
 }

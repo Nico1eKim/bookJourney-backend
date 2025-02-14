@@ -77,7 +77,8 @@ public class SecurityConfig {
         configuration.setAllowedOrigins(Arrays.asList(
                 "http://localhost:5173",  // 로컬 환경
                 "http://ec2-13-48-61-179.eu-north-1.compute.amazonaws.com",  // 서버 배포 환경
-                "https://book-journey-two.vercel.app" //프엔 배포 환경
+                "https://book-journey-two.vercel.app", //프엔 배포 환경
+                "https://book-journey.click"
         ));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PATCH", "DELETE","PUT","OPTIONS"));  // 허용할 HTTP 메서드 설정
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Cache-Control", "Content-Type","Refresh-Token"));  // 허용할 헤더 설정

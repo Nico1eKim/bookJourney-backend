@@ -7,7 +7,7 @@ import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
 @Getter
-@JsonPropertyOrder({"code", "status", "message", "result"})
+@JsonPropertyOrder({"code", "status", "message", "data"})
 public class BaseResponse<T> implements ResponseStatus {
 
     private final int code;
@@ -34,6 +34,14 @@ public class BaseResponse<T> implements ResponseStatus {
 
     public static <T> BaseResponse<T> ok(T data) {
         return of(HttpStatus.OK, data);
+    }
+
+    public static BaseResponse<Void> of(HttpStatus status) {
+        return new BaseResponse<>(status, status.name(), null);
+    }
+
+    public static BaseResponse<Void> ok() {
+        return of(HttpStatus.OK);
     }
 
     @Override

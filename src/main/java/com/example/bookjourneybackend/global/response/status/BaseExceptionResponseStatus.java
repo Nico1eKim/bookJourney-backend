@@ -27,6 +27,7 @@ public enum BaseExceptionResponseStatus implements ResponseStatus {
     CANNOT_CREATE_EMAIL_AUTH_CODE(5005, BAD_REQUEST, "인증번호를 발급 받지 않은 이메일입니다. 먼저 인증번호를 발급받아주세요."),
     EMAIL_AUTH_CODE_EXPIRED(5006, BAD_REQUEST, "만료된 인증번호 입니다."),
     NO_SUCH_ALGORITHM(5007, BAD_REQUEST, "지정된 난수 생성 알고리즘을 찾을 수 없습니다."),
+    PASSWORD_NOT_EQUAL(5008, BAD_REQUEST, "현재 비밀번호와 일치하지 않습니다. 다시 입력해주세요."),
 
     /**
      * 5100 : image 관련
