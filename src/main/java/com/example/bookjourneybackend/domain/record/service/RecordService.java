@@ -79,9 +79,11 @@ public class RecordService {
                 .build();
 
         recordRepository.save(newRecord);
-//        room.addRecord(newRecord);
 
-        return PostRecordResponse.of(newRecord.getRecordId());
+        // 기록 개수 조회
+        int recordCount = userRepository.countRecordsByUserId(userId);
+
+        return PostRecordResponse.of(newRecord.getRecordId(), recordCount);
 
     }
 
@@ -222,7 +224,7 @@ public class RecordService {
 
         Optional<RecordLike> existingLike = recordLikeRepository.findByRecordAndUser(record, user);
 
-        if(existingLike.isPresent()) {
+        if (existingLike.isPresent()) {
             recordLikeRepository.delete(existingLike.get());
             return new PostRecordLikeResponse(false);
         } else {

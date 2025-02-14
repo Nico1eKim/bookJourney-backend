@@ -2,9 +2,11 @@ package com.example.bookjourneybackend.domain.user.service;
 
 import com.example.bookjourneybackend.domain.book.domain.Book;
 import com.example.bookjourneybackend.domain.room.domain.Room;
+import com.example.bookjourneybackend.domain.user.domain.CollectorNicknameType;
 import com.example.bookjourneybackend.domain.user.domain.User;
 import com.example.bookjourneybackend.domain.user.domain.repository.UserRepository;
 import com.example.bookjourneybackend.domain.user.dto.request.PatchUserInfoRequest;
+import com.example.bookjourneybackend.domain.user.dto.response.*;
 import com.example.bookjourneybackend.domain.user.dto.request.PatchUsersPasswordRequest;
 import com.example.bookjourneybackend.domain.user.dto.response.CalendarData;
 import com.example.bookjourneybackend.domain.user.dto.response.GetMyPageCalendarResponse;
@@ -127,6 +129,21 @@ public class MyPageService {
 
         return PatchUserInfoResponse.of(user);
     }
+
+    /**
+     * 사용자의 기록 개수를 조회하고, 해당 개수에 맞는 칭호를 반환
+     */
+    @Transactional(readOnly = true)
+    public GetMyPageCollectorNicknameResponse showMyPageRecordCount(Long userId) {
+
+        int recordCount = userRepository.countRecordsByUserId(userId);
+
+        CollectorNicknameType collectorNicknameType = CollectorNicknameType.getTitleByRecordCount(recordCount);
+        String collectorNickname = (collectorNicknameType != null) ? collectorNicknameType.getCollectorNicknameType() : "칭호 없음";
+
+        return GetMyPageCollectorNicknameResponse.of(collectorNickname, recordCount);
+    }
+
 
     /**
      * 비밀번호 수정
