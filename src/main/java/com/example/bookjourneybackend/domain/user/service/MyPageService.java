@@ -7,10 +7,16 @@ import com.example.bookjourneybackend.domain.user.domain.User;
 import com.example.bookjourneybackend.domain.user.domain.repository.UserRepository;
 import com.example.bookjourneybackend.domain.user.dto.request.PatchUserInfoRequest;
 import com.example.bookjourneybackend.domain.user.dto.response.*;
+import com.example.bookjourneybackend.domain.user.dto.request.PatchUsersPasswordRequest;
+import com.example.bookjourneybackend.domain.user.dto.response.CalendarData;
+import com.example.bookjourneybackend.domain.user.dto.response.GetMyPageCalendarResponse;
+import com.example.bookjourneybackend.domain.user.dto.response.GetMyPageUserInfoResponse;
+import com.example.bookjourneybackend.domain.user.dto.response.PatchUserInfoResponse;
 import com.example.bookjourneybackend.domain.userRoom.domain.repository.UserRoomRepository;
 import com.example.bookjourneybackend.global.exception.GlobalException;
 import com.example.bookjourneybackend.global.util.DateUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,8 +24,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.CANNOT_FOUND_USER;
-import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.INVALID_DATE;
+import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.*;
 
 @Service
 @RequiredArgsConstructor
@@ -29,6 +34,7 @@ public class MyPageService {
     private final UserRoomRepository userRoomRepository;
     private final DateUtil dateUtil;
     private final S3Service s3Service;
+    private final PasswordEncoder passwordEncoder;
 
     /**
      * 마이페이지 캘린더 조회
@@ -138,4 +144,24 @@ public class MyPageService {
         return GetMyPageCollectorNicknameResponse.of(collectorNickname, recordCount);
     }
 
+
+    /**
+     * 비밀번호 수정
+     */
+    @Transactional
+    public void updateMyPagePassword(Long userId, PatchUsersPasswordRequest patchUsersPasswordRequest) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER));
+
+        String userPassword = user.getPassword();
+        String currentPassword = patchUsersPasswordRequest.getCurrentPassword();
+        String newPassword = patchUsersPasswordRequest.getNewPassword();
+
+        if (!passwordEncoder.matches(currentPassword, userPassword)) {
+            throw new GlobalException(PASSWORD_NOT_EQUAL);
+        }
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+    }
 }
