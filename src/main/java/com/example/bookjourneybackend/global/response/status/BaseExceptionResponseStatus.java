@@ -97,6 +97,8 @@ public enum BaseExceptionResponseStatus implements ResponseStatus {
     ROOM_IS_ALONE(8012, BAD_REQUEST, "혼자읽기 방입니다."),
     CANNOT_FIND_HOST(8012, BAD_REQUEST, "호스트를 찾을 수 없습니다."),
 
+    CANNOT_DELETE_IN_EXPIRED_ROOM(8009, BAD_REQUEST, "기간이 지난 방에는 삭제할 수 없습니다."),
+
     /**
      * 9000 : record 관련
      */

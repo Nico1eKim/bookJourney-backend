@@ -299,13 +299,18 @@ public class RecordService {
         // 기록 조회
         Record record = recordRepository.findById(recordId)
                 .orElseThrow(() -> new GlobalException(CANNOT_FOUND_RECORD));
-
-        log.info(String.valueOf(userId));
-        log.info(String.valueOf(record.getUser().getUserId()));
+        Room room = record.getRoom();
+        User user = userRepository.findById(userId).orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER));
+        UserRoom userRoom = userRoomRepository.findUserRoomByRoomAndUser(room, user).orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER_ROOM));
 
         // 기록 작성자가 아닌 경우 삭제 불가능
         if (!record.getUser().getUserId().equals(userId)) {
             throw new GlobalException(UNAUTHORIZED_DELETE_RECORD);
+        }
+
+        // 방이 expired 상태이면 기록 삭제 불가능
+        if (userRoom.getStatus() == EXPIRED) {
+            throw new GlobalException(CANNOT_DELETE_IN_EXPIRED_ROOM);
         }
 
         // 기록 삭제
