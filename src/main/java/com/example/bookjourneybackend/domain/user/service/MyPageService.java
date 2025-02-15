@@ -19,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.DeleteMapping;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -35,6 +36,8 @@ public class MyPageService {
     private final DateUtil dateUtil;
     private final S3Service s3Service;
     private final PasswordEncoder passwordEncoder;
+
+
 
     /**
      * 마이페이지 캘린더 조회
@@ -164,4 +167,15 @@ public class MyPageService {
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
     }
+
+    /**
+     * 회원 탈퇴
+     */
+    public void deleteMyPageUser(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER));
+
+        userRepository.delete(user);
+    }
+
 }

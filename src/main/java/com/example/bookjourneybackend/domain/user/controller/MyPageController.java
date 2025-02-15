@@ -67,4 +67,9 @@ public class MyPageController {
         return BaseResponse.ok();
     }
 
+    @DeleteMapping("/delete")
+    public BaseResponse<Void> deleteMyPageUser(@LoginUserId final Long userId) {
+        myPageService.deleteMyPageUser(userId);
+        return BaseResponse.ok();
+    }
 }
