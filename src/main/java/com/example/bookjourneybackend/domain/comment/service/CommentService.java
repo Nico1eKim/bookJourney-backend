@@ -164,12 +164,20 @@ public class CommentService {
     @Transactional
     public void deleteComment(Long commentId, Long userId) {
         Comment comment = commentRepository.findById(commentId).orElseThrow(() -> new GlobalException(CANNOT_FOUND_COMMENT));
+        User user = userRepository.findById(userId).orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER));
+        Room room = comment.getRecord().getRoom();
+        UserRoom userRoom = userRoomRepository.findUserRoomByRoomAndUser(room, user).orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER_ROOM));
 
         // 댓글 작성자가 아닌 경우 삭제 불가능
-        if(!comment.getUser().getUserId().equals(userId)) {
+        if (!comment.getUser().getUserId().equals(userId)) {
             throw new GlobalException(UNAUTHORIZED_DELETE_COMMENT);
         }
 
-        commentRepository.delete(comment);
+        // 방 기간 지났으면 삭제 불가능
+        if (userRoom.getStatus() == EXPIRED) {
+            throw new GlobalException(CANNOT_DELETE_IN_EXPIRED_ROOM);
+        }
+
+            commentRepository.delete(comment);
     }
 }
