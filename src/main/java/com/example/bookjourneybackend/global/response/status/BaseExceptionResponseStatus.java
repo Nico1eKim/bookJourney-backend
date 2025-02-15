@@ -27,6 +27,7 @@ public enum BaseExceptionResponseStatus implements ResponseStatus {
     CANNOT_CREATE_EMAIL_AUTH_CODE(5005, BAD_REQUEST, "인증번호를 발급 받지 않은 이메일입니다. 먼저 인증번호를 발급받아주세요."),
     EMAIL_AUTH_CODE_EXPIRED(5006, BAD_REQUEST, "만료된 인증번호 입니다."),
     NO_SUCH_ALGORITHM(5007, BAD_REQUEST, "지정된 난수 생성 알고리즘을 찾을 수 없습니다."),
+    PASSWORD_NOT_EQUAL(5008, BAD_REQUEST, "현재 비밀번호와 일치하지 않습니다. 다시 입력해주세요."),
 
     /**
      * 5100 : image 관련
@@ -96,6 +97,8 @@ public enum BaseExceptionResponseStatus implements ResponseStatus {
     ROOM_IS_ALONE(8012, BAD_REQUEST, "혼자읽기 방입니다."),
     CANNOT_FIND_HOST(8012, BAD_REQUEST, "호스트를 찾을 수 없습니다."),
 
+    CANNOT_DELETE_IN_EXPIRED_ROOM(8009, BAD_REQUEST, "기간이 지난 방에는 삭제할 수 없습니다."),
+
     /**
      * 9000 : record 관련
      */
@@ -107,6 +110,8 @@ public enum BaseExceptionResponseStatus implements ResponseStatus {
     INVALID_PAGE_NUMBER(9002, BAD_REQUEST, "유효하지 않은 페이지 범위입니다."),
 
     INVALID_RECORD_SORT_TYPE(9003, BAD_REQUEST, "알맞은 기록 나열 타입을 찾을 수 없습니다."),
+
+    UNAUTHORIZED_DELETE_RECORD(9004, BAD_REQUEST, "기록 작성자가 아닌 경우 기록을 삭제할 수 없습니다."),
 
     /**
      * 10000 : recentSearch 관련
@@ -126,6 +131,7 @@ public enum BaseExceptionResponseStatus implements ResponseStatus {
      * 12000 : comment 관련
      */
     CANNOT_FOUND_COMMENT(12001, BAD_REQUEST, "댓글을 찾을 수 없습니다."),
+    UNAUTHORIZED_DELETE_COMMENT(12002, BAD_REQUEST, "댓글 작성자가 아닌 경우 댓글을 삭제할 수 없습니다."),
 
     /**
      * 13000 : mypage 관련
@@ -151,3 +157,4 @@ public enum BaseExceptionResponseStatus implements ResponseStatus {
         return message;
     }
 }
+

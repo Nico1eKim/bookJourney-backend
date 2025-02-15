@@ -31,7 +31,6 @@ import static com.example.bookjourneybackend.global.response.status.BaseExceptio
 public class RoomArchiveService {
 
     private final UserRepository userRepository;
-    private final RoomRepository roomRepository;
     private final UserRoomRepository userRoomRepository;
     private final DateUtil dateUtil;
 
@@ -55,7 +54,7 @@ public class RoomArchiveService {
         List<UserRoom> togetherArchiveList = userRoomRepository.findInActiveTogetherRoomsByUserIdAndDate(userId, year, month, status);
         List<UserRoom> aloneArchiveList = userRoomRepository.findInActiveAloneRoomsByUserIdAndDate(userId, year, month, status);
 
-        return GetRoomArchiveResponse.of(user.getNickname(), combineAndParseToRecordInfo(togetherArchiveList, aloneArchiveList, status));
+        return GetRoomArchiveResponse.of(dateUtil.extractDateFromLocalDateTime(user.getCreatedAt()), combineAndParseToRecordInfo(togetherArchiveList, aloneArchiveList, status));
     }
 
     //DB에서 찾은 같이읽기와 혼자읽기 방을 InActivatedAt 내림차순으로 정렬하여 RecordInfo의 리스트로 파싱

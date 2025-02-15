@@ -1,7 +1,9 @@
 package com.example.bookjourneybackend.domain.user.domain;
 
+import com.example.bookjourneybackend.domain.comment.domain.Comment;
 import com.example.bookjourneybackend.domain.favorite.domain.Favorite;
 import com.example.bookjourneybackend.domain.recentSearch.domain.RecentSearch;
+import com.example.bookjourneybackend.domain.record.domain.Record;
 import com.example.bookjourneybackend.domain.room.domain.Room;
 import com.example.bookjourneybackend.domain.userRoom.domain.UserRoom;
 import com.example.bookjourneybackend.global.entity.BaseEntity;
@@ -27,6 +29,7 @@ public class User extends BaseEntity{
     @Column(name = "email", nullable = false, length = 255)
     private String email;
 
+    @Setter
     @Column(name = "password", nullable = false, length = 255)
     private String password;
 
@@ -53,6 +56,14 @@ public class User extends BaseEntity{
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<UserRoom> userRooms = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<Record> records = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<Comment> comments = new ArrayList<>();
 
     @Builder
     public User(Long userId, String email, String password, String nickname) {

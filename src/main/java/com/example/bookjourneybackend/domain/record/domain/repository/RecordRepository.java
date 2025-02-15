@@ -25,4 +25,7 @@ public interface RecordRepository extends JpaRepository<Record, Long> {
     Optional<List<Record>> findRecordsOrderByPage(@Param("roomId") Long roomId, @Param("sortType") RecordSortType sortType);
 
     void deleteAllByRoomAndUser(Room room, User user);
+
+    void deleteByRecordId(Long recordId);
 }
+
