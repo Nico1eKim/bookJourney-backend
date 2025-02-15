@@ -138,5 +138,6 @@ public class RecentSearchService {
                 .build();
 
         recentSearchRepository.save(newRecentSearch);
+        recentSearchRepository.flush();
     }
 }
