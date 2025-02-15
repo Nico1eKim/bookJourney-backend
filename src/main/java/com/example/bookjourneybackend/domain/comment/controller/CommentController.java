@@ -46,4 +46,13 @@ public class CommentController {
     ) {
         return BaseResponse.ok(commentService.toggleCommentLike(commentId, userId));
     }
+
+    @DeleteMapping("/{commentId}")
+    public BaseResponse<Void> deleteComment(
+            @PathVariable("commentId") final Long commentId,
+            @LoginUserId final Long userId
+    ) {
+        commentService.deleteComment(commentId, userId);
+        return BaseResponse.ok();
+    }
 }
