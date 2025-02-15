@@ -97,6 +97,8 @@ public enum BaseExceptionResponseStatus implements ResponseStatus {
     ROOM_IS_ALONE(8012, BAD_REQUEST, "혼자읽기 방입니다."),
     CANNOT_FIND_HOST(8012, BAD_REQUEST, "호스트를 찾을 수 없습니다."),
 
+    CANNOT_DELETE_IN_EXPIRED_ROOM(8009, BAD_REQUEST, "기간이 지난 방에는 삭제할 수 없습니다."),
+
     /**
      * 9000 : record 관련
      */
@@ -108,6 +110,8 @@ public enum BaseExceptionResponseStatus implements ResponseStatus {
     INVALID_PAGE_NUMBER(9002, BAD_REQUEST, "유효하지 않은 페이지 범위입니다."),
 
     INVALID_RECORD_SORT_TYPE(9003, BAD_REQUEST, "알맞은 기록 나열 타입을 찾을 수 없습니다."),
+
+    UNAUTHORIZED_DELETE_RECORD(9004, BAD_REQUEST, "기록 작성자가 아닌 경우 기록을 삭제할 수 없습니다."),
 
     /**
      * 10000 : recentSearch 관련
@@ -152,3 +156,4 @@ public enum BaseExceptionResponseStatus implements ResponseStatus {
         return message;
     }
 }
+
