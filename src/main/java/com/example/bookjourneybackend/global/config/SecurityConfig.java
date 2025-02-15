@@ -31,13 +31,9 @@ public class SecurityConfig {
     private static final String[] AUTH_WHITELIST = {
             "/swagger-ui/**", "/api-docs", "/swagger-ui-custom.html",
             "/v3/api-docs/**", "/api-docs/**", "/swagger-ui.html","/swagger-ui/index.html",
-            "/auth/login","/auth/reissue",
-            "/users/signup","/users/emails/verification-requests","/users/emails/verifications",
-            "/users/nickname","/h2-console/**"
-
-            , "/books/**", "/rooms/**", "/users/**","/**"    //개발을 위해 일시적으로 허용..,
+            "/auth/login", "/users/signup","/users/emails/vertifications-requests","/users/emails/vertifications",
+            "/users/nickname","/users/images","/h2-console/**"
     };
-
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
@@ -76,9 +72,9 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(Arrays.asList(
                 "http://localhost:5173",  // 로컬 환경
-                "http://ec2-13-48-61-179.eu-north-1.compute.amazonaws.com",  // 서버 배포 환경
+                "http://ec2-13-48-61-179.eu-north-1.compute.amazonaws.com",  // http 배포 환경
                 "https://book-journey-two.vercel.app", //프엔 배포 환경
-                "https://book-journey.click"
+                "https://book-journey.click" //https 배포 환경
         ));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PATCH", "DELETE","PUT","OPTIONS"));  // 허용할 HTTP 메서드 설정
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Cache-Control", "Content-Type","Refresh-Token"));  // 허용할 헤더 설정
