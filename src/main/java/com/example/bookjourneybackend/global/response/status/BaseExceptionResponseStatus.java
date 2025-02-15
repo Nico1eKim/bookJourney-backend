@@ -127,6 +127,7 @@ public enum BaseExceptionResponseStatus implements ResponseStatus {
      * 12000 : comment 관련
      */
     CANNOT_FOUND_COMMENT(12001, BAD_REQUEST, "댓글을 찾을 수 없습니다."),
+    UNAUTHORIZED_DELETE_COMMENT(12002, BAD_REQUEST, "댓글 작성자가 아닌 경우 기록을 삭제할 수 없습니다."),
 
     /**
      * 13000 : mypage 관련

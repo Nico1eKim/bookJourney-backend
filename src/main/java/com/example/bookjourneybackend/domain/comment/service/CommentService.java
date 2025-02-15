@@ -45,6 +45,10 @@ public class CommentService {
     private final RecordLikeRepository recordLikeRepository;
     private final DateUtil dateUtil;
 
+    /**
+     * 댓글 조회
+     * 기록과 기록에 달린 댓글들을 한번에 조회합니다
+     */
     @Transactional(readOnly = true)
     public GetCommentListResponse showComments(Long recordId, Long userId) {
         Record record = recordRepository.findById(recordId).orElseThrow(() -> new GlobalException(CANNOT_FOUND_RECORD));
@@ -90,6 +94,9 @@ public class CommentService {
         return GetCommentListResponse.of(commentList, recordInfo);
     }
 
+    /**
+     * 댓글 달기
+     */
     @Transactional
     public PostCommentResponse createComment(Long recordId, Long userId, PostCommentRequest request) {
         Record record = recordRepository.findById(recordId).orElseThrow(() -> new GlobalException(CANNOT_FOUND_RECORD));
@@ -113,6 +120,9 @@ public class CommentService {
         return PostCommentResponse.of(newComment.getCommentId());
     }
 
+    /**
+     * 댓글 좋아요
+     */
     @Transactional
     public PostCommentLikeResponse toggleCommentLike(Long commentId, Long userId) {
         Comment comment = commentRepository.findById(commentId).orElseThrow(() -> new GlobalException(CANNOT_FOUND_COMMENT));
@@ -146,5 +156,20 @@ public class CommentService {
             commentLikeRepository.flush(); // 즉시 db에 반영
             return new PostCommentLikeResponse(true);
         }
+    }
+
+    /**
+     * 댓글 삭제
+     */
+    @Transactional
+    public void deleteComment(Long commentId, Long userId) {
+        Comment comment = commentRepository.findById(commentId).orElseThrow(() -> new GlobalException(CANNOT_FOUND_COMMENT));
+
+        // 댓글 작성자가 아닌 경우 삭제 불가능
+        if(!comment.getUser().getUserId().equals(userId)) {
+            throw new GlobalException(UNAUTHORIZED_DELETE_COMMENT);
+        }
+
+        commentRepository.delete(comment);
     }
 }
