@@ -59,7 +59,7 @@ class AuthServiceTest {
 
     @Test
     @DisplayName("로그인_성공")
-    void 로그인_성공() {
+    void loginSuccess() {
 
         // given
         User mockUser = new User(userId, email, passwordEncoder.encode(password), nickName);
@@ -90,7 +90,7 @@ class AuthServiceTest {
 
     @Test
     @DisplayName("로그인_실패_이메일_없음")
-    void 로그인_실패_이메일_없음() {
+    void loginFailureEmailNotFound() {
 
         // given
         PostAuthLoginRequest loginRequest = new PostAuthLoginRequest(email, password);
@@ -104,7 +104,7 @@ class AuthServiceTest {
 
     @Test
     @DisplayName("로그인_실패_비밀번호_불일치")
-    void 로그인_실패_비밀번호_불일치() {
+    void loginFailurePasswordMismatch() {
 
         // given
         User mockUser = new User(userId, email, passwordEncoder.encode("correctPassword"), nickName);
@@ -123,7 +123,7 @@ class AuthServiceTest {
 
     @Test
     @DisplayName("엑세스_토큰_재발급_성공")
-    void 엑세스_토큰_재발급_성공() {
+    void accessTokenReissueSuccess() {
 
         // given
         User mockUser = new User(userId, email, passwordEncoder.encode(password), nickName);
@@ -149,7 +149,7 @@ class AuthServiceTest {
 
     @Test
     @DisplayName("엑세스_토큰_재발급_실패_리프레시_토큰_만료")
-    void 엑세스_토큰_재발급_실패_리프레시_토큰_만료() {
+    void accessTokenReissueFailureRefreshTokenExpired() {
 
         // given
         String expiredRefreshToken = "expiredToken";
@@ -164,7 +164,7 @@ class AuthServiceTest {
 
     @Test
     @DisplayName("로그아웃_성공")
-    void 로그아웃_성공() {
+    void logoutSuccess() {
 
         // given
         User mockUser = new User(userId, email, passwordEncoder.encode(password), nickName);
