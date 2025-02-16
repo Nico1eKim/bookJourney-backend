@@ -7,12 +7,14 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class PostRecordResponse {
     private Long recordId;
+    private Integer recordCount;
 
-    public PostRecordResponse(Long recordId) {
+    public PostRecordResponse(Long recordId, Integer recordCount) {
         this.recordId = recordId;
+        this.recordCount = recordCount;
     }
 
-    public static PostRecordResponse of(Long recordId) {
-        return new PostRecordResponse(recordId);
+    public static PostRecordResponse of(Long recordId, Integer recordCount) {
+        return new PostRecordResponse(recordId, recordCount);
     }
 }

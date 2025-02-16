@@ -1,15 +1,17 @@
 package com.example.bookjourneybackend.domain.user.controller;
 
 import com.example.bookjourneybackend.domain.user.dto.request.PatchUserInfoRequest;
+import com.example.bookjourneybackend.domain.user.dto.request.PatchUsersPasswordRequest;
 import com.example.bookjourneybackend.domain.user.dto.response.GetMyPageCalendarResponse;
+import com.example.bookjourneybackend.domain.user.dto.response.GetMyPageCollectorNicknameResponse;
 import com.example.bookjourneybackend.domain.user.dto.response.GetMyPageUserInfoResponse;
 import com.example.bookjourneybackend.domain.user.dto.response.PatchUserInfoResponse;
 import com.example.bookjourneybackend.domain.user.service.MyPageService;
 import com.example.bookjourneybackend.global.annotation.LoginUserId;
 import com.example.bookjourneybackend.global.response.BaseResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequiredArgsConstructor
@@ -49,4 +51,25 @@ public class MyPageController {
         return BaseResponse.ok(myPageService.updateMyPageProfile(patchUserInfoRequest,userId));
     }
 
+    @GetMapping("/collector-nickname")
+    public BaseResponse<GetMyPageCollectorNicknameResponse> getMyPageRecordCount(
+            @LoginUserId final Long userId
+    ) {
+        return BaseResponse.ok(myPageService.showMyPageRecordCount(userId));
+    }
+
+    @PatchMapping("/password")
+    public BaseResponse<Void> updateMyPagePassword(
+            @LoginUserId final Long userId,
+            @Valid @RequestBody final PatchUsersPasswordRequest patchUsersPasswordRequest
+    ) {
+        myPageService.updateMyPagePassword(userId, patchUsersPasswordRequest);
+        return BaseResponse.ok();
+    }
+
+    @DeleteMapping("/delete")
+    public BaseResponse<Void> deleteMyPageUser(@LoginUserId final Long userId) {
+        myPageService.deleteMyPageUser(userId);
+        return BaseResponse.ok();
+    }
 }

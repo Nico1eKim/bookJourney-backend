@@ -65,4 +65,14 @@ public class RecordController {
         return BaseResponse.ok(recordService.enterRecordPage(roomId, userId, currentPage));
     }
 
+    @DeleteMapping("/{recordId}")
+    public BaseResponse<Void> deleteRecord(
+            @PathVariable("recordId") final Long recordId,
+            @LoginUserId final Long userId
+    ) {
+        recordService.deleteRecord(recordId, userId);
+        return BaseResponse.ok();
+    }
+
 }
+

@@ -22,6 +22,7 @@ import com.example.bookjourneybackend.domain.userRoom.domain.repository.UserRoom
 import com.example.bookjourneybackend.global.exception.GlobalException;
 import com.example.bookjourneybackend.global.util.DateUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,6 +39,7 @@ import java.util.stream.Collectors;
 import static com.example.bookjourneybackend.domain.record.domain.RecordSortType.LATEST;
 import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.*;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class RecordService {
@@ -69,6 +71,14 @@ public class RecordService {
         RecordType recordType = RecordType.from(postRecordRequest.getRecordType());
         validateRecordRequest(postRecordRequest, recordType);
 
+        Book book = room.getBook();
+        int totalPages = book.getPageCount();
+
+        //  페이지 기록일 때 입력한 페이지 가 책의 페이지 수보다 크면 오류 발생
+        if (recordType == RecordType.PAGE && postRecordRequest.getRecordPage() > totalPages) {
+            throw new GlobalException(INVALID_PAGE_NUMBER);
+        }
+
         Record newRecord = Record.builder()
                 .room(room)
                 .user(user)
@@ -79,9 +89,11 @@ public class RecordService {
                 .build();
 
         recordRepository.save(newRecord);
-//        room.addRecord(newRecord);
 
-        return PostRecordResponse.of(newRecord.getRecordId());
+        // 기록 개수 조회
+        int recordCount = userRepository.countRecordsByUserId(userId);
+
+        return PostRecordResponse.of(newRecord.getRecordId(), recordCount);
 
     }
 
@@ -222,7 +234,7 @@ public class RecordService {
 
         Optional<RecordLike> existingLike = recordLikeRepository.findByRecordAndUser(record, user);
 
-        if(existingLike.isPresent()) {
+        if (existingLike.isPresent()) {
             recordLikeRepository.delete(existingLike.get());
             return new PostRecordLikeResponse(false);
         } else {
@@ -286,4 +298,31 @@ public class RecordService {
 
         return PostRecordPageResponse.of(currentPage);
     }
+
+    /**
+     * 기록 삭제
+     */
+    @Transactional
+    public void deleteRecord(Long recordId, Long userId) {
+        // 기록 조회
+        Record record = recordRepository.findById(recordId)
+                .orElseThrow(() -> new GlobalException(CANNOT_FOUND_RECORD));
+        Room room = record.getRoom();
+        User user = userRepository.findById(userId).orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER));
+        UserRoom userRoom = userRoomRepository.findUserRoomByRoomAndUser(room, user).orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER_ROOM));
+
+        // 기록 작성자가 아닌 경우 삭제 불가능
+        if (!record.getUser().getUserId().equals(userId)) {
+            throw new GlobalException(UNAUTHORIZED_DELETE_RECORD);
+        }
+
+        // 방이 expired 상태이면 기록 삭제 불가능
+        if (userRoom.getStatus() == EXPIRED) {
+            throw new GlobalException(CANNOT_DELETE_IN_EXPIRED_ROOM);
+        }
+
+        // 기록 삭제
+        recordRepository.deleteByRecordId(recordId);
+    }
 }
+

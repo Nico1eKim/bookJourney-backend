@@ -2,9 +2,12 @@ package com.example.bookjourneybackend.domain.user.service;
 
 import com.example.bookjourneybackend.domain.book.domain.Book;
 import com.example.bookjourneybackend.domain.room.domain.Room;
+import com.example.bookjourneybackend.domain.user.domain.CollectorNicknameType;
 import com.example.bookjourneybackend.domain.user.domain.User;
 import com.example.bookjourneybackend.domain.user.domain.repository.UserRepository;
 import com.example.bookjourneybackend.domain.user.dto.request.PatchUserInfoRequest;
+import com.example.bookjourneybackend.domain.user.dto.response.*;
+import com.example.bookjourneybackend.domain.user.dto.request.PatchUsersPasswordRequest;
 import com.example.bookjourneybackend.domain.user.dto.response.CalendarData;
 import com.example.bookjourneybackend.domain.user.dto.response.GetMyPageCalendarResponse;
 import com.example.bookjourneybackend.domain.user.dto.response.GetMyPageUserInfoResponse;
@@ -13,15 +16,16 @@ import com.example.bookjourneybackend.domain.userRoom.domain.repository.UserRoom
 import com.example.bookjourneybackend.global.exception.GlobalException;
 import com.example.bookjourneybackend.global.util.DateUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.DeleteMapping;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.CANNOT_FOUND_USER;
-import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.INVALID_DATE;
+import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.*;
 
 @Service
 @RequiredArgsConstructor
@@ -31,6 +35,9 @@ public class MyPageService {
     private final UserRoomRepository userRoomRepository;
     private final DateUtil dateUtil;
     private final S3Service s3Service;
+    private final PasswordEncoder passwordEncoder;
+
+
 
     /**
      * 마이페이지 캘린더 조회
@@ -106,7 +113,7 @@ public class MyPageService {
      * 닉네임 변경 -> 닉네임 변경
      */
     @Transactional
-    public PatchUserInfoResponse updateMyPageProfile(PatchUserInfoRequest patchUserInfoRequest,Long userId) {
+    public PatchUserInfoResponse updateMyPageProfile(PatchUserInfoRequest patchUserInfoRequest, Long userId) {
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER));
@@ -118,11 +125,57 @@ public class MyPageService {
             user.setImageUrl(patchUserInfoRequest.getImageUrl());
         }
         //닉네임 변경
-        if(!patchUserInfoRequest.getNickName().isBlank()){
+        if (!patchUserInfoRequest.getNickName().isBlank()) {
             user.setNickname(patchUserInfoRequest.getNickName());
         }
         userRepository.save(user);
 
         return PatchUserInfoResponse.of(user);
     }
+
+    /**
+     * 사용자의 기록 개수를 조회하고, 해당 개수에 맞는 칭호를 반환
+     */
+    @Transactional(readOnly = true)
+    public GetMyPageCollectorNicknameResponse showMyPageRecordCount(Long userId) {
+
+        int recordCount = userRepository.countRecordsByUserId(userId);
+
+        CollectorNicknameType collectorNicknameType = CollectorNicknameType.getTitleByRecordCount(recordCount);
+        String collectorNickname = (collectorNicknameType != null) ? collectorNicknameType.getCollectorNicknameType() : "칭호 없음";
+
+        return GetMyPageCollectorNicknameResponse.of(collectorNickname, recordCount);
+    }
+
+
+    /**
+     * 비밀번호 수정
+     */
+    @Transactional
+    public void updateMyPagePassword(Long userId, PatchUsersPasswordRequest patchUsersPasswordRequest) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER));
+
+        String userPassword = user.getPassword();
+        String currentPassword = patchUsersPasswordRequest.getCurrentPassword();
+        String newPassword = patchUsersPasswordRequest.getNewPassword();
+
+        if (!passwordEncoder.matches(currentPassword, userPassword)) {
+            throw new GlobalException(PASSWORD_NOT_EQUAL);
+        }
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+    }
+
+    /**
+     * 회원 탈퇴
+     */
+    public void deleteMyPageUser(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER));
+
+        userRepository.delete(user);
+    }
+
 }
