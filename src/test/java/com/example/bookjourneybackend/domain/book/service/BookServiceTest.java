@@ -100,7 +100,7 @@ class BookServiceTest {
 
     @Test
     @DisplayName("알라딘 api 호출이 제대로 되고 책 제목 검색이 제대로 되는지 테스트")
-    public void test_searchBook_byTitle() throws Exception {
+    public void searchBookByTitle() throws Exception {
         //given
         User user = userRepository.findByEmailAndStatus(email, ACTIVE).get();
         String searchTerm = "해리포터";
@@ -124,7 +124,7 @@ class BookServiceTest {
     @Test
     @Rollback(value = false)
     @DisplayName("알라딘 api 호출이 제대로 되고 작가 이름 검색이 제대로 되는지 테스트")
-    public void test_searchBook_byAuthor() throws Exception {
+    public void searchBookByAuthor() throws Exception {
         //given
         User user = userRepository.findByEmailAndStatus(email, ACTIVE).get();
         String searchTerm = "한강";
@@ -136,7 +136,6 @@ class BookServiceTest {
                 .build();
 
         //when
-
         GetBookListResponse response = bookService.searchBook(request, user.getUserId());
 
         //then
@@ -148,7 +147,7 @@ class BookServiceTest {
 
     @Test
     @DisplayName("요청한 isbn이 DB에 존재하지 않을 경우 알라딘 api를 호출하여 해당하는 책 정보를 반환하는지 테스트")
-    void test_showBookInfo_isNotExistDB() throws Exception {
+    void showBookInfoIfBookIsNotExistInDB() throws Exception {
         // given
         User user = userRepository.findByEmailAndStatus(email, ACTIVE).get();
         String isbn = "9791193790694";
@@ -162,7 +161,7 @@ class BookServiceTest {
     
     @Test
     @DisplayName("요청한 isbn이 DB에 존재하고 사용자가 이미 즐겨찾기해뒀을 경우 책 정보를 알맞게 반환하는지 테스트")
-    void test_showBookInfo_isExistDb() throws Exception {
+    void showBookInfoIfBookIsFavoriteBook() throws Exception {
         //given
         User user = userRepository.findByEmailAndStatus(email, ACTIVE).get();
         String isbn = "9791193790663";
@@ -197,7 +196,7 @@ class BookServiceTest {
 
     @Test
     @DisplayName("읽기횟수가 가장 많은 책을 알맞게 조회하는지 테스트")
-    public void test_showPopularBook() throws Exception {
+    public void showPopularBook() throws Exception {
         //given
         User user = userRepository.findByEmailAndStatus(email, ACTIVE).get();
 
@@ -245,7 +244,7 @@ class BookServiceTest {
 
     @Test
     @DisplayName("사용자의 관심장르에 따른 베스트셀러를 알맞게 조회하는지 테스트")
-    void test_showBestSeller() throws Exception {
+    void showBestSellerByUserFavoriteGenre() throws Exception {
         //given
         User user = userRepository.findByEmailAndStatus(email, ACTIVE).get();
         Book book = Book.builder()

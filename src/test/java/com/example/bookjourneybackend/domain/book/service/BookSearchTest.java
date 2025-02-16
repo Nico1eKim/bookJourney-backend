@@ -54,7 +54,7 @@ class BookSearchTest {
 
     @Test
     @DisplayName("알라딘 api를 통해 책 검색을 했을 때 10개의 책이 반환되고, 캐싱이 올바르게 되고 있는지 테스트")
-    void test_searchBook() {
+    void searchBookByAladinApiWithCaching() {
         // given
         Long userId = 1L;
         GetBookListRequest request = GetBookListRequest.builder()
@@ -87,7 +87,7 @@ class BookSearchTest {
 
     @Test
     @DisplayName("가장 인기 있는 책이 없을 때 null로 반환 테스트")
-    void test_showPopularBook_NotFound() {
+    void returnNullIfNotExistPopularBook() {
         // given
         when(bookRepository.findBookWithMostRooms()).thenReturn(Collections.emptyList());
 
