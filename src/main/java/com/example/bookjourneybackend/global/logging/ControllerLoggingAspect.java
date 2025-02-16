@@ -25,7 +25,8 @@ import java.lang.reflect.Field;
 public class ControllerLoggingAspect {
 
     private final HttpServletRequest request;
-    private final ObjectMapper objectMapper = new ObjectMapper(); //  JSON 변환용 ObjectMapper
+    private final ObjectMapper objectMapper = new ObjectMapper(); // JSON 변환용 ObjectMapper
+    private static final ThreadLocal<Long> startTime = new ThreadLocal<>();
 
     public ControllerLoggingAspect(HttpServletRequest request) {
         this.request = request;
@@ -36,26 +37,30 @@ public class ControllerLoggingAspect {
 
     @Before("controller()")
     public void requestLog(JoinPoint joinPoint) {
+        startTime.set(System.currentTimeMillis());
         String httpMethod = request.getMethod();
         String requestUrl = request.getRequestURI();
-        log.info("======= Request Received: [{}] {} =======", httpMethod, requestUrl);
+        log.info("=============================== API 요청: [{}] {} ===============================", httpMethod, requestUrl);
 
         Method method = getMethod(joinPoint);
         log.info("Handler Method: {}", method.getName());
 
         Object[] args = joinPoint.getArgs();
+        String[] paramNames = ((MethodSignature) joinPoint.getSignature()).getParameterNames();
         if (args.length == 0) {
             log.info("No parameters in request.");
         } else {
-            for (Object arg : args) {
+            for (int i = 0; i < args.length; i++) {
+                Object arg = args[i];
+                String paramName = paramNames[i];
                 if (arg == null) {
-                    log.info("Parameter value is null.");
+                    log.info("Parameter: {} = null", paramName);
                 } else if (arg instanceof ServletRequest || arg instanceof ServletResponse || arg instanceof BindingResult) {
                     log.info("Skipping system object: {}", arg.getClass().getSimpleName());
                 } else if (isPrimitiveOrWrapper(arg.getClass()) || arg instanceof String) {
-                    log.info("Parameter: {} = {}", arg.getClass().getSimpleName(), arg);
+                    log.info("Parameter: {} = {}", paramName, arg);
                 } else {
-                    logJson("Request", arg); //  DTO를 JSON으로 변환하여 로깅
+                    logJson("Request", arg);
                 }
             }
         }
@@ -63,9 +68,11 @@ public class ControllerLoggingAspect {
 
     @AfterReturning(value = "controller()", returning = "returnObj")
     public void afterReturnLog(JoinPoint joinPoint, Object returnObj) {
+        long elapsedTime = System.currentTimeMillis() - startTime.get();
         String httpMethod = request.getMethod();
         String requestUrl = request.getRequestURI();
-        log.info("======= Processed Request: [{}] {} =======", httpMethod, requestUrl);
+        log.info("=============================== API 응답: [{}] {} ===============================", httpMethod, requestUrl);
+        log.info("응답 소요시간: {} ms", elapsedTime);
 
         Method method = getMethod(joinPoint);
         log.info("Handler Method: {}", method.getName());
@@ -82,14 +89,14 @@ public class ControllerLoggingAspect {
                 log.info("Map Size: {}", ((Map<?, ?>) returnObj).size());
                 ((Map<?, ?>) returnObj).forEach((key, value) -> logJson("Key: " + key, value));
             } else {
-                logJson("Response", returnObj); //  BaseResponse 및 내부 DTO를 JSON으로 로깅
+                logJson("Response", returnObj);
             }
         } else {
             log.info("Return Value: null");
         }
     }
 
-    //  JSON 변환 및 로깅
+    // JSON 변환 및 로깅
     private void logJson(String label, Object obj) {
         try {
             String json = objectMapper.writeValueAsString(obj);
