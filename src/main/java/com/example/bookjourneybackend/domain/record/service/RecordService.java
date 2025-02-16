@@ -71,6 +71,14 @@ public class RecordService {
         RecordType recordType = RecordType.from(postRecordRequest.getRecordType());
         validateRecordRequest(postRecordRequest, recordType);
 
+        Book book = room.getBook();
+        int totalPages = book.getPageCount();
+
+        //  페이지 기록일 때 입력한 페이지 가 책의 페이지 수보다 크면 오류 발생
+        if (recordType == RecordType.PAGE && postRecordRequest.getRecordPage() > totalPages) {
+            throw new GlobalException(INVALID_PAGE_NUMBER);
+        }
+
         Record newRecord = Record.builder()
                 .room(room)
                 .user(user)
