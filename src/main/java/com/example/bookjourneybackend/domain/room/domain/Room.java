@@ -16,8 +16,7 @@ import java.util.List;
 @Entity
 @Getter
 @Builder
-//@Table(name = "rooms")
-@Table(name = "rooms", indexes = @Index(name = "idx_room_name", columnList = "room_name"))
+@Table(name = "rooms")
 @AllArgsConstructor
 @NoArgsConstructor
 public class Room extends BaseEntity {
