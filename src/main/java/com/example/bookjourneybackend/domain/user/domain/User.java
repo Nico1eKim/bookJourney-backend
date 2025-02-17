@@ -26,11 +26,11 @@ public class User extends BaseEntity{
     @Column(name = "user_id")
     private Long userId;
 
-    @Column(name = "email", nullable = false, length = 255)
+    @Column(name = "email", nullable = false)
     private String email;
 
     @Setter
-    @Column(name = "password", nullable = false, length = 255)
+    @Column(name = "password", nullable = false, length = 20)
     private String password;
 
     @Setter

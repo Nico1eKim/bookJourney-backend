@@ -7,7 +7,6 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,10 +26,9 @@ public class Book extends BaseEntity {
     @Column(nullable = false)
     private GenreType genre;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 500)
     private String bookTitle;
 
-    @Column(length = 255)
     private String publisher;
 
     private LocalDate publishedDate;
@@ -41,10 +39,10 @@ public class Book extends BaseEntity {
     @Setter
     private Integer pageCount;
 
-    @Column(length = 1000)
+    @Column(length = 3000)
     private String description;
 
-    @Column(nullable = false, length = 50)
+    @Column(nullable = false)
     private String authorName;
 
     @Builder.Default
@@ -55,7 +53,7 @@ public class Book extends BaseEntity {
     @OneToMany(mappedBy = "book", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Room> rooms = new ArrayList<>();
 
-    @Column(nullable = false, length = 500)
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String imageUrl;
 
     @Setter

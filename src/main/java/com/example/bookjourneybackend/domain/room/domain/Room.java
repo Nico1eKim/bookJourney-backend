@@ -29,7 +29,7 @@ public class Room extends BaseEntity {
     @Column(nullable = false)
     private RoomType roomType;
 
-    @Column(length = 60)
+    @Column(length = 75)
     private String roomName;
 
     @Setter
