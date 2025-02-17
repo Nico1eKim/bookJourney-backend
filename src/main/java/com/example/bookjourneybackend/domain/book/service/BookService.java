@@ -29,7 +29,6 @@ import java.util.concurrent.CompletableFuture;
 import static com.example.bookjourneybackend.global.entity.EntityStatus.ACTIVE;
 import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.*;
 
-@Slf4j
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
@@ -63,15 +62,11 @@ public class BookService {
         // 비동기적으로 다음 페이지 캐싱
         CompletableFuture.runAsync(() -> {
             bookCacheService.getCurrentPage(getBookListRequest.IncreasePage());
-            log.info("Next page caching completed for request page: {}", getBookListRequest.IncreasePage().getPage());
         });
 
         //응답 JSON 데이터 파싱
         List<BookInfo> bookList = parseBookListFromResponse(currentResponse);
 
-
-        log.info("Caching completed for current page.");
-        log.info("currentResponse: {}", currentResponse);
         return GetBookListResponse.of(bookList);
     }
 
@@ -85,6 +80,7 @@ public class BookService {
 
             JsonNode root = objectMapper.readTree(currentResponse);
             String searchCategoryName = root.get("searchCategoryName").asText();
+
             JsonNode items = root.get("item");
 
             if (items != null && items.isArray()) {
@@ -109,14 +105,15 @@ public class BookService {
                 }
             }
         } catch (JsonProcessingException e) {
-            log.info("Json 파싱 에러 메시지: {}", e.getMessage());
             throw new GlobalException(ALADIN_API_PARSING_ERROR);
         }
         return bookList;
     }
 
+    /**
+     * 책 상세정보 조회
+     */
     public GetBookInfoResponse showBookInfo(String isbn, Long userId) {
-        log.info("------------------------[BookService.showBookInfo]------------------------");
         GetBookInfoResponse getBookInfoResponse = bookCacheService.checkBookInfo(isbn);
 
         Optional<Book> findBook = bookRepository.findByIsbn(isbn);
@@ -132,6 +129,9 @@ public class BookService {
         return getBookInfoResponse;
     }
 
+    /**
+     * 읽기횟수가 가장 많은 책 조회
+     */
     public GetBookPopularResponse showPopularBook() {
         return bookRepository.findBookWithMostRooms().stream()
                 .findFirst()
@@ -144,7 +144,7 @@ public class BookService {
                         book.getRooms().size(),
                         book.getDescription()
                 ))
-                .orElseThrow(() -> new GlobalException(CANNOT_FOUND_POPULAR_BOOK));
+                .orElse(null);
     }
 
 
@@ -154,7 +154,6 @@ public class BookService {
      * @return GetBookBestSellersResponse
      */
     public GetBookBestSellersResponse showBestSellers(Long userId) {
-        log.info("[BookService.showBestSellers]");
 
         //로그인 한 유저 찾기
         User user = userRepository.findByUserIdAndStatus(userId, ACTIVE)
