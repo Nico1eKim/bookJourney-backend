@@ -17,7 +17,9 @@ import java.util.List;
 @Repository
 public interface RoomRepository extends JpaRepository<Room, Long> {
     @Query("SELECT r FROM Room r " +
-            "WHERE (:genre IS NULL OR r.book.genre = :genre) " +
+            "WHERE r.roomType = 'TOGETHER' " +  // TOGETHER 타입만 조회
+            "AND r.status = 'ACTIVE' "+
+            "AND (:genre IS NULL OR r.book.genre = :genre) " +
             "AND (:recruitStartDate IS NULL OR r.startDate >= :recruitStartDate) " +
             "AND (:recruitEndDate IS NULL OR r.recruitEndDate <= :recruitEndDate) " +
             "AND (:roomStartDate IS NULL OR r.startDate >= :roomStartDate) " +
