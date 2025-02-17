@@ -24,6 +24,6 @@ public class BestsellerUpdateScheduler implements ApplicationRunner {
     // 애플리케이션 시작 시 한 번 실행
     @Override
     public void run(ApplicationArguments args) {
-        updateBestsellers();
+        //updateBestsellers();
     }
 }

@@ -8,4 +8,5 @@ import lombok.Getter;
 public class BestSellerInfo {
     private String imageUrl;
     private String isbn;
+    private String genreName;
 }

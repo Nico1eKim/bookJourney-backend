@@ -149,7 +149,7 @@ public class BookService {
 
 
     /**
-     * 로그인 한 유저의 베스트셀러 이미지 조회
+     * 로그인 한 유저의 베스트셀러 정보 조회
      * @param userId
      * @return GetBookBestSellersResponse
      */
@@ -162,17 +162,17 @@ public class BookService {
         //유저의 관심장르 찾기
         List<FavoriteGenre> favoriteGenres = user.getFavoriteGenres();
 
-        List<BestSellerInfo> imageUrls = new ArrayList<>();
+        List<BestSellerInfo> bestSellerInfoList = new ArrayList<>();
 
-        //유저의 관심장르 별 베스트셀러의 이미지 불러오기
+        //유저의 관심장르 별 베스트셀러 정보 불러오기
         for (FavoriteGenre favoriteGenre : favoriteGenres) {
             Book bestseller = bookRepository.findByBestSellerTrueAndGenre(favoriteGenre.getGenre())
                     .orElseThrow(() -> new GlobalException(CANNOT_FOUND_BESTSELLER));
 
-            BestSellerInfo imageUrl = new BestSellerInfo(bestseller.getImageUrl(),bestseller.getIsbn());
-            imageUrls.add(imageUrl);
+            BestSellerInfo bestSellerInfo = new BestSellerInfo(bestseller.getImageUrl(),bestseller.getIsbn(),bestseller.getGenre().getGenreType());
+            bestSellerInfoList.add(bestSellerInfo);
         }
-        return GetBookBestSellersResponse.of(imageUrls,user.getNickname());
+        return GetBookBestSellersResponse.of(bestSellerInfoList,user.getNickname());
 
     }
 
