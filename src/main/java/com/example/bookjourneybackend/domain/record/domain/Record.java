@@ -31,7 +31,6 @@ public class Record extends BaseEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(length = 90)
     private String recordTitle;
 
     @Enumerated(EnumType.STRING)
@@ -40,7 +39,7 @@ public class Record extends BaseEntity {
 
     private Integer recordPage;
 
-    @Column(nullable = false, length = 3000)
+    @Column(nullable = false)
     private String content;
 
     @Builder.Default

@@ -24,7 +24,7 @@ public class RecentSearch extends BaseEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(name = "recent_search", nullable = false, length = 255)
+    @Column(name = "recent_search", nullable = false)
     private String recentSearch;
 
     @Builder
