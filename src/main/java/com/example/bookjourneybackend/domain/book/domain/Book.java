@@ -44,7 +44,7 @@ public class Book extends BaseEntity {
     @Column(length = 1000)
     private String description;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 50)
     private String authorName;
 
     @Builder.Default
@@ -55,7 +55,7 @@ public class Book extends BaseEntity {
     @OneToMany(mappedBy = "book", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Room> rooms = new ArrayList<>();
 
-    @Column(nullable = false, columnDefinition = "TEXT")
+    @Column(nullable = false, length = 500)
     private String imageUrl;
 
     @Setter
