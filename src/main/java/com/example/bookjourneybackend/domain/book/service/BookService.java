@@ -29,6 +29,7 @@ import java.util.concurrent.CompletableFuture;
 import static com.example.bookjourneybackend.global.entity.EntityStatus.ACTIVE;
 import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.*;
 
+@Slf4j
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
@@ -58,6 +59,7 @@ public class BookService {
 
         // 현재 페이지 데이터 가져오기
         String currentResponse = bookCacheService.getCurrentPage(getBookListRequest);
+        log.info("currentResponse : {}", currentResponse);
 
         // 비동기적으로 다음 페이지 캐싱
         CompletableFuture.runAsync(() -> {
@@ -92,12 +94,21 @@ public class BookService {
                     String isbn = item.has("isbn13") && !item.get("isbn13").asText().isEmpty()
                             ? item.get("isbn13").asText()
                             : item.get("isbn").asText();
+
+                    if (isbn.startsWith("K")) { //책이 아닌 경우(ex. 굿즈) 책 목록에서 제거
+                        continue;
+                    }
+
                     String cover = item.get("cover").asText();
 
                     String description = item.get("description").asText();
-                    GenreType genreType = GenreType.parsingGenreType(searchCategoryName);
+
                     String publisher = item.get("publisher").asText();
                     String publishedDate = item.get("pubDate").asText();
+
+                    String categoryName = item.get("categoryName").asText();
+                    GenreType genreType = (searchCategoryName == null || searchCategoryName.isBlank() || searchCategoryName.isEmpty() || searchCategoryName.equals("전체"))?
+                            GenreType.parsingGenreType(categoryName) : GenreType.parsingGenreType(searchCategoryName);
 
                     GetBookInfoResponse g = bookCacheService.cachingBookInfo(title, author, isbn, cover, description, genreType.getGenreType(), publisher, publishedDate);
 
