@@ -1,8 +1,8 @@
 ---
-name: "Issue:\U0001F41EBUG"
-about: Bug 발생 시 작성해주세요.
-title: "[BUG]"
-labels: "⚡️ fix"
+name: Issue:⛑️TEST
+about: Test 시 작성해주세요
+title: "[TEST]"
+labels: "⚠️ test"
 assignees: ''
 
 ---
@@ -10,7 +10,7 @@ assignees: ''
 ## 📄Description
 설명을 작성해주세요.
 
-## ✅Tasks
+## ✅Test Tasks
 - [ ] todo
 - [ ] todo
 
