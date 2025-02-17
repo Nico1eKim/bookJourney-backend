@@ -27,7 +27,7 @@ public class Book extends BaseEntity {
     @Column(nullable = false)
     private GenreType genre;
 
-    @Column(nullable = false, length = 100)
+    @Column(nullable = false)
     private String bookTitle;
 
     @Column(length = 255)
