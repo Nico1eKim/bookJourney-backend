@@ -59,19 +59,16 @@ public class BookService {
 
         // 현재 페이지 데이터 가져오기
         String currentResponse = bookCacheService.getCurrentPage(getBookListRequest);
+        log.info("currentResponse : {}", currentResponse);
 
         // 비동기적으로 다음 페이지 캐싱
         CompletableFuture.runAsync(() -> {
             bookCacheService.getCurrentPage(getBookListRequest.IncreasePage());
-            log.info("Next page caching completed for request page: {}", getBookListRequest.IncreasePage().getPage());
         });
 
         //응답 JSON 데이터 파싱
         List<BookInfo> bookList = parseBookListFromResponse(currentResponse);
 
-
-        log.info("Caching completed for current page.");
-        log.info("currentResponse: {}", currentResponse);
         return GetBookListResponse.of(bookList);
     }
 
@@ -85,6 +82,7 @@ public class BookService {
 
             JsonNode root = objectMapper.readTree(currentResponse);
             String searchCategoryName = root.get("searchCategoryName").asText();
+
             JsonNode items = root.get("item");
 
             if (items != null && items.isArray()) {
@@ -96,12 +94,21 @@ public class BookService {
                     String isbn = item.has("isbn13") && !item.get("isbn13").asText().isEmpty()
                             ? item.get("isbn13").asText()
                             : item.get("isbn").asText();
+
+                    if (isbn.startsWith("K")) { //책이 아닌 경우(ex. 굿즈) 책 목록에서 제거
+                        continue;
+                    }
+
                     String cover = item.get("cover").asText();
 
                     String description = item.get("description").asText();
-                    GenreType genreType = GenreType.parsingGenreType(searchCategoryName);
+
                     String publisher = item.get("publisher").asText();
                     String publishedDate = item.get("pubDate").asText();
+
+                    String categoryName = item.get("categoryName").asText();
+                    GenreType genreType = (searchCategoryName == null || searchCategoryName.isBlank() || searchCategoryName.isEmpty() || searchCategoryName.equals("전체"))?
+                            GenreType.parsingGenreType(categoryName) : GenreType.parsingGenreType(searchCategoryName);
 
                     GetBookInfoResponse g = bookCacheService.cachingBookInfo(title, author, isbn, cover, description, genreType.getGenreType(), publisher, publishedDate);
 
@@ -109,14 +116,15 @@ public class BookService {
                 }
             }
         } catch (JsonProcessingException e) {
-            log.info("Json 파싱 에러 메시지: {}", e.getMessage());
             throw new GlobalException(ALADIN_API_PARSING_ERROR);
         }
         return bookList;
     }
 
+    /**
+     * 책 상세정보 조회
+     */
     public GetBookInfoResponse showBookInfo(String isbn, Long userId) {
-        log.info("------------------------[BookService.showBookInfo]------------------------");
         GetBookInfoResponse getBookInfoResponse = bookCacheService.checkBookInfo(isbn);
 
         Optional<Book> findBook = bookRepository.findByIsbn(isbn);
@@ -132,6 +140,9 @@ public class BookService {
         return getBookInfoResponse;
     }
 
+    /**
+     * 읽기횟수가 가장 많은 책 조회
+     */
     public GetBookPopularResponse showPopularBook() {
         return bookRepository.findBookWithMostRooms().stream()
                 .findFirst()
@@ -144,7 +155,7 @@ public class BookService {
                         book.getRooms().size(),
                         book.getDescription()
                 ))
-                .orElseThrow(() -> new GlobalException(CANNOT_FOUND_POPULAR_BOOK));
+                .orElse(null);
     }
 
 
@@ -154,7 +165,6 @@ public class BookService {
      * @return GetBookBestSellersResponse
      */
     public GetBookBestSellersResponse showBestSellers(Long userId) {
-        log.info("[BookService.showBestSellers]");
 
         //로그인 한 유저 찾기
         User user = userRepository.findByUserIdAndStatus(userId, ACTIVE)

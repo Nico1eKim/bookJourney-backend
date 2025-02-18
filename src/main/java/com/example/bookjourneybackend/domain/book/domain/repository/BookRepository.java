@@ -15,7 +15,7 @@ public interface BookRepository extends JpaRepository<Book, Long> {
 
     Optional<Book> findByIsbn(String isbn);
 
-    @Query("SELECT b FROM Book b LEFT JOIN b.rooms r WHERE r.status = 'ACTIVE' GROUP BY b ORDER BY COUNT(r) DESC")
+    @Query("SELECT b FROM Book b LEFT JOIN b.rooms r GROUP BY b ORDER BY COUNT(r) DESC")
     List<Book> findBookWithMostRooms();
 
     Optional<List<Book>> findByBestSellerTrue();

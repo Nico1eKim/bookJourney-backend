@@ -5,7 +5,6 @@ import com.example.bookjourneybackend.domain.book.dto.request.GetBookListRequest
 import com.example.bookjourneybackend.domain.book.dto.response.GetBookInfoResponse;
 import com.example.bookjourneybackend.global.exception.GlobalException;
 import com.example.bookjourneybackend.global.util.AladinApiUtil;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -20,7 +19,6 @@ public class BookCacheService {
 
     private final RestTemplate restTemplate;
     private final AladinApiUtil aladinApiUtil;
-    private final ObjectMapper objectMapper;
 
     //Ex) books:searchTerm:해리포터(인코딩 안된상태로 들어감):genreType:NOVEL_POETRY_DRAMA:queryType:Title:page:1
     @Cacheable(

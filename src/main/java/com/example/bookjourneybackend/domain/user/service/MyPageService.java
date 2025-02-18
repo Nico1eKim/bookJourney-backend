@@ -1,5 +1,6 @@
 package com.example.bookjourneybackend.domain.user.service;
 
+import com.example.bookjourneybackend.domain.auth.service.RedisService;
 import com.example.bookjourneybackend.domain.book.domain.Book;
 import com.example.bookjourneybackend.domain.room.domain.Room;
 import com.example.bookjourneybackend.domain.user.domain.CollectorNicknameType;
@@ -16,6 +17,7 @@ import com.example.bookjourneybackend.domain.userRoom.domain.repository.UserRoom
 import com.example.bookjourneybackend.global.exception.GlobalException;
 import com.example.bookjourneybackend.global.util.DateUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,7 +38,7 @@ public class MyPageService {
     private final DateUtil dateUtil;
     private final S3Service s3Service;
     private final PasswordEncoder passwordEncoder;
-
+    private final RedisService redisService;
 
 
     /**
@@ -171,9 +173,16 @@ public class MyPageService {
     /**
      * 회원 탈퇴
      */
+    @Transactional
     public void deleteMyPageUser(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new GlobalException(CANNOT_FOUND_USER));
+
+        //리프레쉬 토큰 저장소에서 삭제
+        redisService.invalidateToken(userId);
+
+        // Spring Security에서 인증 정보 초기화
+        SecurityContextHolder.clearContext();  // 인증 정보 초기화
 
         userRepository.delete(user);
     }

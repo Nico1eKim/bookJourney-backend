@@ -40,7 +40,7 @@ public class Record extends BaseEntity {
 
     private Integer recordPage;
 
-    @Column(nullable = false, length = 3000)
+    @Column(nullable = false, length = 10000)
     private String content;
 
     @Builder.Default
