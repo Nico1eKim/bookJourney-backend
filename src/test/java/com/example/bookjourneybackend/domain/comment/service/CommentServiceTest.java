@@ -4,6 +4,7 @@ import com.example.bookjourneybackend.domain.book.domain.Book;
 import com.example.bookjourneybackend.domain.book.domain.repository.BookRepository;
 import com.example.bookjourneybackend.domain.comment.domain.Comment;
 import com.example.bookjourneybackend.domain.comment.domain.dto.request.PostCommentRequest;
+import com.example.bookjourneybackend.domain.comment.domain.dto.response.GetCommentListResponse;
 import com.example.bookjourneybackend.domain.comment.domain.dto.response.PostCommentLikeResponse;
 import com.example.bookjourneybackend.domain.comment.domain.dto.response.PostCommentResponse;
 import com.example.bookjourneybackend.domain.comment.domain.repository.CommentLikeRepository;
@@ -134,6 +135,50 @@ class CommentServiceTest {
         bookRepository.deleteAll();
         userRoomRepository.deleteAll();
         userRepository.deleteAll();
+    }
+
+    @Test
+    @DisplayName("특정 기록의 댓글을 정상적으로 조회하는 경우")
+    void showCommentsSuccess() {
+        // given
+        Record record = Record.builder()
+                .room(mockRoom)
+                .user(mockUser)
+                .recordType(PAGE)
+                .recordPage(150)
+                .content("기록 내용")
+                .build();
+        recordRepository.save(record);
+        em.flush();
+        em.clear();
+
+        Comment comment1 = Comment.builder()
+                .record(record)
+                .user(mockUser)
+                .content("첫번째 댓글")
+                .build();
+        commentRepository.save(comment1);
+
+        Comment comment2 = Comment.builder()
+                .record(record)
+                .user(mockUser)
+                .content("두번째 댓글")
+                .build();
+        commentRepository.save(comment2);
+
+        em.flush();
+        em.clear();
+
+        // when
+        GetCommentListResponse response = commentService.showComments(record.getRecordId(), mockUser.getUserId());
+
+        // then
+        assertNotNull(response);
+        assertThat(response.getComments()).isNotNull();  // 댓글 리스트가 null이 아님
+        assertFalse(response.getComments().isEmpty());  // 댓글 리스트가 비어있지 않음
+        assertThat(response.getComments().size()).isEqualTo(2); // 두 개의 댓글이 존재
+        assertThat(response.getComments().get(0).getContent()).isEqualTo("첫번째 댓글");
+        assertThat(response.getComments().get(1).getContent()).isEqualTo("두번째 댓글");
     }
 
     @Test
