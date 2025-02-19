@@ -26,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import static com.example.bookjourneybackend.domain.book.domain.GenreType.NOVEL_POETRY_DRAMA;
 import static com.example.bookjourneybackend.domain.record.domain.RecordType.ENTIRE;
+import static com.example.bookjourneybackend.domain.record.domain.RecordType.PAGE;
 import static com.example.bookjourneybackend.domain.room.domain.RoomType.TOGETHER;
 import static com.example.bookjourneybackend.domain.userRoom.domain.UserRole.HOST;
 import static com.example.bookjourneybackend.global.entity.EntityStatus.*;
@@ -197,5 +198,50 @@ class RecordServiceTest {
         assertFalse(response.getRecordList().isEmpty());   // 리스트가 비어있지 않은지 확인
         assertThat(response.getRecordList().size()).isEqualTo(1);
         assertThat(response.getRecordList().get(0).getRecordTitle()).isEqualTo(entireRecord.getRecordTitle());
+    }
+
+    @Test
+    @DisplayName("특정 페이지 범위 내의 기록을 조회하는 경우")
+    void showPageRecordsSuccess() {
+        // given
+        Record pageRecord = Record.builder()
+                .room(mockRoom)
+                .user(mockUser)
+                .recordType(PAGE)
+                .recordPage(150)
+                .content("이것은 페이지 기록 테스트입니다.")
+                .build();
+        recordRepository.save(pageRecord);
+
+        // when
+        GetRecordResponse response = recordService.showPageRecords(mockRoom.getRoomId(), mockUser.getUserId(), "페이지순", 100, 200);
+
+        // then
+        assertThat(response.getRecordList()).isNotNull();  // 리스트가 null이 아닌지 확인
+        assertFalse(response.getRecordList().isEmpty());   // 리스트가 비어있지 않은지 확인
+        assertThat(response.getRecordList().size()).isEqualTo(1);
+        assertThat(response.getRecordList().get(0).getContent()).isEqualTo(pageRecord.getContent());
+    }
+
+
+    @Test
+    @DisplayName("페이지 범위를 벗어난 경우 빈 리스트 반환")
+    void showPageRecordsFailInvalidPageRange() {
+        // given
+        Record pageRecord = Record.builder()
+                .room(mockRoom)
+                .user(mockUser)
+                .recordType(PAGE)
+                .recordPage(50)
+                .content("이것은 페이지 기록 테스트입니다.")
+                .build();
+        recordRepository.save(pageRecord);
+
+        // when
+        GetRecordResponse response = recordService.showPageRecords(mockRoom.getRoomId(), mockUser.getUserId(), "페이지순", 200, 300);
+
+        // then
+        assertThat(response.getRecordList()).isNotNull();
+        assertThat(response.getRecordList().size()).isEqualTo(0);
     }
 }
