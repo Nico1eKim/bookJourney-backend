@@ -2,8 +2,10 @@ package com.example.bookjourneybackend.domain.record.service;
 
 import com.example.bookjourneybackend.domain.book.domain.Book;
 import com.example.bookjourneybackend.domain.book.domain.repository.BookRepository;
+import com.example.bookjourneybackend.domain.record.domain.Record;
 import com.example.bookjourneybackend.domain.record.domain.repository.RecordRepository;
 import com.example.bookjourneybackend.domain.record.dto.request.PostRecordRequest;
+import com.example.bookjourneybackend.domain.record.dto.response.GetRecordResponse;
 import com.example.bookjourneybackend.domain.record.dto.response.PostRecordResponse;
 import com.example.bookjourneybackend.domain.room.domain.Room;
 import com.example.bookjourneybackend.domain.room.domain.repository.RoomRepository;
@@ -23,13 +25,12 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import static com.example.bookjourneybackend.domain.book.domain.GenreType.NOVEL_POETRY_DRAMA;
-import static com.example.bookjourneybackend.domain.record.domain.RecordType.PAGE;
+import static com.example.bookjourneybackend.domain.record.domain.RecordType.ENTIRE;
 import static com.example.bookjourneybackend.domain.room.domain.RoomType.TOGETHER;
 import static com.example.bookjourneybackend.domain.userRoom.domain.UserRole.HOST;
 import static com.example.bookjourneybackend.global.entity.EntityStatus.*;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @Transactional
@@ -173,5 +174,28 @@ class RecordServiceTest {
         // UserRoom 상태가 ACTIVE로 변경되었는지 확인
         UserRoom updatedUserRoom = userRoomRepository.findUserRoomByRoomAndUser(mockRoom, mockUser).get();
         assertThat(updatedUserRoom.getStatus()).isEqualTo(ACTIVE);
+    }
+
+    @Test
+    @DisplayName("특정 방의 전체 기록을 정상적으로 조회하는 경우")
+    void showEntireRecordsSuccess() {
+        // given
+        Record entireRecord = Record.builder()
+                .room(mockRoom)
+                .user(mockUser)
+                .recordType(ENTIRE)
+                .recordTitle("전체 기록 테스트")
+                .content("이것은 전체 기록 테스트입니다.")
+                .build();
+        recordRepository.save(entireRecord);
+
+        // when
+        GetRecordResponse response = recordService.showEntireRecords(mockRoom.getRoomId(), mockUser.getUserId(), "최신 등록순");
+
+        // then
+        assertThat(response.getRecordList()).isNotNull();  // 리스트가 null이 아닌지 확인
+        assertFalse(response.getRecordList().isEmpty());   // 리스트가 비어있지 않은지 확인
+        assertThat(response.getRecordList().size()).isEqualTo(1);
+        assertThat(response.getRecordList().get(0).getRecordTitle()).isEqualTo(entireRecord.getRecordTitle());
     }
 }
