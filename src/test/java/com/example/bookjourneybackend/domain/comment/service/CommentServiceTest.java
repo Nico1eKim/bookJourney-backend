@@ -29,6 +29,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 import static com.example.bookjourneybackend.domain.book.domain.GenreType.NOVEL_POETRY_DRAMA;
 import static com.example.bookjourneybackend.domain.record.domain.RecordType.ENTIRE;
+import static com.example.bookjourneybackend.domain.record.domain.RecordType.PAGE;
 import static com.example.bookjourneybackend.domain.room.domain.RoomType.TOGETHER;
 import static com.example.bookjourneybackend.domain.userRoom.domain.UserRole.HOST;
 import static com.example.bookjourneybackend.global.entity.EntityStatus.EXPIRED;
@@ -275,5 +276,92 @@ class CommentServiceTest {
         GlobalException exception = assertThrows(GlobalException.class,
                 () -> commentService.toggleCommentLike(comment.getCommentId(), mockUser.getUserId()));
         assertEquals(CANNOT_LIKE_IN_EXPIRED_ROOM, exception.getExceptionStatus());
+    }
+
+    @Test
+    @DisplayName("댓글을 정상적으로 삭제하는 경우")
+    void deleteCommentSuccess() {
+        // given
+        Comment comment = Comment.builder()
+                .record(mockRecord)
+                .user(mockUser)
+                .content("댓글")
+                .build();
+        commentRepository.save(comment);
+        assertThat(commentRepository.count()).isEqualTo(1);
+
+        // when
+        commentService.deleteComment(comment.getCommentId(), mockUser.getUserId());
+
+        // then
+        assertThat(commentRepository.count()).isEqualTo(0);
+    }
+
+    @Test
+    @DisplayName("댓글 작성자가 아닌 경우 삭제 불가")
+    void deleteCommentFailNotAuthor() {
+        // given
+        User otherUser = User.builder()
+                .email("other@test.com")
+                .nickname("otherUser")
+                .password("password")
+                .imageUrl("test.jpg")
+                .build();
+        userRepository.save(otherUser);
+
+        // 다른 유저를 방에 추가 (삭제하려면 방에 있어야 하므로)
+        UserRoom otherUserRoom = UserRoom.builder()
+                .room(mockRoom)
+                .user(otherUser)
+                .userPercentage(0.0)
+                .userRole(HOST)
+                .currentPage(0)
+                .build();
+        userRoomRepository.save(otherUserRoom);
+
+        Record record = Record.builder()
+                .room(mockRoom)
+                .user(mockUser)
+                .recordType(PAGE)
+                .recordPage(150)
+                .content("기록")
+                .build();
+        recordRepository.save(record);
+        em.flush();
+        em.clear();
+
+        Comment comment = Comment.builder()
+                .record(record)
+                .user(mockUser) // 원래 댓글 작성자
+                .content("댓글 내용")
+                .build();
+        commentRepository.save(comment);
+        em.flush();
+        em.clear();
+
+        // when & then
+        GlobalException exception = assertThrows(GlobalException.class,
+                () -> commentService.deleteComment(comment.getCommentId(), otherUser.getUserId()));
+        assertEquals(UNAUTHORIZED_DELETE_COMMENT, exception.getExceptionStatus());
+    }
+
+    @Test
+    @DisplayName("방이 EXPIRED 상태이면 댓글 삭제 불가")
+    void deleteCommentFailExpiredRoom() {
+        // given
+        mockUserRoom.setStatus(EXPIRED);
+        userRoomRepository.save(mockUserRoom);
+
+        Comment comment = Comment.builder()
+                .record(mockRecord)
+                .user(mockUser)
+                .content("댓글")
+                .build();
+        commentRepository.save(comment);
+
+        // when & then
+        GlobalException exception = assertThrows(GlobalException.class,
+                () -> commentService.deleteComment(comment.getCommentId(), mockUser.getUserId()));
+        assertEquals(CANNOT_DELETE_IN_EXPIRED_ROOM, exception.getExceptionStatus());
     }
 }
