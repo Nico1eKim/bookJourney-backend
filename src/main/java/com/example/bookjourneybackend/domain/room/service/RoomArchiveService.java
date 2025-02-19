@@ -2,6 +2,7 @@ package com.example.bookjourneybackend.domain.room.service;
 
 import com.example.bookjourneybackend.domain.book.domain.Book;
 import com.example.bookjourneybackend.domain.room.domain.Room;
+import com.example.bookjourneybackend.domain.room.domain.RoomType;
 import com.example.bookjourneybackend.domain.room.domain.repository.RoomRepository;
 import com.example.bookjourneybackend.domain.room.dto.response.GetRoomArchiveResponse;
 import com.example.bookjourneybackend.domain.room.dto.response.RecordInfo;
@@ -89,6 +90,7 @@ public class RoomArchiveService {
                                 .bookTitle(book.getBookTitle())
 //                                .modifiedAt(dateUtil.calculateLastActivityTime(room.getRecords()))
                                 .authorName(book.getAuthorName())
+                                .roomName(room.getRoomType()== RoomType.TOGETHER ? room.getRoomName() : null)
 //                                .userPercentage(userRoom.getUserPercentage())
                                 .roomDate(dateUtil.formatDateRange(room.getStartDate(), room.getProgressEndDate()))
                                 .build();
@@ -108,6 +110,7 @@ public class RoomArchiveService {
                             .roomType(room.getRoomType().getRoomType())
                             .bookTitle(book.getBookTitle())
                             .modifiedAt(dateUtil.calculateLastActivityTime(room.getRecords()))
+                            .roomName(room.getRoomType()== RoomType.TOGETHER ? room.getRoomName() : null)
                             .authorName(book.getAuthorName())
                             .userPercentage(userRoom.getUserPercentage())
                             .build();
