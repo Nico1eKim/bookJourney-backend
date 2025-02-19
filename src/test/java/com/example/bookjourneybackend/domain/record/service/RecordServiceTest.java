@@ -3,9 +3,11 @@ package com.example.bookjourneybackend.domain.record.service;
 import com.example.bookjourneybackend.domain.book.domain.Book;
 import com.example.bookjourneybackend.domain.book.domain.repository.BookRepository;
 import com.example.bookjourneybackend.domain.record.domain.Record;
+import com.example.bookjourneybackend.domain.record.domain.repository.RecordLikeRepository;
 import com.example.bookjourneybackend.domain.record.domain.repository.RecordRepository;
 import com.example.bookjourneybackend.domain.record.dto.request.PostRecordRequest;
 import com.example.bookjourneybackend.domain.record.dto.response.GetRecordResponse;
+import com.example.bookjourneybackend.domain.record.dto.response.PostRecordLikeResponse;
 import com.example.bookjourneybackend.domain.record.dto.response.PostRecordPageResponse;
 import com.example.bookjourneybackend.domain.record.dto.response.PostRecordResponse;
 import com.example.bookjourneybackend.domain.room.domain.Room;
@@ -57,6 +59,9 @@ class RecordServiceTest {
 
     @Autowired
     private UserRoomRepository userRoomRepository;
+
+    @Autowired
+    RecordLikeRepository recordLikeRepository;
 
     @Autowired
     private EntityManager em;
@@ -282,4 +287,102 @@ class RecordServiceTest {
         GlobalException exception = assertThrows(GlobalException.class, () -> recordService.enterRecordPage(mockRoom.getRoomId(), mockUser.getUserId(), 100));
         assertEquals(CANNOT_ENTER_PAGE_IN_EXPIRED_ROOM, exception.getExceptionStatus());
     }
+
+    @Test
+    @DisplayName("기록 좋아요를 누르는 경우")
+    void toggleRecordLikeSuccess() {
+        // given
+        Record record = Record.builder()
+                .room(mockRoom)
+                .user(mockUser)
+                .recordType(PAGE)
+                .recordPage(150)
+                .content("기록")
+                .build();
+        recordRepository.save(record);
+        em.flush();
+        em.clear();
+
+        // when
+        PostRecordLikeResponse response = recordService.toggleRecordLike(record.getRecordId(), mockUser.getUserId());
+
+        // then
+        assertTrue(response.isLiked());
+        assertThat(recordLikeRepository.count()).isEqualTo(1);
+    }
+
+
+    @Test
+    @DisplayName("기록 좋아요를 취소하는 경우")
+    void toggleRecordLikeCancel() {
+        // given
+        Record record = Record.builder()
+                .room(mockRoom)
+                .user(mockUser)
+                .recordType(PAGE)
+                .recordPage(150)
+                .content("기록")
+                .build();
+        recordRepository.save(record);
+
+        recordService.toggleRecordLike(record.getRecordId(), mockUser.getUserId());
+        assertThat(recordLikeRepository.count()).isEqualTo(1);
+
+        // when
+        PostRecordLikeResponse response = recordService.toggleRecordLike(record.getRecordId(), mockUser.getUserId());
+
+        // then
+        assertFalse(response.isLiked());
+        assertThat(recordLikeRepository.count()).isEqualTo(0);
+    }
+
+    @Test
+    @DisplayName("방에 속해있지 않은 경우 좋아요 불가")
+    void toggleRecordLikeFail_NotInRoom() {
+        // given
+        User otherUser = User.builder()
+                .email("other@test.com")
+                .nickname("otherUser")
+                .password("password")
+                .imageUrl("test.jpg")
+                .build();
+        userRepository.save(otherUser);
+
+        Record record = Record.builder()
+                .room(mockRoom)
+                .user(mockUser)
+                .recordType(PAGE)
+                .recordPage(150)
+                .content("기록")
+                .build();
+        recordRepository.save(record);
+
+        // when & then
+        GlobalException exception = assertThrows(GlobalException.class,
+                () -> recordService.toggleRecordLike(record.getRecordId(), otherUser.getUserId()));
+        assertEquals(NOT_PARTICIPATING_IN_ROOM, exception.getExceptionStatus());
+    }
+
+    @Test
+    @DisplayName("방이 EXPIRED 상태이면 좋아요 토글 불가")
+    void toggleRecordLikeFail_ExpiredRoom() {
+        // given
+        mockRoom.setStatus(EXPIRED);
+        roomRepository.save(mockRoom);
+
+        Record record = Record.builder()
+                .room(mockRoom)
+                .user(mockUser)
+                .recordType(PAGE)
+                .recordPage(150)
+                .content("기록")
+                .build();
+        recordRepository.save(record);
+
+        // when & then
+        GlobalException exception = assertThrows(GlobalException.class,
+                () -> recordService.toggleRecordLike(record.getRecordId(), mockUser.getUserId()));
+        assertEquals(CANNOT_LIKE_IN_EXPIRED_ROOM, exception.getExceptionStatus());
+    }
+
 }
