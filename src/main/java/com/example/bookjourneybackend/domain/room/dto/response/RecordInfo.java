@@ -16,6 +16,7 @@ public class RecordInfo {
     private final String bookTitle;
     private final String authorName;
     private final String roomType;
+    private final String roomName;
 
     private String modifiedAt;
     private Double userPercentage;
