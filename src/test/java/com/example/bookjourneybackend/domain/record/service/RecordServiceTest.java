@@ -6,6 +6,7 @@ import com.example.bookjourneybackend.domain.record.domain.Record;
 import com.example.bookjourneybackend.domain.record.domain.repository.RecordRepository;
 import com.example.bookjourneybackend.domain.record.dto.request.PostRecordRequest;
 import com.example.bookjourneybackend.domain.record.dto.response.GetRecordResponse;
+import com.example.bookjourneybackend.domain.record.dto.response.PostRecordPageResponse;
 import com.example.bookjourneybackend.domain.record.dto.response.PostRecordResponse;
 import com.example.bookjourneybackend.domain.room.domain.Room;
 import com.example.bookjourneybackend.domain.room.domain.repository.RoomRepository;
@@ -30,6 +31,7 @@ import static com.example.bookjourneybackend.domain.record.domain.RecordType.PAG
 import static com.example.bookjourneybackend.domain.room.domain.RoomType.TOGETHER;
 import static com.example.bookjourneybackend.domain.userRoom.domain.UserRole.HOST;
 import static com.example.bookjourneybackend.global.entity.EntityStatus.*;
+import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.*;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -140,7 +142,8 @@ class RecordServiceTest {
         PostRecordRequest request = new PostRecordRequest("페이지 기록", null, 50, "기록 내용");
 
         // when & then
-        assertThrows(GlobalException.class, () -> recordService.createRecord(request, mockRoom.getRoomId(), mockUser.getUserId()));
+        GlobalException exception = assertThrows(GlobalException.class, () -> recordService.createRecord(request, mockRoom.getRoomId(), mockUser.getUserId()));
+        assertEquals(CANNOT_WRITE_IN_EXPIRED_ROOM, exception.getExceptionStatus());
     }
 
 
@@ -152,7 +155,8 @@ class RecordServiceTest {
         PostRecordRequest request = new PostRecordRequest("페이지 기록", null, invalidPage, "기록 내용");
 
         // when & then
-        assertThrows(GlobalException.class, () -> recordService.createRecord(request, mockRoom.getRoomId(), mockUser.getUserId()));
+        GlobalException exception = assertThrows(GlobalException.class, () -> recordService.createRecord(request, mockRoom.getRoomId(), mockUser.getUserId()));
+        assertEquals(INVALID_PAGE_NUMBER, exception.getExceptionStatus());
     }
 
     @Test
@@ -243,5 +247,39 @@ class RecordServiceTest {
         // then
         assertThat(response.getRecordList()).isNotNull();
         assertThat(response.getRecordList().size()).isEqualTo(0);
+    }
+
+    @Test
+    @DisplayName("현재 읽은 페이지 기록하기")
+    void enterRecordPageSuccess() {
+        // when
+        PostRecordPageResponse response = recordService.enterRecordPage(mockRoom.getRoomId(), mockUser.getUserId(), 150);
+
+        // then
+        UserRoom updatedUserRoom = userRoomRepository.findById(mockUserRoom.getUserRoomId()).orElseThrow();  // 업데이트 된 데이터 새로 조회
+        assertNotNull(response);
+        assertThat(response.getCurrentPage()).isEqualTo(150);
+        assertThat(updatedUserRoom.getCurrentPage()).isEqualTo(150);
+    }
+
+    @Test
+    @DisplayName("현재 읽은 페이지가 책 페이지 수를 초과하는 경우")
+    void enterRecordPageFailInvalidPage() {
+        // when & then: 예외 발생 검증
+        GlobalException exception = assertThrows(GlobalException.class,
+                () -> recordService.enterRecordPage(mockRoom.getRoomId(), mockUser.getUserId(), 400));
+        assertEquals(INVALID_PAGE_NUMBER, exception.getExceptionStatus());
+    }
+
+    @Test
+    @DisplayName("방이 EXPIRED 상태라서 페이지 기록을 남길 수 없는 경우")
+    void enterRecordPageFailRoomExpired() {
+        // given
+        mockRoom.setStatus(EXPIRED);
+        roomRepository.save(mockRoom);
+
+        // when & then
+        GlobalException exception = assertThrows(GlobalException.class, () -> recordService.enterRecordPage(mockRoom.getRoomId(), mockUser.getUserId(), 100));
+        assertEquals(CANNOT_ENTER_PAGE_IN_EXPIRED_ROOM, exception.getExceptionStatus());
     }
 }
