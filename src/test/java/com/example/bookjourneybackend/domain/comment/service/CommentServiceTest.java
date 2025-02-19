@@ -2,7 +2,9 @@ package com.example.bookjourneybackend.domain.comment.service;
 
 import com.example.bookjourneybackend.domain.book.domain.Book;
 import com.example.bookjourneybackend.domain.book.domain.repository.BookRepository;
+import com.example.bookjourneybackend.domain.comment.domain.Comment;
 import com.example.bookjourneybackend.domain.comment.domain.dto.request.PostCommentRequest;
+import com.example.bookjourneybackend.domain.comment.domain.dto.response.PostCommentLikeResponse;
 import com.example.bookjourneybackend.domain.comment.domain.dto.response.PostCommentResponse;
 import com.example.bookjourneybackend.domain.comment.domain.repository.CommentLikeRepository;
 import com.example.bookjourneybackend.domain.comment.domain.repository.CommentRepository;
@@ -30,8 +32,7 @@ import static com.example.bookjourneybackend.domain.record.domain.RecordType.ENT
 import static com.example.bookjourneybackend.domain.room.domain.RoomType.TOGETHER;
 import static com.example.bookjourneybackend.domain.userRoom.domain.UserRole.HOST;
 import static com.example.bookjourneybackend.global.entity.EntityStatus.EXPIRED;
-import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.CANNOT_COMMENT_IN_EXPIRED_ROOM;
-import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.CANNOT_FOUND_USER_ROOM;
+import static com.example.bookjourneybackend.global.response.status.BaseExceptionResponseStatus.*;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -182,5 +183,97 @@ class CommentServiceTest {
         GlobalException exception = assertThrows(GlobalException.class,
                 () -> commentService.createComment(mockRecord.getRecordId(), mockUser.getUserId(), request));
         assertEquals(CANNOT_COMMENT_IN_EXPIRED_ROOM, exception.getExceptionStatus());
+    }
+
+    @Test
+    @DisplayName("댓글 좋아요를 누르는 경우")
+    void toggleCommentLikeSuccess() {
+        // given
+        Comment comment = Comment.builder()
+                .record(mockRecord)
+                .user(mockUser)
+                .content("댓글")
+                .build();
+        commentRepository.save(comment);
+        em.flush();
+        em.clear();
+
+        // when
+        PostCommentLikeResponse response = commentService.toggleCommentLike(comment.getCommentId(), mockUser.getUserId());
+
+        // then
+        assertTrue(response.isLiked());
+        assertThat(commentLikeRepository.count()).isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("댓글 좋아요를 취소하는 경우")
+    void toggleCommentLikeCancel() {
+        // given
+        Comment comment = Comment.builder()
+                .record(mockRecord)
+                .user(mockUser)
+                .content("댓글")
+                .build();
+        commentRepository.save(comment);
+
+        commentService.toggleCommentLike(comment.getCommentId(), mockUser.getUserId());
+        assertThat(commentLikeRepository.count()).isEqualTo(1);
+
+        // when
+        PostCommentLikeResponse response = commentService.toggleCommentLike(comment.getCommentId(), mockUser.getUserId());
+
+        // then
+        assertFalse(response.isLiked());
+        assertThat(commentLikeRepository.count()).isEqualTo(0);
+    }
+
+
+    @Test
+    @DisplayName("방에 속해있지 않은 경우 좋아요 불가")
+    void toggleCommentLikeFailNotInRoom() {
+        // given
+        User otherUser = User.builder()
+                .email("other@test.com")
+                .nickname("otherUser")
+                .password("password")
+                .imageUrl("test.jpg")
+                .build();
+        userRepository.save(otherUser);
+
+        Comment comment = Comment.builder()
+                .record(mockRecord)
+                .user(mockUser)
+                .content("댓글")
+                .build();
+        commentRepository.save(comment);
+
+        // when & then
+        GlobalException exception = assertThrows(GlobalException.class,
+                () -> commentService.toggleCommentLike(comment.getCommentId(), otherUser.getUserId()));
+        assertEquals(NOT_PARTICIPATING_IN_ROOM, exception.getExceptionStatus());
+    }
+
+
+    @Test
+    @DisplayName("방이 EXPIRED 상태이면 좋아요 토글 불가")
+    void toggleCommentLikeFailExpiredRoom() {
+        // given
+        mockRoom.setStatus(EXPIRED);
+        roomRepository.save(mockRoom);
+        em.flush();
+        em.clear();
+
+        Comment comment = Comment.builder()
+                .record(mockRecord)
+                .user(mockUser)
+                .content("댓글")
+                .build();
+        commentRepository.save(comment);
+
+        // when & then
+        GlobalException exception = assertThrows(GlobalException.class,
+                () -> commentService.toggleCommentLike(comment.getCommentId(), mockUser.getUserId()));
+        assertEquals(CANNOT_LIKE_IN_EXPIRED_ROOM, exception.getExceptionStatus());
     }
 }
