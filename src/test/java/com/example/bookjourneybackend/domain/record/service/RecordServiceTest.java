@@ -338,7 +338,7 @@ class RecordServiceTest {
 
     @Test
     @DisplayName("방에 속해있지 않은 경우 좋아요 불가")
-    void toggleRecordLikeFail_NotInRoom() {
+    void toggleRecordLikeFailNotInRoom() {
         // given
         User otherUser = User.builder()
                 .email("other@test.com")
@@ -385,4 +385,83 @@ class RecordServiceTest {
         assertEquals(CANNOT_LIKE_IN_EXPIRED_ROOM, exception.getExceptionStatus());
     }
 
+    @Test
+    @DisplayName("기록을 정상적으로 삭제하는 경우")
+    void deleteRecordSuccess() {
+        // given
+        Record record = Record.builder()
+                .room(mockRoom)
+                .user(mockUser)
+                .recordType(PAGE)
+                .recordPage(150)
+                .content("기록")
+                .build();
+        recordRepository.save(record);
+        assertThat(recordRepository.count()).isEqualTo(1);
+
+        // when
+        recordService.deleteRecord(record.getRecordId(), mockUser.getUserId());
+
+        // then
+        assertThat(recordRepository.count()).isEqualTo(0);
+    }
+
+    @Test
+    @DisplayName("방이 EXPIRED 상태이면 기록 삭제 불가")
+    void deleteRecordFailExpiredRoom() {
+        // given
+        mockUserRoom.setStatus(EXPIRED);
+        userRoomRepository.save(mockUserRoom);
+
+        Record record = Record.builder()
+                .room(mockRoom)
+                .user(mockUser)
+                .recordType(PAGE)
+                .recordPage(150)
+                .content("기록")
+                .build();
+        recordRepository.save(record);
+
+        // when & then
+        GlobalException exception = assertThrows(GlobalException.class,
+                () -> recordService.deleteRecord(record.getRecordId(), mockUser.getUserId()));
+        assertEquals(CANNOT_DELETE_IN_EXPIRED_ROOM, exception.getExceptionStatus());
+    }
+
+    @Test
+    @DisplayName("기록 작성자가 아닌 경우 삭제 불가")
+    void deleteRecordFailNotAuthor() {
+        // given
+        User otherUser = User.builder()
+                .email("other@test.com")
+                .nickname("otherUser")
+                .password("password")
+                .imageUrl("test.jpg")
+                .build();
+        userRepository.save(otherUser);
+
+        // otherUser를 mockRoom에 추가 (일단 삭제를 시도하려면 방에 속해있어야 하므로)
+        UserRoom otherUserRoom = UserRoom.builder()
+                .room(mockRoom)
+                .user(otherUser)
+                .userPercentage(0.0)
+                .userRole(HOST)
+                .currentPage(0)
+                .build();
+        userRoomRepository.save(otherUserRoom);
+
+        Record record = Record.builder()
+                .room(mockRoom)
+                .user(mockUser)
+                .recordType(PAGE)
+                .recordPage(150)
+                .content("기록")
+                .build();
+        recordRepository.save(record);
+
+        // when & then
+        GlobalException exception = assertThrows(GlobalException.class,
+                () -> recordService.deleteRecord(record.getRecordId(), otherUser.getUserId()));
+        assertEquals(UNAUTHORIZED_DELETE_RECORD, exception.getExceptionStatus());
+    }
 }
